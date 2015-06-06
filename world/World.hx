@@ -2,6 +2,7 @@ package lycan.world;
 
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
+import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
