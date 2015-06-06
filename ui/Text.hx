@@ -1,9 +1,8 @@
-package ui;
+package lycan.ui ;
 
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 
 class Text extends FlxText {

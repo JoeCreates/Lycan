@@ -1,14 +1,7 @@
-package world;
+package lycan.world;
 
-import flixel.addons.nape.FlxNapeTilemap;
-import flixel.FlxCamera;
-import flixel.FlxSprite;
-import flixel.group.FlxGroup;
-import flixel.math.FlxAngle;
 import flixel.tile.FlxTilemap;
-import flixel.tile.FlxTilemapBuffer;
-import nape.phys.Body;
-import world.WorldLayer.WorldLayerType;
+import lycan.world.WorldLayer.WorldLayerType;
 
 class TileLayer extends FlxTilemap implements WorldLayer {
 	

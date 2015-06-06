@@ -1,38 +1,18 @@
-package world;
+package lycan.world;
 
-import config.Config;
-import flixel.addons.editors.tiled.TiledLayer;
+import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
-import flixel.addons.nape.FlxNapeSpace;
-import flixel.addons.nape.FlxNapeSprite;
-import flixel.addons.nape.FlxNapeTilemap;
 import flixel.FlxBasic;
-import flixel.graphics.atlas.FlxAtlas;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.frames.FlxTileFrames;
-import flixel.math.FlxAngle;
-import flixel.math.FlxPoint;
-import flixel.system.FlxAssets;
-import flixel.tile.FlxBaseTilemap;
-import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
-import openfl.Assets;
-import haxe.io.Path;
-import haxe.xml.Parser;
 import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
+import flixel.graphics.frames.FlxTileFrames;
 import flixel.group.FlxGroup;
-import flixel.tile.FlxTilemap;
-import flixel.addons.editors.tiled.TiledMap;
-import flixel.addons.editors.tiled.TiledObject;
-import flixel.addons.editors.tiled.TiledObjectLayer;
-import flixel.addons.editors.tiled.TiledTileSet;
-import openfl.display.Bitmap;
+import flixel.math.FlxPoint;
+import flixel.system.FlxAssets;
+import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
+import haxe.io.Path;
 import openfl.display.BitmapData;
-import openfl.geom.ColorTransform;
-import states.PlayState;
-import world.WorldLayer.WorldLayerType;
-import flixel.util.FlxColor;
+
 /**
  * A 2D world using Tiled maps, Nape Physics, and hxDynaLight lighting
  * 

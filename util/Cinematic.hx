@@ -1,4 +1,4 @@
-package util;
+package lycan.util;
 
 /**
  * @author Joe Williamson

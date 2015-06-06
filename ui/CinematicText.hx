@@ -1,11 +1,7 @@
-package ui ;
-import flixel.FlxG;
+package lycan.ui ;
+
 import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxRandom;
 import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
 
 class CinematicText extends FlxSpriteGroup {
 	

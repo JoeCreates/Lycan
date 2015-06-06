@@ -1,4 +1,4 @@
-package;
+package lycan;
 import flixel.FlxObject;
 
 //TODO actually make entity

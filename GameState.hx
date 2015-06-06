@@ -1,16 +1,15 @@
-package;
+package lycan;
+
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-import openfl.filters.BlurFilter;
-import world.World;
 import flixel.tweens.FlxTween.TweenOptions;
+import flixel.util.FlxColor;
+import lycan.world.World;
+import openfl.filters.BlurFilter;
 
 /**
  * Extends basic FlxState with additional functionality

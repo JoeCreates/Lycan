@@ -1,8 +1,7 @@
-package world;
+package lycan.world;
 
 import flixel.group.FlxGroup;
-import nape.phys.Body;
-import world.WorldLayer.WorldLayerType;
+import lycan.world.WorldLayer.WorldLayerType;
 
 class ObjectLayer extends FlxGroup implements WorldLayer {
 	

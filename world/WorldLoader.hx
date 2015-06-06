@@ -1,12 +1,9 @@
-package world;
+package lycan.world;
+
 import flixel.addons.editors.tiled.TiledObject;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.FlxBasic;
-import flixel.FlxObject;
-import flixel.group.FlxGroup;
-import nape.geom.Vec2;
-import nape.shape.Polygon;
-import world.WorldLoader;
+import lycan.world.WorldLoader;
 
 typedef WorldObjectLoader = TiledObject->ObjectLayer->FlxBasic;
 

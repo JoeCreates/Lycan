@@ -1,6 +1,5 @@
-package world;
+package lycan.world;
 
-import config.Config;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
@@ -8,7 +7,6 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxSpriteUtil;
 
 class Stars extends FlxTypedSpriteGroup<Star> {
 	public var starCount:Int;

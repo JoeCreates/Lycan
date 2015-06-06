@@ -1,4 +1,4 @@
-package world;
+package lycan.world;
 
 enum WorldLayerType {
 	TILE;
