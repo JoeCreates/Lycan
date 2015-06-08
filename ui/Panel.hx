@@ -1,5 +1,5 @@
-package gameUtil;
-import flixel.FlxG;
+package lycan.ui;
+
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 

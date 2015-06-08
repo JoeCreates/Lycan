@@ -1,19 +1,13 @@
-package gameUtil;
-import flash.display.Graphics;
-import flash.display.Stage;
+package lycan.ui;
+
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.group.FlxGroup;
 import flixel.input.touch.FlxTouch;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.math.FlxVector;
 import flixel.util.FlxColor;
-import flixel.math.FlxRect;
-import openfl.display.Sprite;
 
 /**
  * @author Joe Williamson

@@ -1,7 +1,8 @@
-package;
+package lycan.ui;
+
 import flixel.addons.ui.FlxSlider;
-import flixel.util.FlxColor;
 import flixel.FlxSprite;
+import flixel.util.FlxColor;
 
 class Slider extends FlxSlider {
 

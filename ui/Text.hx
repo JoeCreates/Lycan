@@ -1,4 +1,4 @@
-package lycan.ui ;
+package lycan.ui;
 
 import flixel.FlxG;
 import flixel.text.FlxText;
