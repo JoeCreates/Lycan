@@ -1,10 +1,13 @@
 package lycan.ui.layouts;
 
-class SizePolicy {
+enum Policy {
+	Fixed; // The widget can never grow or shrink
+}
 
-	public function new() 
-	{
-		
-	}
+class SizePolicy {
+	private var policy:Policy;
 	
+	public function new(policy:Policy) {
+		this.policy = policy;
+	}
 }

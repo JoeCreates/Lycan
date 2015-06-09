@@ -1,10 +1,9 @@
 package lycan.ui.widgets ;
 
-class Button extends Widget {
+import lycan.ui.UIObject;
 
-	public function new() 
-	{
-		
+class Button extends Widget {
+	public function new(?parent:UIObject, ?name:String) {
+		super(parent, name);
 	}
-	
 }

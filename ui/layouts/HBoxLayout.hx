@@ -1,10 +1,9 @@
 package lycan.ui.layouts;
 
-class HBoxLayout extends BoxLayout {
+import lycan.ui.widgets.Widget;
 
-	public function new() 
-	{
-		
+class HBoxLayout extends BoxLayout {
+	public function new(?parent:Widget, ?name:String) {
+		super(parent, name);
 	}
-	
 }

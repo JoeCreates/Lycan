@@ -1,10 +1,9 @@
 package lycan.ui.layouts;
 
-class ButtonGroup extends Layout {
+import lycan.ui.widgets.Widget;
 
-	public function new() 
-	{
-		
+class ButtonGroup extends Layout {
+	public function new(?parent:Widget, ?name:String) {
+		super(parent, name);
 	}
-	
 }

@@ -1,4 +1,4 @@
 package lycan.ui.layouts;
 
-interface ILayout {	
+interface ILayoutItem {	
 }

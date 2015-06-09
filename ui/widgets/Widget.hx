@@ -1,81 +1,75 @@
 package lycan.ui.widgets;
+
 import flixel.math.FlxPoint;
-import lime.app.Event;
 import lycan.ui.events.UIEvent;
 import lycan.ui.layouts.Layout;
 import lycan.ui.layouts.SizePolicy;
+import lycan.ui.UIObject;
 
-enum FindChildOptions {
-	DirectChildrenOnly;
-	FindChildrenRecursively;
+enum Direction {
+	LEFT;
+	UP;
+	RIGHT;
+	DOWN;
 }
-// TODO classify and paramaeterize the numerical types?
-// TODO define IWidget and figure out if it's necessary
-class Widget implements IWidget {
-	public var parent:Widget = null;
-	public var children:List<Widget>;
-	public var name:String = null;
-	public var uid:Int;
-	public var sendChildEvents:Bool;
-	public var receiveChildEvents:Bool;
-	
+
+// TODO does use of floats rather than ints matter?
+class Widget extends UIObject {
 	public var layout:Layout;
-	public var enabled:Bool;
-	public var modal:Bool;
-	public var x:Int;
-	public var y:Int;
-	public var width:Int;
-	public var height:Int;
+	public var enabled:Bool = true;
+	public var modal:Bool = false;
+	public var x:Int = 0;
+	public var y:Int = 0;
+	public var width:Int = 0;
+	public var height:Int = 0;
 	public var sizePolicy:SizePolicy;
-	public var minWidth:Int;
-	public var maxWidth:Int;
-	public var minHeight:Int;
-	public var maxHeight:Int;
-	public var sizeIncrement:FlxPoint;
-	public var focus:Bool;
-	public var shown:Bool;
-	public var acceptDrops:Bool;
+	public var minWidth:Int = 0;
+	public var minHeight:Int = 0;
+	public var maxWidth:Int = 10000;
+	public var maxHeight:Int = 10000;
+	public var sizeIncrement:FlxPoint = FlxPoint.get(1, 1);
+	public var focus:Bool = false;
+	public var shown:Bool = true;
+	public var acceptDrops:Bool = true;
 	
-	public function new() {
-		uid = cast (Math.random() * (2 ^ 30), Int);
+	public function new(?parent:UIObject, ?name:String) {
+		super(parent, name);
+	}
+	
+	/*
+	public function getNearestChildForDirection(direction:Direction, wrapAround:Bool = true):Widget {
+		
+	}
+	*/
+	
+	public function updateGeometry() {
+		// Invalidates the current layout
+		if(layout != null) {
+			layout.dirty = true;
+		}
+		
+		// Mark this and all parent objects as dirty
+		var p = cast(this, UIObject);
+		while (true) {
+			p.dirty = true;
+			
+			if (p.parent != null) {
+				p = p.parent;
+			} else {
+				break;
+			}
+		}
+		
+		// Ask the top-level object to recalculate the geometries of the dirty objects
+		p.event(new UIEvent(Type.LayoutRequest));
 	}
 	
 	/*
 	public function draw() {
-		
+	
 	}
 	
 	public function close() {
-		
-	}
-	
-	public function event(e:UIEvent):Bool {
-		return false;
-	}
-	
-	//public function installEventFilter
-	//public function removeEventFilter
-	//public function eventFilter(widget:IWidget, e:UIEvent):Bool {
-	//	return false;
-	//}
-		
-	public function findChildren(name:String, ?findOption:FindChildOptions):List<IWidget> {
-		if(findOption == null) {
-			findOption = FindChildOptions.FindChildrenRecursively;
-		}
-	
-		var list:IWidget = new List<Widget>();
-		
-		// TODO
-		
-		return list;
-	}
-	
-	private function childEvent(e:ChildEvent) {
-		
-	}
-	
-	private function customEvent(e:UIEvent) {
 		
 	}
 	

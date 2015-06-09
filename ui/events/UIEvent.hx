@@ -1,5 +1,5 @@
 package lycan.ui.events;
-import haxe.macro.Type;
+
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.widgets.Widget;
 
@@ -30,13 +30,15 @@ abstract Type(Int) {
 	var OrientationChange = 22; // The screen orientation changed
 	var Resize = 23; // The widget size changed
 	var Scroll = 24; // The object needs to scroll to a position
-	// ZOrderChange; // The widget's z-order changed
 	var PropertyChanged = 25; // A widget's watch property changed
+	var LayoutRequest = 26; // Widget layout needs to be redone
+	var Leave = 27; // Pointer leaves the widgets boundaries
+	// ZOrderChange; // The widget's z-order changed
 }
 
 class UIEvent {
 	public var type(get, null):Type;
-	public var accept:Bool;
+	public var accept:Bool = false;
 	
 	public function new(type:Type) {
 		this.type = type;
@@ -58,7 +60,7 @@ class UIEvent {
 	
 	/*
 	static public function registerEventType(hint:Int):Void {
-		
+	
 	}
 	*/
 }

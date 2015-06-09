@@ -15,13 +15,10 @@ class Slider extends FlxSlider {
 		hoverAlpha = 1;
 	}
 	
-	override public function createHandle():Void {
+	public function createHandle():Void {
 		handle = new SliderHandle(offset.x, offset.y);
 		handle.y += handle.frameHeight / 2;
 	}
-	
-	
-	
 }
 
 class SliderHandle extends FlxSprite {
