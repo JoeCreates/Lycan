@@ -20,7 +20,7 @@ class UIObject {
 		this.parent = parent;
 		children = new List<UIObject>();
 		this.name = name;
-		uid = cast (Math.random() * 1073741824, Int);
+		uid = cast (Math.random() * 1073741824);
 		sendChildEvents = true;
 		receiveChildEvents = true;
 	}

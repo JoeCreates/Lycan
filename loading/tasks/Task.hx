@@ -1,4 +1,4 @@
-package lycan.assetloading.tasks ;
+package lycan.loading.tasks ;
 
 import lycan.util.queue.IPrioritizable;
 import msignal.Signal.Signal1;

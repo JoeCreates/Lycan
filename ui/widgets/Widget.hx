@@ -15,7 +15,7 @@ enum Direction {
 
 // TODO does use of floats rather than ints matter?
 class Widget extends UIObject {
-	public var layout:Layout;
+	public var layout:Layout = null;
 	public var enabled:Bool = true;
 	public var modal:Bool = false;
 	public var x:Int = 0;
@@ -32,7 +32,7 @@ class Widget extends UIObject {
 	public var shown:Bool = true;
 	public var acceptDrops:Bool = true;
 	
-	public function new(?parent:UIObject, ?name:String) {
+	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
 	}
 	

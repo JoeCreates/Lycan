@@ -1,10 +1,10 @@
-package lycan.assetloading.loaders;
+package lycan.loading.loaders;
 
 import openfl.events.Event;
 import openfl.Lib;
-import lycan.assetloading.tasks.IDescribable;
-import lycan.assetloading.tasks.ILoadingSignalDispatcher;
-import lycan.assetloading.tasks.IRunnable;
+import lycan.loading.tasks.IDescribable;
+import lycan.loading.tasks.ILoadingSignalDispatcher;
+import lycan.loading.tasks.IRunnable;
 import lycan.util.queue.IPrioritizable;
 
 #if neko

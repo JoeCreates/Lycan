@@ -1,4 +1,4 @@
-package lycan.assetloading.tasks ;
+package lycan.loading.tasks ;
 
 import flixel.graphics.frames.FlxAtlasFrames;
 
