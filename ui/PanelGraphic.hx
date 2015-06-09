@@ -8,7 +8,7 @@ import flixel.group.FlxSpriteGroup;
  * 
  * @author Joe Williamson
  */
-class Panel extends FlxSpriteGroup {
+class PanelGraphic extends FlxSpriteGroup {
 	
 	var topLeftSection:FlxSprite;
 	var topRightSection:FlxSprite;
