@@ -8,6 +8,10 @@ import openfl.events.MouseEvent;
 import openfl.events.Event;
 import openfl.events.TouchEvent;
 
+import lime.ui.Gamepad;
+import lime.ui.GamepadAxis;
+import lime.ui.GamepadButton;
+
 @:enum
 abstract EventType(Int) {
 	var None = 0;
@@ -42,6 +46,13 @@ abstract EventType(Int) {
 	var WheelScroll = 29; // The mouse wheel was scrolled
 	var KeyPress = 30; // Key pressed down
 	var KeyRelease = 31; // Key released
+	
+	var GamepadButtonDown = 32; // Gamepad button pressed down
+	var GamepadButtonUp = 33; // Gamepad button released
+	var GamepadConnect = 34; // Gamepad connected/detected
+	var GamepadDisconnect = 35; // Gamepad disconnected
+	var GamepadAxisMove = 36; // Gamepad analog stick moved
+	
 	// ZOrderChange; // The widget's z-order changed
 	
 	// TODO gamepad?
@@ -176,5 +187,9 @@ class KeyEvent extends UIEvent {
 }
 
 class MoveEvent extends UIEvent {
+	
+}
+
+class GamepadEvent extends UIEvent {
 	
 }

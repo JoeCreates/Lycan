@@ -154,6 +154,16 @@ class Widget extends UIObject {
 				propertyChangeEvent(cast e);
 			case EventType.LayoutRequest:
 				layoutRequestEvent(cast e);
+			case EventType.GamepadAxisMove:
+				gamepadAxisMoveEvent(cast e);
+			case EventType.GamepadButtonDown:
+				gamepadButtonDownEvent(cast e);
+			case EventType.GamepadButtonUp:
+				gamepadButtonUpEvent(cast e);
+			case EventType.GamepadConnect:
+				gamepadConnectEvent(cast e);
+			case EventType.GamepadDisconnect:
+				gamepadDisconnectEvent(cast e);
 			default:
 				return super.event(e);
 		}
@@ -293,6 +303,36 @@ class Widget extends UIObject {
 			
 			// TODO
 		//}
+	}
+				
+	private function gamepadAxisMoveEvent(e:GamepadEvent) {
+		#if debug
+		trace(name + " got a gamepad axis event");
+		#end
+	}
+	
+	private function gamepadButtonDownEvent(e:GamepadEvent) {
+		#if debug
+		trace(name + " got a gamepad button down event");
+		#end
+	}
+	
+	private function gamepadButtonUpEvent(e:GamepadEvent) {
+		#if debug
+		trace(name + " got a gamepad button up event");
+		#end
+	}
+	
+	private function gamepadConnectEvent(e:GamepadEvent) {
+		#if debug
+		trace(name + " got a gamepad connect event");
+		#end
+	}
+	
+	private function gamepadDisconnectEvent(e:GamepadEvent) {
+		#if debug
+		trace(name + " got a gamepad disconnect event");
+		#end
 	}
 	
 	// Returns the widget furthest down the hierarchy with the mouse inside it, or null if the mouse is inside none of them.
