@@ -14,15 +14,14 @@ class DebugRenderer extends FlxSprite {
 	private var root:UIApplicationRoot;
 	
 	public function new(root:UIApplicationRoot) {
-		super(FlxG.width / 2, FlxG.height / 2);
-		
+		super();
 		this.root = root;
 	}
 	
-	override public function draw() {		
+	override public function draw() {
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
-		x = FlxG.width / 2;
-		y = FlxG.height / 2;
+		
+		FlxSpriteUtil.drawRect(this, x, y, width, height, FlxColor.TRANSPARENT);
 		
 		var renderWidget = function(o:UIObject) {
 			Sure.sure(o != null);
