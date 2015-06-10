@@ -27,7 +27,7 @@ class UIEventLoop {
 			application.notify(event.receiver, event.event);
 		}
 		
-		events.clear();
+		clear();
 	}
 	
 	public function add(receiver:UIObject, event:UIEvent) {

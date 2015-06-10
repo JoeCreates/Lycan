@@ -9,7 +9,7 @@ import openfl.events.Event;
 import openfl.events.TouchEvent;
 
 @:enum
-abstract Type(Int) {
+abstract EventType(Int) {
 	var None = 0;
 	var ChildAdded = 1; // Object gets a child
 	var ChildRemoved = 2; // Object loses a child
@@ -23,34 +23,43 @@ abstract Type(Int) {
 	var FocusIn = 10; // Widget gains the keyboard focus
 	var FocusOut = 11; // Widget loses the keyboard focus
 	var Gesture = 12; // A gesture was triggered
-	var Hide = 13; // Widget was hidden
-	var HoverEnter = 14; // Pointer enters a hoverable widget
-	var HoverLeave = 15; // Pointer leaves a hoverable widget
-	var HoverMove = 16; // Pointer moves inside a hoverable widget
-	var LocaleChange = 17; // The app's locale changed
-	var PointerPress = 18; // Pointer pressed
-	var PointerRelease = 19; // Pointer released
-	var PointerMove = 20; // Pointer moved
-	var Move = 21; // Widget position changed
-	var OrientationChange = 22; // The screen orientation changed
-	var Resize = 23; // The widget size changed
-	var Scroll = 24; // The object needs to scroll to a position
-	var PropertyChanged = 25; // A widget's watch property changed
-	var LayoutRequest = 26; // Widget layout needs to be redone
-	var Leave = 27; // Pointer leaves the widgets boundaries
-	var WheelScroll = 28; // The mouse wheel was scrolled
+	var Show = 13;
+	var Hide = 14; // Widget was hidden
+	var HoverEnter = 15; // Pointer enters a hoverable widget
+	var HoverLeave = 16; // Pointer leaves a hoverable widget
+	var HoverMove = 17; // Pointer moves inside a hoverable widget
+	var LocaleChange = 18; // The app's locale changed
+	var PointerPress = 19; // Pointer pressed
+	var PointerRelease = 20; // Pointer released
+	var PointerMove = 21; // Pointer moved
+	var Move = 22; // Widget position changed
+	var OrientationChange = 23; // The screen orientation changed
+	var Resize = 24; // The widget size changed
+	var Scroll = 25; // The object needs to scroll to a position
+	var PropertyChange = 26; // A widget's watch property changed
+	var LayoutRequest = 27; // Widget layout needs to be redone
+	var Leave = 28; // Pointer leaves the widgets boundaries
+	var WheelScroll = 29; // The mouse wheel was scrolled
+	var KeyPress = 30; // Key pressed down
+	var KeyRelease = 31; // Key released
 	// ZOrderChange; // The widget's z-order changed
+	
+	// TODO gamepad?
+	// TODO accelerometer?
 }
 
+// Base of event classes. Events are generally passed from the input system to UI objects to handle.
 class UIEvent {
-	public var type(get, null):Type;
+	public var type(get, null):EventType;
+	
+	// The receiver usually sets the accept flag to indicate that it wants to consume the event. Unwanted events may be propagated to the parent objects via UIObject.event() 
 	public var accept:Bool = false;
 	
-	public function new(type:Type) {
+	public function new(type:EventType) {
 		this.type = type;
 	}
 	
-	public function get_type():Type {
+	public function get_type():EventType {
 		return type;
 	}
 	
@@ -65,6 +74,7 @@ class UIEvent {
 	*/
 	
 	/*
+	// For extending the Type enum with user generated events
 	static public function registerEventType(hint:Int):Void {
 	
 	}
@@ -74,17 +84,17 @@ class UIEvent {
 class ChildEvent extends UIEvent {
 	public var child(get, null):Widget;
 	
-	public function new(type:Type, child:Widget) {
+	public function new(type:EventType, child:Widget) {
 		super(type);
 		this.child = child;
 	}
 	
 	public function added():Bool {
-		return type == Type.ChildAdded;
+		return type == EventType.ChildAdded;
 	}
 	
 	public function removed():Bool {
-		return type == Type.ChildRemoved;
+		return type == EventType.ChildRemoved;
 	}
 	
 	public function get_child():Widget {
@@ -92,6 +102,7 @@ class ChildEvent extends UIEvent {
 	}
 }
 
+// NOTE in theory all of these event types could be implemented just by passing the right data, so don't expose the OpenFL events passed into them, so that the system will be flexible enough to work with alternative different input systems
 class CloseEvent extends UIEvent {
 	
 }
@@ -120,11 +131,7 @@ class EnterEvent extends UIEvent {
 	
 }
 
-class FocusInEvent extends UIEvent {
-	
-}
-
-class FocusOutEvent extends UIEvent {
+class FocusEvent extends UIEvent {
 	
 }
 
@@ -132,19 +139,15 @@ class GestureEvent extends UIEvent {
 	
 }
 
+class ShowEvent extends UIEvent {
+	
+}
+
 class HideEvent extends UIEvent {
 	
 }
 
-class HoverEnterEvent extends UIEvent {
-	
-}
-
-class HoverLeaveEvent extends UIEvent {
-	
-}
-
-class HoverMoveEvent extends UIEvent {
+class HoverEvent extends UIEvent {
 	
 }
 
@@ -156,7 +159,7 @@ class PointerEvent extends UIEvent {
 	
 }
 
-class PropertyChangedEvent extends UIEvent {
+class PropertyChangeEvent extends UIEvent {
 	
 }
 
@@ -165,5 +168,13 @@ class ResizeEvent extends UIEvent {
 }
 
 class WheelEvent extends UIEvent {
+	
+}
+
+class KeyEvent extends UIEvent {
+	
+}
+
+class MoveEvent extends UIEvent {
 	
 }

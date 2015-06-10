@@ -12,8 +12,14 @@ class Layout implements ILayoutItem extends UIObject {
 		}
 	}
 	
-	public function update() {
+	override public function event(e:UIEvent):Bool {
+		var handled = super.event(e);
 		
+		if(!handled) {
+			parent.event(e);
+		}
+		
+		return handled;
 	}
 	
 	public function addWidget(w:Widget) {

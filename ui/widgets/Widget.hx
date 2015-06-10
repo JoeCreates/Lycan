@@ -48,13 +48,20 @@ class Widget extends UIObject {
 	
 	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
+		
+		#if debug
+		if(name == null) {
+			this.name = Type.getClassName(Type.getClass(this));
+		}
+		#end
 	}
 	
-	/*
-	public function getNearestChildForDirection(direction:Direction, wrapAround:Bool = true):Widget {
-		
+	public function getNearestSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
+		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
+		// Should be useful for gamepads
+		// TODO could delegate this to layouts?
+		return null;
 	}
-	*/
 	
 	public function innerRect():FlxRect {
 		return FlxRect.get(x, y, width, height); // TODO
@@ -87,7 +94,7 @@ class Widget extends UIObject {
 		}
 		
 		// Ask the top-level object to recalculate the geometries of the dirty objects
-		p.event(new UIEvent(Type.LayoutRequest));
+		p.event(new UIEvent(EventType.LayoutRequest));
 	}
 	
 	public function draw() {
@@ -100,12 +107,47 @@ class Widget extends UIObject {
 	
 	override public function event(e:UIEvent):Bool {
 		switch(e.type) {
-			case Type.PointerPress:
+			case EventType.PointerPress:
 				pointerPressEvent(cast e);
-			case Type.PointerMove:
+			case EventType.PointerMove:
 				pointerMoveEvent(cast e);
-			case Type.PointerRelease:
+			case EventType.PointerRelease:
 				pointerReleaseEvent(cast e);
+			case EventType.WheelScroll:
+				wheelEvent(cast e);
+			case EventType.KeyPress:
+				keyPressEvent(cast e);
+				// TODO use tabs to pass focus to children here?
+			case EventType.KeyRelease:
+				keyReleaseEvent(cast e);
+			case EventType.FocusIn:
+				focusInEvent(cast e);
+			case EventType.FocusOut:
+				focusOutEvent(cast e);
+			case EventType.HoverEnter:
+				hoverEnterEvent(cast e);
+			case EventType.HoverLeave:
+				hoverLeaveEvent(cast e);
+			case EventType.Move:
+				moveEvent(cast e);
+			case EventType.Resize:
+				resizeEvent(cast e);
+			case EventType.Close:
+				closeEvent(cast e);
+			case EventType.DragEnter:
+				dragEnterEvent(cast e);
+			case EventType.DragLeave:
+				dragLeaveEvent(cast e);
+			case EventType.Drop:
+				dropEvent(cast e);
+			case EventType.Show:
+				showEvent(cast e);
+			case EventType.Hide:
+				hideEvent(cast e);
+			case EventType.LocaleChange:
+				localeChangeEvent(cast e);
+			case EventType.PropertyChange:
+				propertyChange(cast e);
 			default:
 				return super.event(e);
 		}
@@ -126,86 +168,124 @@ class Widget extends UIObject {
 	}
 	
 	private function pointerPressEvent(e:PointerEvent) {
-		trace("Received pointer press");
+		#if debug
+		trace(name + " received pointer press");
+		#end
 	}
 	
 	private function pointerReleaseEvent(e:PointerEvent) {
-		trace("Received pointer release");
+		#if debug
+		trace(name + " received pointer release");
+		#end
 	}
 	
 	private function pointerMoveEvent(e:PointerEvent) {
-		trace("Received pointer move");
+		#if debug
+		trace(name + " received pointer move");
+		#end
 	}
 	
-	/*
 	private function wheelEvent(e:WheelEvent) {
-		
+		#if debug
+		trace(name + " received mouse wheel scroll");
+		#end
 	}
 	
-	private function keyPressEvent(e:KeyboardEvent) {
-		
+	private function keyPressEvent(e:KeyEvent) {
+		#if debug
+		trace(name + " received key press");
+		#end
 	}
 	
-	private function keyReleaseEvent(e:KeyboardEvent) {
-		
+	private function keyReleaseEvent(e:KeyEvent) {
+		#if debug
+		trace(name + " received key release");
+		#end
 	}
 	
 	private function focusInEvent(e:FocusEvent) {
-		
+		#if debug
+		trace(name + " gained focus");
+		#end
 	}
 	
 	private function focusOutEvent(e:FocusEvent) {
-		
+		#if debug
+		trace(name + " lost focus");
+		#end
 	}
 	
-	private function enterEvent(e:UIEvent) {
-		
+	private function hoverEnterEvent(e:HoverEvent) {
+		#if debug
+		trace(name + " was hovered");
+		#end
 	}
 	
-	private function leaveEvent(e:UIEvent) {
-		
+	private function hoverLeaveEvent(e:HoverEvent) {
+		#if debug
+		trace(name + " was unhovered");
+		#end
 	}
 	
 	private function moveEvent(e:MoveEvent) {
-		
+		#if debug
+		trace(name + " was moved");
+		#end
 	}
 	
 	private function resizeEvent(e:ResizeEvent) {
-		
+		#if debug
+		trace(name + " was resized");
+		#end
 	}
 	
 	private function closeEvent(e:CloseEvent) {
-		
+		#if debug
+		trace(name + " will close");
+		#end
 	}
-	
+		
 	private function dragEnterEvent(e:DragEnterEvent) {
-		
-	}
-	
-	private function dragMoveEvent(e:DragMoveEvent) {
-		
+		#if debug
+		trace(name + " got drag enter");
+		#end	
 	}
 	
 	private function dragLeaveEvent(e:DragLeaveEvent) {
-		
+		#if debug
+		trace(name + " drag leave");
+		#end
 	}
 	
 	private function dropEvent(e:DropEvent) {
-		
+		#if debug
+		trace(name + " received drop");
+		#end
 	}
 	
 	private function showEvent(e:ShowEvent) {
-		
+		#if debug
+		trace(name + " was shown");
+		#end
 	}
 	
 	private function hideEvent(e:HideEvent) {
-		
+		#if debug
+		trace(name + " was hidden");
+		#end
 	}
 	
-	private function changeEvent(e:ChangeEvent) {
-		
+	private function localeChangeEvent(e:LocaleChangeEvent) {
+		#if debug
+		trace(name + " received a locale change event");
+		#end
 	}
-	*/
+	
+	private function propertyChange(e:PropertyChangeEvent) {
+		#if debug
+		trace(name + " had a property change");
+		#end
+	}
 	
 	// Returns the widget furthest down the tree with the mouse inside it, or null if the mouse is inside none of them.
 	public static function findHoveredWidget(w:Widget, point:FlxPoint):Widget {

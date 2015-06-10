@@ -28,7 +28,7 @@ class UIObject {
 	
 	public function event(e:UIEvent):Bool {
 		switch(e.type) {
-			case Type.ChildAdded, Type.ChildRemoved:
+			case EventType.ChildAdded, EventType.ChildRemoved:
 				childEvent(cast e);			
 			default:
 				// if(type >= MAX_USER) { // TODO custom events added to e above a max range

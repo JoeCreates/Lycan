@@ -28,7 +28,6 @@ class UIApplicationRoot {
 		
 		// TODO it would be faster to loop through the whole OpenFL event loop itself, possibly
 		Lib.current.stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-		Lib.current.stage.addEventListener(Event.EXIT_FRAME, onExitFrame);
 		Lib.current.stage.addEventListener(Event.ACTIVATE, onActivate);
 		Lib.current.stage.addEventListener(Event.DEACTIVATE, onDeactivate);
 		
@@ -55,7 +54,6 @@ class UIApplicationRoot {
 	public function destroy() {
 		// TODO possible to just clear all for this object?
 		Lib.current.stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-		Lib.current.stage.removeEventListener(Event.EXIT_FRAME, onExitFrame);
 		Lib.current.stage.removeEventListener(Event.ACTIVATE, onActivate);
 		Lib.current.stage.removeEventListener(Event.DEACTIVATE, onDeactivate);
 		
@@ -94,10 +92,6 @@ class UIApplicationRoot {
 		}
 	}
 	
-	private function onExitFrame(e:Event) {
-		//trace("Frame ended");
-	}
-	
 	private function onResize(e:Event) {
 		trace("TLW resized");
 		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
@@ -126,7 +120,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerPress));
+			postEvent(w, new PointerEvent(EventType.PointerPress));
 		}
 	}
 	
@@ -138,7 +132,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new WheelEvent(Type.WheelScroll));
+			postEvent(w, new WheelEvent(EventType.WheelScroll));
 		}
 	}
 	
@@ -150,7 +144,7 @@ class UIApplicationRoot {
 		
 		// TODO possibly rate-limit this to avoid lag, only use if the widget has a mousetracker flag, and cache the last hovered widget
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerMove));
+			postEvent(w, new PointerEvent(EventType.PointerMove));
 		}
 	}
 	
@@ -161,7 +155,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerRelease));
+			postEvent(w, new PointerEvent(EventType.PointerRelease));
 		}
 	}
 	
@@ -172,7 +166,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerPress));
+			postEvent(w, new PointerEvent(EventType.PointerPress));
 		}
 	}
 	
@@ -183,7 +177,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerMove));
+			postEvent(w, new PointerEvent(EventType.PointerMove));
 		}
 	}
 	
@@ -194,7 +188,7 @@ class UIApplicationRoot {
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			postEvent(w, new PointerEvent(Type.PointerRelease));
+			postEvent(w, new PointerEvent(EventType.PointerRelease));
 		}
 	}
 	
@@ -214,10 +208,10 @@ class UIApplicationRoot {
 	
 	private function dispatchEnterLeave(enter:Widget, leave:Widget, globalPosition:FlxPoint) {
 		if (enter != null) {
-			postEvent(enter, new UIEvent(Type.Enter)); // TODO pass new global mouse position
+			postEvent(enter, new UIEvent(EventType.Enter)); // TODO pass new global mouse position
 		}
 		if (leave != null) {
-			postEvent(leave, new UIEvent(Type.Leave));
+			postEvent(leave, new UIEvent(EventType.Leave));
 		}
 	}
 	
