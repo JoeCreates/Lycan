@@ -3,7 +3,6 @@ package lycan.ui.core ;
 import flixel.math.FlxPoint;
 import lycan.ui.events.UIEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
-import lycan.ui.events.UIEvent.ResizeEvent;
 import lycan.ui.events.UIEventLoop;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
@@ -11,17 +10,16 @@ import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
-import openfl.events.AccelerometerEvent;
-import openfl.events.JoystickEvent;
 import openfl.Lib;
 
 // Responsible for translating OpenFL/platform events into UI events and dispatching them to the widgets in the application
+@:allow(DebugRenderer)
 class UIApplicationRoot {
 	private var eventLoop:UIEventLoop;
 	
 	// Assumes there can only be one top level widget active at any one time
 	// TODO a solution to this is probably to use a stack/priority queue of TLWs
-	public var topLevelWidget(null,set):Widget = null;
+	@:isVar public var topLevelWidget(get, set):Widget = null;
 	
 	public function new() {
 		eventLoop = new UIEventLoop(this);
@@ -225,6 +223,10 @@ class UIApplicationRoot {
 	private function sendEvent(receiver:UIObject, event:UIEvent):Bool {
 		Sure.sure(receiver != null && event != null);
 		return receiver.event(event);
+	}
+	
+	public function get_topLevelWidget():Widget {
+		return topLevelWidget;
 	}
 	
 	public function set_topLevelWidget(topLevelWidget:Widget):Widget {

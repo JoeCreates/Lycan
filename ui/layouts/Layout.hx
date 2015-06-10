@@ -46,10 +46,6 @@ class Layout implements ILayoutItem extends UIObject {
 		return children.isEmpty();
 	}
 	
-	public function setContentsMargins(left:Int, top:Int, right:Int, bottom:Int) {
-		// TODO
-	}
-	
 	private function widgetEvent(e:UIEvent) {
 	}
 }

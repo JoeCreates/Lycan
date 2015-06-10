@@ -42,11 +42,25 @@ class UIObject {
 		return true;
 	}
 	
+	private function childEvent(e:ChildEvent) {
+		
+	}
+	
+	private function customEvent(e:UIEvent) {
+		
+	}
+	
 	//public function installEventFilter
 	//public function removeEventFilter
 	//public function eventFilter(widget:IWidget, e:UIEvent):Bool {
 	//	return false;
 	//}
+	
+	// NOTE this WON'T respect the way that each layout/widget might want to specify the children's iteration order
+	// TODO breadth first?
+	// TODO should be static method on UIObject instead?
+	public function walkChildren(func:UIObject->Void) {
+	}
 	
 	public function findChildren(name:String, ?findOption:FindChildOptions):List<UIObject> {
 		if(findOption == null) {
@@ -61,19 +75,11 @@ class UIObject {
 		}
 	}
 	
-	private function childEvent(e:ChildEvent) {
-		
-	}
-	
-	private function customEvent(e:UIEvent) {
-		
-	}
-	
 	private function findChildrenRecursively(name:String, depth:Int = -1):List<UIObject> {
 		var list = new List<UIObject>();
 		return list;
 		
-		// TODO		
+		// TODO
 		if (depth == -1) {
 			
 		}

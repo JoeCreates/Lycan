@@ -15,7 +15,6 @@ enum Direction {
 	DOWN;
 }
 
-// TODO does use of floats rather than ints matter?
 class Widget extends UIObject {
 	public var layout:Layout = null;
 	public var enabled:Bool = true;
@@ -63,16 +62,26 @@ class Widget extends UIObject {
 		return null;
 	}
 	
+	// The area that contains the child widgets without inner padding
 	public function innerRect():FlxRect {
-		return FlxRect.get(x, y, width, height); // TODO
+		return FlxRect.get(50, 50, 100, 100); // TODO
 	}
 	
+	// The area that contains the child widgets including inner padding
 	public function borderRect():FlxRect {
-		return FlxRect.get(x, y, width, height);
+		return FlxRect.get(47, 47, 106, 106);
 	}
 	
+	// The area that contains the child widget including inner padding and outer margins
+	// This is the area that the layout manager should consider when laying out widgets
 	public function outerRect():FlxRect {
-		return FlxRect.get(x, y, width, height); // TODO
+		return FlxRect.get(45, 45, 110, 110); // TODO
+	}
+	
+	// The center of the innerRect
+	public function innerCenter():FlxPoint {
+		var innerRect = innerRect();
+		return FlxPoint.get(innerRect.x + innerRect.width / 2, innerRect.y + innerRect.height / 2); // TODO avoid FlxPoint and minimize calculation
 	}
 	
 	public function updateGeometry() {
@@ -97,10 +106,6 @@ class Widget extends UIObject {
 		p.event(new UIEvent(EventType.LayoutRequest));
 	}
 	
-	public function draw() {
-	
-	}
-	
 	public function close() {
 		
 	}
@@ -117,7 +122,6 @@ class Widget extends UIObject {
 				wheelEvent(cast e);
 			case EventType.KeyPress:
 				keyPressEvent(cast e);
-				// TODO use tabs to pass focus to children here?
 			case EventType.KeyRelease:
 				keyReleaseEvent(cast e);
 			case EventType.FocusIn:
@@ -147,23 +151,13 @@ class Widget extends UIObject {
 			case EventType.LocaleChange:
 				localeChangeEvent(cast e);
 			case EventType.PropertyChange:
-				propertyChange(cast e);
+				propertyChangeEvent(cast e);
+			case EventType.LayoutRequest:
+				layoutRequestEvent(cast e);
 			default:
 				return super.event(e);
 		}
 		
-		return true;
-		
-		//if (e.type == Type.LayoutRequest) {
-			// The top level object (or its layout if it has one) recalculates geometry for all dirty children
-			// The layout recursively proceeds down the object tree to determine the constraints for each item until it reaches the dirty layout.
-			// It produces a final size constraint for the whole layout, which may change the size of the parent widget
-			
-			// TODO
-		//}
-	}
-	
-	override private function get_isWidgetType():Bool {
 		return true;
 	}
 	
@@ -281,13 +275,27 @@ class Widget extends UIObject {
 		#end
 	}
 	
-	private function propertyChange(e:PropertyChangeEvent) {
+	private function propertyChangeEvent(e:PropertyChangeEvent) {
 		#if debug
 		trace(name + " had a property change");
 		#end
 	}
 	
-	// Returns the widget furthest down the tree with the mouse inside it, or null if the mouse is inside none of them.
+	private function layoutRequestEvent(e:UIEvent) {
+		#if debug
+		trace(name + " got a layout request");
+		#end
+		
+		//if (e.type == Type.LayoutRequest) {
+			// The top level object (or its layout if it has one) recalculates geometry for all dirty children
+			// The layout recursively proceeds down the object tree to determine the constraints for each item until it reaches the dirty layout.
+			// It produces a final size constraint for the whole layout, which may change the size of the parent widget
+			
+			// TODO
+		//}
+	}
+	
+	// Returns the widget furthest down the hierarchy with the mouse inside it, or null if the mouse is inside none of them.
 	public static function findHoveredWidget(w:Widget, point:FlxPoint):Widget {
 		Sure.sure(w != null);
 		Sure.sure(point != null);
@@ -329,5 +337,9 @@ class Widget extends UIObject {
 	
 	private static function isPointOver(w:Widget, point:FlxPoint):Bool {
 		return w.borderRect().containsFlxPoint(point);
+	}
+	
+	override private function get_isWidgetType():Bool {
+		return true;
 	}
 }
