@@ -3,6 +3,11 @@ package lycan.ui.events;
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.widgets.Widget;
 
+import openfl.events.KeyboardEvent;
+import openfl.events.MouseEvent;
+import openfl.events.Event;
+import openfl.events.TouchEvent;
+
 @:enum
 abstract Type(Int) {
 	var None = 0;
@@ -151,5 +156,9 @@ class PointerEvent extends UIEvent {
 }
 
 class PropertyChangedEvent extends UIEvent {
+	
+}
+
+class ResizeEvent extends UIEvent {
 	
 }

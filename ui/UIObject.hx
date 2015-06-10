@@ -15,6 +15,7 @@ class UIObject {
 	public var uid:Int;
 	public var sendChildEvents:Bool;
 	public var receiveChildEvents:Bool;
+	public var isWidgetType(get, never):Bool;
 	
 	public function new(?parent:UIObject, ?name:String) {
 		this.parent = parent;
@@ -26,15 +27,19 @@ class UIObject {
 	}
 	
 	public function event(e:UIEvent):Bool {
-		if (e.type == Type.LayoutRequest) {
-			// The top level object (or its layout if it has one) recalculates geometry for all dirty children
-			// The layout recursively proceeds down the object tree to determine the constraints for each item until it reaches the dirty layout.
-			// It produces a final size constraint for the whole layout, which may change the size of the parent widget
-			
-			// TODO
+		switch(e.type) {
+			case Type.ChildAdded, Type.ChildRemoved:
+				childEvent(cast e);			
+			default:
+				// if(type >= MAX_USER) { // TODO custom events added to e above a max range
+				// customEvent(e);
+				// }
+				// break;
+				
+				return false;
 		}
 		
-		return false;
+		return true;
 	}
 	
 	//public function installEventFilter
@@ -72,5 +77,9 @@ class UIObject {
 		if (depth == -1) {
 			
 		}
+	}
+	
+	private function get_isWidgetType():Bool {
+		return false;
 	}
 }
