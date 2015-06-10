@@ -11,8 +11,11 @@ import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
+import openfl.events.AccelerometerEvent;
+import openfl.events.JoystickEvent;
 import openfl.Lib;
 
+// Responsible for translating OpenFL/platform events into UI events and dispatching them to the widgets in the application
 class UIApplicationRoot {
 	private var eventLoop:UIEventLoop;
 	
@@ -28,14 +31,23 @@ class UIApplicationRoot {
 		Lib.current.stage.addEventListener(Event.EXIT_FRAME, onExitFrame);
 		Lib.current.stage.addEventListener(Event.ACTIVATE, onActivate);
 		Lib.current.stage.addEventListener(Event.DEACTIVATE, onDeactivate);
+		
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		
 		Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		Lib.current.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
+		
 		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
 	}
 	
@@ -46,14 +58,23 @@ class UIApplicationRoot {
 		Lib.current.stage.removeEventListener(Event.EXIT_FRAME, onExitFrame);
 		Lib.current.stage.removeEventListener(Event.ACTIVATE, onActivate);
 		Lib.current.stage.removeEventListener(Event.DEACTIVATE, onDeactivate);
+		
 		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		
 		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		
 		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
 		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
 		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_END, onTouchEnd);
+		
 		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
 	}
 	
@@ -74,7 +95,7 @@ class UIApplicationRoot {
 	}
 	
 	private function onExitFrame(e:Event) {
-		//trace("Frame exited");
+		//trace("Frame ended");
 	}
 	
 	private function onResize(e:Event) {
@@ -86,74 +107,94 @@ class UIApplicationRoot {
 	}
 	
 	private function onKeyDown(e:KeyboardEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Key down");
 		// TODO pass the key event to the appropriate widget
 		// TODO maintain a list of focus widgets that can receive the input
 	}
 	
 	private function onKeyUp(e:KeyboardEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Key up");
 		// TODO pass the key event to the appropriate widget
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Mouse down");
 		
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerPress));
+			postEvent(w, new PointerEvent(Type.PointerPress));
+		}
+	}
+	
+	private function onMouseWheel(e:MouseEvent) {
+		Sure.sure(topLevelWidget != null);
+		trace("Mouse wheel");
+		
+		// TODO may prefer to do this for the first scrollable item, or the focus widget instead
+		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		
+		if (w != null) {
+			postEvent(w, new WheelEvent(Type.WheelScroll));
 		}
 	}
 	
 	private function onMouseMove(e:MouseEvent) {
+		Sure.sure(topLevelWidget != null);
 		// trace("Mouse move");
 		
-		// TODO possibly rate-limit this to avoid lag, cache the last hovered widget
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
+		// TODO possibly rate-limit this to avoid lag, only use if the widget has a mousetracker flag, and cache the last hovered widget
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerMove));
+			postEvent(w, new PointerEvent(Type.PointerMove));
 		}
 	}
 	
 	private function onMouseUp(e:MouseEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Mouse up");
 		
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerRelease));
+			postEvent(w, new PointerEvent(Type.PointerRelease));
 		}
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Touch begin");
 		
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerPress));
+			postEvent(w, new PointerEvent(Type.PointerPress));
 		}
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Touch move");
 		
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerMove));
+			postEvent(w, new PointerEvent(Type.PointerMove));
 		}
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
+		Sure.sure(topLevelWidget != null);
 		trace("Touch end");
 		
 		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (w != null) {
-			eventLoop.add(w, new PointerEvent(Type.PointerRelease));
+			postEvent(w, new PointerEvent(Type.PointerRelease));
 		}
 	}
 	
@@ -180,7 +221,7 @@ class UIApplicationRoot {
 		}
 	}
 	
-	// Puts the event onto the event loop, to be processed on the next frame
+	// Puts event onto the event loop, to be processed on the next frame
 	private function postEvent(receiver:UIObject, event:UIEvent) {
 		Sure.sure(receiver != null && event != null);
 		eventLoop.add(receiver, event);

@@ -38,6 +38,7 @@ abstract Type(Int) {
 	var PropertyChanged = 25; // A widget's watch property changed
 	var LayoutRequest = 26; // Widget layout needs to be redone
 	var Leave = 27; // Pointer leaves the widgets boundaries
+	var WheelScroll = 28; // The mouse wheel was scrolled
 	// ZOrderChange; // The widget's z-order changed
 }
 
@@ -160,5 +161,9 @@ class PropertyChangedEvent extends UIEvent {
 }
 
 class ResizeEvent extends UIEvent {
+	
+}
+
+class WheelEvent extends UIEvent {
 	
 }
