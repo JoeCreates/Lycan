@@ -10,11 +10,8 @@ import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
+import openfl.events.AccelerometerEvent;
 import openfl.Lib;
-
-import lime.ui.Gamepad;
-import lime.ui.GamepadAxis;
-import lime.ui.GamepadButton;
 
 // Responsible for translating OpenFL/platform events into UI events and dispatching them to the widgets in the application
 @:allow(DebugRenderer)
@@ -27,6 +24,8 @@ class UIApplicationRoot {
 	
 	public function new() {
 		eventLoop = new UIEventLoop(this);
+		
+		Sure.sure(Lib.current.stage != null);
 		
 		// TODO it would be faster to loop through the whole OpenFL event loop itself, possibly
 		Lib.current.stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
@@ -49,14 +48,25 @@ class UIApplicationRoot {
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
 		
+		Lib.current.stage.addEventListener(AccelerometerEvent.UPDATE, onAccelerometerUpdate);
+		
 		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
 		
-		// TODO
-		//lime.app.Application.current.windows[0].onGamepadAxisMove.add
+		// TODO requires more recent openfl mode than haxeflixel can use (seeing openfl._legacy.Lib errors)?
+		//Sure.sure(Lib.application.window != null);
+		//Lib.application.window.onGamepadAxisMove.add(onGamepadAxisMove);
+		//Lib.application.window.onGamepadButtonDown.add(onGamepadButtonDown);
+		//Lib.application.window.onGamepadButtonUp.add(onGamepadButtonUp);
+		//Lib.application.window.onGamepadConnect.add(onGamepadConnect);
+		//Lib.application.window.onGamepadDisconnect.add(onGamepadDisconnect);
 	}
 	
 	// TODO call this if the TLW is set to null?
 	public function destroy() {
+		// TODO destroy event loop?
+		
+		Sure.sure(Lib.current.stage != null);
+		
 		// TODO possible to just clear all for this object?
 		Lib.current.stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		Lib.current.stage.removeEventListener(Event.ACTIVATE, onActivate);
@@ -80,8 +90,12 @@ class UIApplicationRoot {
 		
 		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
 		
-		//TODO
-		//lime.app.Application.current.windows[0].onGamepadAxisMove.remove
+		//Sure.sure(Lib.application.window != null);
+		//Lib.application.window.onGamepadAxisMove.remove(onGamepadAxisMove);
+		//Lib.application.window.onGamepadButtonDown.remove(onGamepadButtonDown);
+		//Lib.application.window.onGamepadButtonUp.remove(onGamepadButtonUp);
+		//Lib.application.window.onGamepadConnect.remove(onGamepadConnect);
+		//Lib.application.window.onGamepadDisconnect.remove(onGamepadDisconnect);
 	}
 	
 	private function onActivate(e:Event) {
@@ -201,27 +215,37 @@ class UIApplicationRoot {
 	}
 	
 	// TODO
-	/*
-	private function onGamepadButtonDown() {
+	private function onGamepadButtonDown(gamepad, button) {
+		Sure.sure(topLevelWidget != null);
+		trace("Gamepad button down");
+	}
+	
+	private function onGamepadButtonUp(gamepad, button) {
+		Sure.sure(topLevelWidget != null);
+		trace("Gamepad button up");
+	}
+	
+	private function onGamepadConnect(gamepad) {
+		Sure.sure(topLevelWidget != null);
+		trace("Gamepad connect");
 		
 	}
 	
-	private function onGamepadButtonUp() {
+	private function onGamepadDisconnect(gamepad) {
+		Sure.sure(topLevelWidget != null);
+		trace("Gamepad disconnect");
 		
 	}
 	
-	private function onGamepadConnect() {
-		
+	private function onGamepadAxisMove(gamepad, axis, value:Float) {
+		Sure.sure(topLevelWidget != null);
+		trace("Gamepad axis move");
 	}
 	
-	private function onGamepadDisconnect() {
-		
+	private function onAccelerometerUpdate(e:AccelerometerEvent) {
+		Sure.sure(topLevelWidget != null);
+		trace("Accelerometer update");
 	}
-	
-	private function onGamepadAxisMove() {
-		
-	}
-	*/
 	
 	public function notify(receiver:UIObject, event:UIEvent) {
 		Sure.sure(receiver != null);

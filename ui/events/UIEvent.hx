@@ -8,10 +8,7 @@ import openfl.events.MouseEvent;
 import openfl.events.Event;
 import openfl.events.TouchEvent;
 
-import lime.ui.Gamepad;
-import lime.ui.GamepadAxis;
-import lime.ui.GamepadButton;
-
+// TODO macro to just make the enum values increase rather than specifying values manually?
 @:enum
 abstract EventType(Int) {
 	var None = 0;
@@ -53,9 +50,9 @@ abstract EventType(Int) {
 	var GamepadDisconnect = 35; // Gamepad disconnected
 	var GamepadAxisMove = 36; // Gamepad analog stick moved
 	
-	// ZOrderChange; // The widget's z-order changed
+	var AccelerometerUpdate = 37; // An accelerometer sent an update
 	
-	// TODO accelerometer?
+	// ZOrderChange; // The widget's z-order changed
 }
 
 // Base of event classes. Events are generally passed from the input system to UI objects to handle.
@@ -190,5 +187,9 @@ class MoveEvent extends UIEvent {
 }
 
 class GamepadEvent extends UIEvent {
+	
+}
+
+class AccelerometerEvent extends UIEvent {
 	
 }
