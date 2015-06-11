@@ -1,27 +1,26 @@
 package source.lycan.ui.core;
-import flixel.FlxSprite;
-import flixel.math.FlxRect;
-import lycan.ui.core.UIApplicationRoot;
-import lycan.ui.UIObject;
-import flixel.util.FlxSpriteUtil;
-import lycan.ui.widgets.Widget;
-import flixel.util.FlxColor;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.util.FlxColor;
+import flixel.util.FlxSpriteUtil;
+import lycan.ui.core.UIApplicationRoot;
+import lycan.ui.UIObject;
+import lycan.ui.widgets.Widget;
 
 // Debug/development renderering for UI elements
+@:access(lycan.ui.core.UIApplicationRoot)
 class DebugRenderer extends FlxSprite {
 	private var root:UIApplicationRoot;
 	
 	public function new(root:UIApplicationRoot) {
-		super();
+		super(0, 0);
 		this.root = root;
+		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
 	}
 	
 	override public function draw() {
-		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
-		
-		FlxSpriteUtil.drawRect(this, x, y, width, height, FlxColor.TRANSPARENT);
+		FlxSpriteUtil.fill(this, FlxColor.TRANSPARENT);
 		
 		var renderWidget = function(o:UIObject) {
 			Sure.sure(o != null);
@@ -33,22 +32,26 @@ class DebugRenderer extends FlxSprite {
 				var inner = w.innerRect();
 				var center = w.innerCenter();
 				
-				var rectLineColor = FlxColor.RED;
+				var borderRectLineColor = FlxColor.RED;
 				
+				// TODO
 				if (w.focus) {
-					rectLineColor.green += 127;
-				}				
+					borderRectLineColor.green += 127;
+				}
 				if (!w.shown) {
-					rectLineColor = FlxColor.CYAN;
+					borderRectLineColor = FlxColor.CYAN;
 				}
 				if (!w.enabled) {
-					rectLineColor = FlxColor.GRAY;
+					borderRectLineColor = FlxColor.GRAY;
 				}
 				
-				var rectLineStyle:LineStyle = { thickness: 1, color: rectLineColor };
-				FlxSpriteUtil.drawRect(this, outer.x, outer.y, outer.width, outer.height, FlxColor.TRANSPARENT, rectLineStyle);
-				FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, rectLineStyle);
-				FlxSpriteUtil.drawRect(this, inner.x, inner.y, inner.width, inner.height, FlxColor.TRANSPARENT, rectLineStyle);
+				var outerRectLineStyle:LineStyle = { thickness: 1, color: FlxColor.ORANGE };
+				var borderRectLineStyle:LineStyle = { thickness: 1, color: borderRectLineColor };
+				var innerRectLineStyle:LineStyle = { thickness: 1, color: FlxColor.BLUE };
+				
+				FlxSpriteUtil.drawRect(this, outer.x, outer.y, outer.width, outer.height, FlxColor.TRANSPARENT, outerRectLineStyle);
+				FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, borderRectLineStyle);
+				FlxSpriteUtil.drawRect(this, inner.x, inner.y, inner.width, inner.height, FlxColor.TRANSPARENT, innerRectLineStyle);
 				
 				var centerLineStyle:LineStyle = { thickness: 1, color: FlxColor.MAGENTA };
 				FlxSpriteUtil.drawLine(this, center.x, center.y + inner.height / 4, center.x, center.y - inner.height / 4, centerLineStyle);
@@ -71,6 +74,12 @@ class DebugRenderer extends FlxSprite {
 		}
 		
 		visitElements(root.topLevelWidget);
+		
+		if (root.hoveredWidget != null) {
+			var border = root.hoveredWidget.borderRect();
+			var lineStyle:LineStyle = { thickness: 5, color: FlxColor.MAGENTA };
+			FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, lineStyle);
+		}
 		
 		super.draw();
 	}

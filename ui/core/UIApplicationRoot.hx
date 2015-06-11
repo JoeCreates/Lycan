@@ -11,12 +11,20 @@ import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.events.AccelerometerEvent;
+import openfl.events.FocusEvent;
+
 import openfl.Lib;
 
 // Responsible for translating OpenFL/platform events into UI events and dispatching them to the widgets in the application
-@:allow(DebugRenderer)
 class UIApplicationRoot {
 	private var eventLoop:UIEventLoop;
+	private var listenersAttached:Bool = false;
+	
+	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
+	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
+	
+	// TODO this gets screwed if you resize the window on Flash and move the mouse about - probably a mouse coordinate problem
+	private var hoveredWidget(default, set):Widget = null;
 	
 	// Assumes there can only be one top level widget active at any one time
 	// TODO a solution to this is probably to use a stack/priority queue of TLWs
@@ -24,102 +32,53 @@ class UIApplicationRoot {
 	
 	public function new() {
 		eventLoop = new UIEventLoop(this);
-		
-		Sure.sure(Lib.current.stage != null);
-		
-		// TODO it would be faster to loop through the whole OpenFL event loop itself, possibly
-		Lib.current.stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-		Lib.current.stage.addEventListener(Event.ACTIVATE, onActivate);
-		Lib.current.stage.addEventListener(Event.DEACTIVATE, onDeactivate);
-		
-		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		Lib.current.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-		
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
-		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
-		Lib.current.stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
-		
-		Lib.current.stage.addEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
-		Lib.current.stage.addEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
-		Lib.current.stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
-		
-		Lib.current.stage.addEventListener(AccelerometerEvent.UPDATE, onAccelerometerUpdate);
-		
-		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
-		
-		// TODO requires more recent openfl mode than haxeflixel can use (seeing openfl._legacy.Lib errors)?
-		//Sure.sure(Lib.application.window != null);
-		//Lib.application.window.onGamepadAxisMove.add(onGamepadAxisMove);
-		//Lib.application.window.onGamepadButtonDown.add(onGamepadButtonDown);
-		//Lib.application.window.onGamepadButtonUp.add(onGamepadButtonUp);
-		//Lib.application.window.onGamepadConnect.add(onGamepadConnect);
-		//Lib.application.window.onGamepadDisconnect.add(onGamepadDisconnect);
 	}
 	
-	// TODO call this if the TLW is set to null?
 	public function destroy() {
-		// TODO destroy event loop?
-		
-		Sure.sure(Lib.current.stage != null);
-		
-		// TODO possible to just clear all for this object?
-		Lib.current.stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-		Lib.current.stage.removeEventListener(Event.ACTIVATE, onActivate);
-		Lib.current.stage.removeEventListener(Event.DEACTIVATE, onDeactivate);
-		
-		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-		
-		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
-		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
-		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
-		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
-		
-		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
-		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
-		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_END, onTouchEnd);
-		
-		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
-		
-		//Sure.sure(Lib.application.window != null);
-		//Lib.application.window.onGamepadAxisMove.remove(onGamepadAxisMove);
-		//Lib.application.window.onGamepadButtonDown.remove(onGamepadButtonDown);
-		//Lib.application.window.onGamepadButtonUp.remove(onGamepadButtonUp);
-		//Lib.application.window.onGamepadConnect.remove(onGamepadConnect);
-		//Lib.application.window.onGamepadDisconnect.remove(onGamepadDisconnect);
+		topLevelWidget = null;
+		eventLoop = null;
 	}
 	
 	private function onActivate(e:Event) {
+		Sure.sure(topLevelWidget != null);
 		trace("UI activated");
 	}
 	
 	private function onDeactivate(e:Event) {
+		Sure.sure(topLevelWidget != null);
 		trace("UI deactivated");
+		
+		hoveredWidget = null;
 	}
 	
 	private function onEnterFrame(e:Event) {
 		if(topLevelWidget != null) { // TODO need better way of knowing when not to process events
 			//trace("Frame entered");
-			
 			eventLoop.process();
 		}
 	}
 	
+	private function onFocusIn(e:FocusEvent) {
+		Sure.sure(topLevelWidget != null);
+		trace("Window focused in");
+	}
+	
+	private function onFocusOut(e:FocusEvent) {
+		Sure.sure(topLevelWidget != null);
+		trace("Window focused out");
+		
+		hoveredWidget = null;
+	}
+	
 	private function onResize(e:Event) {
+		Sure.sure(topLevelWidget != null);
 		trace("TLW resized");
 		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
 		
 		// TODO only if the TLW should resize rather than ignoring and letting flixel do the scaling or whatever?
 		// sendEvent(topLevelWidget, new ResizeEvent());
+		
+		hoveredWidget = null;
 	}
 	
 	private function onKeyDown(e:KeyboardEvent) {
@@ -139,10 +98,10 @@ class UIApplicationRoot {
 		Sure.sure(topLevelWidget != null);
 		trace("Mouse down");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerPress));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
 		}
 	}
 	
@@ -151,10 +110,10 @@ class UIApplicationRoot {
 		trace("Mouse wheel");
 		
 		// TODO may prefer to do this for the first scrollable item, or the focus widget instead
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new WheelEvent(EventType.WheelScroll));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new WheelEvent(EventType.WheelScroll));
 		}
 	}
 	
@@ -162,11 +121,11 @@ class UIApplicationRoot {
 		Sure.sure(topLevelWidget != null);
 		// trace("Mouse move");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		// TODO possibly rate-limit this to avoid lag, only use if the widget has a mousetracker flag, and cache the last hovered widget
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerMove));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
 		}
 	}
 	
@@ -174,21 +133,28 @@ class UIApplicationRoot {
 		Sure.sure(topLevelWidget != null);
 		trace("Mouse up");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerRelease));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
 		}
+	}
+	
+	private function onMouseLeave(e:Event) {
+		Sure.sure(topLevelWidget != null);
+		trace("Mouse leave");
+		
+		hoveredWidget = null;
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Touch begin");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerPress));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
 		}
 	}
 	
@@ -196,10 +162,10 @@ class UIApplicationRoot {
 		Sure.sure(topLevelWidget != null);
 		trace("Touch move");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerMove));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
 		}
 	}
 	
@@ -207,10 +173,10 @@ class UIApplicationRoot {
 		Sure.sure(topLevelWidget != null);
 		trace("Touch end");
 		
-		var w = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = Widget.findHoveredWidget(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
-		if (w != null) {
-			postEvent(w, new PointerEvent(EventType.PointerRelease));
+		if (hoveredWidget != null) {
+			postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
 		}
 	}
 	
@@ -218,6 +184,8 @@ class UIApplicationRoot {
 	private function onGamepadButtonDown(gamepad, button) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad button down");
+		
+		// TODO work out a gamepad focus system, or give the user control over it manually?
 	}
 	
 	private function onGamepadButtonUp(gamepad, button) {
@@ -234,7 +202,6 @@ class UIApplicationRoot {
 	private function onGamepadDisconnect(gamepad) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad disconnect");
-		
 	}
 	
 	private function onGamepadAxisMove(gamepad, axis, value:Float) {
@@ -255,10 +222,6 @@ class UIApplicationRoot {
 		receiver.event(event);
 		
 		// TODO see http://code.woboq.org/qt5/qtbase/src/widgets/kernel/qapplication.cpp.html notify (this is gonna take awhile.......)
-	}
-	
-	private function sendPointerEvent(receiver:Widget, event:PointerEvent, lastReceiver:Widget) {
-		//var widgetUnderMouse:Bool = receiver.rect().contains(event.localPosition());
 	}
 	
 	private function dispatchEnterLeave(enter:Widget, leave:Widget, globalPosition:FlxPoint) {
@@ -286,13 +249,129 @@ class UIApplicationRoot {
 		return topLevelWidget;
 	}
 	
-	public function set_topLevelWidget(topLevelWidget:Widget):Widget {
+	private function set_hoveredWidget(w:Widget):Widget {
 		#if debug
-		trace("Set top level widget to: " + topLevelWidget.name);
+		if (w == null) {
+			trace("Set hovered widget to null");
+		} else {
+			if(w.name == null) {
+				trace("Set hovered widget to " + Type.getClassName(Type.getClass(w)));
+			} else {
+				trace("Set hovered widget to " + w.name);
+			}
+		}
 		#end
+		
+		return hoveredWidget = w;
+	}
+	
+	private function set_topLevelWidget(nextTopLevelWidget:Widget):Widget {
+		#if debug
+		trace("Set top level widget to: " + nextTopLevelWidget.name);
+		#end
+		
+		if (nextTopLevelWidget == null) {
+			Sure.sure(listenersAttached);
+			removeEventListeners();
+		}
+		
+		if (nextTopLevelWidget != null && this.topLevelWidget != nextTopLevelWidget && !listenersAttached) {
+			addEventListeners();
+		}
 		
 		eventLoop.clear();
 		
-		return this.topLevelWidget = topLevelWidget;
+		hoveredWidget = null;
+		
+		return this.topLevelWidget = nextTopLevelWidget;
+	}
+	
+	private function addEventListeners() {
+		Sure.sure(Lib.current.stage != null);
+		
+		// TODO it would be faster to loop through the whole OpenFL event loop itself, possibly
+		Lib.current.stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		Lib.current.stage.addEventListener(Event.ACTIVATE, onActivate);
+		Lib.current.stage.addEventListener(Event.DEACTIVATE, onDeactivate);
+		Lib.current.stage.addEventListener(FocusEvent.FOCUS_IN, onFocusIn);
+		Lib.current.stage.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+		
+		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		Lib.current.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		//Lib.current.stage.addEventListener(MouseEvent.RELEASE_OUTSIDE, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		Lib.current.stage.addEventListener(Event.MOUSE_LEAVE, onMouseLeave); // TODO may not work on Windows native build
+		
+		Lib.current.stage.addEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
+		Lib.current.stage.addEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
+		Lib.current.stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
+		
+		#if !neko // Crashes
+		Lib.current.stage.addEventListener(AccelerometerEvent.UPDATE, onAccelerometerUpdate);
+		#end
+		
+		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
+		
+		// TODO requires more recent openfl mode than haxeflixel can use (seeing openfl._legacy.Lib errors)?
+		//Sure.sure(Lib.application.window != null);
+		//Lib.application.window.onGamepadAxisMove.add(onGamepadAxisMove);
+		//Lib.application.window.onGamepadButtonDown.add(onGamepadButtonDown);
+		//Lib.application.window.onGamepadButtonUp.add(onGamepadButtonUp);
+		//Lib.application.window.onGamepadConnect.add(onGamepadConnect);
+		//Lib.application.window.onGamepadDisconnect.add(onGamepadDisconnect);
+		
+		listenersAttached = true;
+	}
+	
+	private function removeEventListeners() {		
+		Sure.sure(Lib.current.stage != null);
+		
+		// TODO possible to just clear all for this object? // Pass a list of methods/events
+		Lib.current.stage.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+		Lib.current.stage.removeEventListener(Event.ACTIVATE, onActivate);
+		Lib.current.stage.removeEventListener(Event.DEACTIVATE, onDeactivate);
+		Lib.current.stage.removeEventListener(FocusEvent.FOCUS_IN, onFocusIn);
+		Lib.current.stage.removeEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
+		
+		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		
+		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		//Lib.current.stage.removeEventListener(MouseEvent.RELEASE_OUTSIDE, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onMouseDown);
+		Lib.current.stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onMouseUp);
+		Lib.current.stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		Lib.current.stage.removeEventListener(Event.MOUSE_LEAVE, onMouseLeave);
+		
+		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
+		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
+		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_END, onTouchEnd);
+		
+		#if !neko // Crashes
+		Lib.current.stage.removeEventListener(AccelerometerEvent.UPDATE, onAccelerometerUpdate);
+		#end
+		
+		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
+		
+		//Sure.sure(Lib.application.window != null);
+		//Lib.application.window.onGamepadAxisMove.remove(onGamepadAxisMove);
+		//Lib.application.window.onGamepadButtonDown.remove(onGamepadButtonDown);
+		//Lib.application.window.onGamepadButtonUp.remove(onGamepadButtonUp);
+		//Lib.application.window.onGamepadConnect.remove(onGamepadConnect);
+		//Lib.application.window.onGamepadDisconnect.remove(onGamepadDisconnect);
+		
+		listenersAttached = false;
 	}
 }

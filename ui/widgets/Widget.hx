@@ -32,14 +32,14 @@ class Widget extends UIObject {
 	public var focus:Bool = false;
 	public var shown:Bool = true;
 	public var acceptDrops:Bool = true;
-	public var paddingLeft:Int = 0;
-	public var paddingTop:Int = 0;
-	public var paddingRight:Int = 0;
-	public var paddingBottom:Int = 0;
-	public var marginLeft:Int = 0;
-	public var marginTop:Int = 0;
-	public var marginRight:Int = 0;
-	public var marginBottom:Int = 0;
+	public var paddingLeft:Int = 2;
+	public var paddingTop:Int = 2;
+	public var paddingRight:Int = 2;
+	public var paddingBottom:Int = 2;
+	public var marginLeft:Int = 2;
+	public var marginTop:Int = 2;
+	public var marginRight:Int = 2;
+	public var marginBottom:Int = 2;
 	
 	public var hoverable:Bool = true;
 	public var selectable:Bool = true;
@@ -63,19 +63,20 @@ class Widget extends UIObject {
 	}
 	
 	// The area that contains the child widgets without inner padding
+	// This is the area inside which widget contents may be positioned
 	public function innerRect():FlxRect {
-		return FlxRect.get(50, 50, 100, 100); // TODO
+		return FlxRect.get(x + ((paddingLeft + paddingRight) / 2), y + ((paddingBottom + paddingTop) / 2), width - paddingLeft - paddingRight, height - paddingBottom - paddingTop);
 	}
 	
 	// The area that contains the child widgets including inner padding
 	public function borderRect():FlxRect {
-		return FlxRect.get(47, 47, 106, 106);
+		return FlxRect.get(x, y, width, height);
 	}
 	
 	// The area that contains the child widget including inner padding and outer margins
-	// This is the area that the layout manager should consider when laying out widgets
+	// This is the area that the layout manager should consider when laying out widgets within a layout
 	public function outerRect():FlxRect {
-		return FlxRect.get(45, 45, 110, 110); // TODO
+		return FlxRect.get(x - ((marginLeft + marginRight) / 2), y - ((marginBottom + marginTop) / 2), width + marginLeft + marginRight, height + marginBottom + marginTop);
 	}
 	
 	// The center of the innerRect
@@ -339,6 +340,10 @@ class Widget extends UIObject {
 	public static function findHoveredWidget(w:Widget, point:FlxPoint):Widget {
 		Sure.sure(w != null);
 		Sure.sure(point != null);
+		
+		if (!isPointOver(w, point)) {
+			return null;
+		}
 		
 		while (true) {
 			var child = findHoveredChild(w, point);
