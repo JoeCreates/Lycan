@@ -55,7 +55,6 @@ abstract EventType(Int) {
 	
 	// ZOrderChange; // The widget's z-order changed
 	
-	// TODO gamepad?
 	// TODO accelerometer?
 }
 

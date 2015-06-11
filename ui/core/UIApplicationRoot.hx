@@ -12,6 +12,10 @@ import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.Lib;
 
+import lime.ui.Gamepad;
+import lime.ui.GamepadAxis;
+import lime.ui.GamepadButton;
+
 // Responsible for translating OpenFL/platform events into UI events and dispatching them to the widgets in the application
 @:allow(DebugRenderer)
 class UIApplicationRoot {
@@ -46,6 +50,9 @@ class UIApplicationRoot {
 		Lib.current.stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
 		
 		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
+		
+		// TODO
+		//lime.app.Application.current.windows[0].onGamepadAxisMove.add
 	}
 	
 	// TODO call this if the TLW is set to null?
@@ -72,6 +79,9 @@ class UIApplicationRoot {
 		Lib.current.stage.removeEventListener(TouchEvent.TOUCH_END, onTouchEnd);
 		
 		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
+		
+		//TODO
+		//lime.app.Application.current.windows[0].onGamepadAxisMove.remove
 	}
 	
 	private function onActivate(e:Event) {
@@ -189,6 +199,29 @@ class UIApplicationRoot {
 			postEvent(w, new PointerEvent(EventType.PointerRelease));
 		}
 	}
+	
+	// TODO
+	/*
+	private function onGamepadButtonDown() {
+		
+	}
+	
+	private function onGamepadButtonUp() {
+		
+	}
+	
+	private function onGamepadConnect() {
+		
+	}
+	
+	private function onGamepadDisconnect() {
+		
+	}
+	
+	private function onGamepadAxisMove() {
+		
+	}
+	*/
 	
 	public function notify(receiver:UIObject, event:UIEvent) {
 		Sure.sure(receiver != null);
