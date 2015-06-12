@@ -48,8 +48,8 @@ class Widget extends UIObject {
 	public var layout:Layout = null;
 	public var enabled:Bool = true;
 	public var modal:Bool = false;
-	public var x:Int = 0;
-	public var y:Int = 0;
+	public var x(default, set):Int = 0;
+	public var y(default, set):Int = 0;
 	public var width:Int = 0;
 	public var height:Int = 0;
 	public var sizePolicy:SizePolicy; // TODO
@@ -75,7 +75,9 @@ class Widget extends UIObject {
 	
 	public var hoverable:Bool = true;
 	public var selectable:Bool = true;
+	
 	// TODO multitouch?
+	// TODO should probably use gesture detectors for multitouch and propagate them as events to widgets
 	
 	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
@@ -480,5 +482,28 @@ class Widget extends UIObject {
 	
 	override private function get_isWidgetType():Bool {
 		return true;
+	}
+	
+	// TODO this is ugly, consider attaching layouts to blank widgets rather than having an isWidgetType at all?
+	private function set_x(x:Int):Int {		
+		for (child in children) {
+			if (child.isWidgetType) {
+				var w:Widget = cast child;
+				w.x += (this.x - x);
+			}
+		}
+		
+		return this.x = x;
+	}
+	
+	private function set_y(y:Int):Int {		
+		for (child in children) {
+			if (child.isWidgetType) {
+				var w:Widget = cast child;
+				w.y += (this.y - y);
+			}
+		}
+		
+		return this.y = y;
 	}
 }

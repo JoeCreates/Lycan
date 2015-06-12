@@ -12,17 +12,26 @@ import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.events.AccelerometerEvent;
 import openfl.events.FocusEvent;
+import source.lycan.ui.core.GestureRecognizer;
 
 import openfl.Lib;
 
 // Interface for translation of platform events into UI events and dispatching them
 interface IApplicationRoot {
-	// TODO
+	var topLevelWidget(get, set):Widget;
+	
+	var hoveredWidget(default, set):Widget;
+	var keyboardFocusWidget(default, set):Widget;
+	var gamepadFocusWidget(default, set):Widget;
+	
+	var keyboardGrabWidget(default, set):Widget;
+	var gamepadGrabWidget(default, set):Widget;
 }
 
 // Responsible for translating OpenFL/platform events into UI events and dispatching them
-class UIApplicationRoot implements IApplicationRoot {
+class UIApplicationRoot {
 	private var eventLoop:UIEventLoop;
+	private var gestureRecognizers:Array<GestureRecognizer> = new Array<GestureRecognizer>();
 	private var listenersAttached:Bool = false;
 	
 	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
@@ -42,6 +51,10 @@ class UIApplicationRoot implements IApplicationRoot {
 	
 	// TODO require gamepad focus policies to be set on widgets
 	private var gamepadFocusWidget(default, set):Widget = null;
+	
+	// TODO use these to override the current widget focus
+	//private var keyboardGrabWidget(default, set):Widget = null;
+	//private var gamepadGrabWidget(default, set):Widget = null;
 	
 	public function new() {
 		eventLoop = new UIEventLoop(this);
@@ -293,6 +306,10 @@ class UIApplicationRoot implements IApplicationRoot {
 		#end
 		
 		return this.gamepadFocusWidget = nextGamepadFocusWidget;
+	}
+	
+	public function registerGestureRecognizer(recognizer:GestureRecognizer) {
+		gestureRecognizers.push(recognizer);
 	}
 	
 	private function addEventListeners() {
