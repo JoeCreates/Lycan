@@ -10,6 +10,8 @@ class FlxDebugRenderItem implements IRenderItem {
 	
 	public function new(w:Int, h:Int) {
 		graphic.makeGraphic(w, h, FlxColor.fromRGB(cast Math.random() * 255, cast Math.random() * 255, cast Math.random() * 255, 128));
+		set_width(cast graphic.width);
+		set_height(cast graphic.height);
 	}
 	
 	public function get_x():Int {
