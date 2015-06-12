@@ -10,7 +10,7 @@ enum FindChildOptions {
 class UIObject {
 	public var dirty:Bool = false;
 	public var parent:UIObject = null;
-	public var children:List<UIObject>;
+	private var children:List<UIObject>;
 	public var name:String = null;
 	public var uid:Int;
 	public var sendChildEvents:Bool;

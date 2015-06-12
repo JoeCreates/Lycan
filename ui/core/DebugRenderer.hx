@@ -8,8 +8,9 @@ import lycan.ui.core.UIApplicationRoot;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
 
-// Debug/development renderering for UI elements
+// HaxeFlixel debug/development rendererer for UI elements
 @:access(lycan.ui.core.UIApplicationRoot)
+@:access(lycan.ui.UIObject)
 class DebugRenderer extends FlxSprite {
 	private var root:UIApplicationRoot;
 	
@@ -34,9 +35,11 @@ class DebugRenderer extends FlxSprite {
 				
 				var borderRectLineColor = FlxColor.RED;
 				
-				// TODO
-				if (w.focus) {
+				if (w.keyboardFocus) {
 					borderRectLineColor.green += 127;
+				}
+				if (w.gamepadFocus) {
+					borderRectLineColor.blue += 127;
 				}
 				if (!w.shown) {
 					borderRectLineColor = FlxColor.CYAN;

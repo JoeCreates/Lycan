@@ -13,6 +13,7 @@ class UIPostEvent {
 	}
 }
 
+@:access(lycan.ui.core.UIApplicationRoot)
 class UIEventLoop {
 	private var events = new List<UIPostEvent>();
 	private var application:UIApplicationRoot;

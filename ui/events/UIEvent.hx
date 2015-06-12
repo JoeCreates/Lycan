@@ -21,10 +21,10 @@ abstract EventType(Int) {
 	var Drop = 7; // A drag and drop operation completes
 	var EnabledChange = 8; // The widget's enabled/disabled state changed
 	var Enter = 9; // Pointer enters the widget
-	var FocusIn = 10; // Widget gains the keyboard focus
-	var FocusOut = 11; // Widget loses the keyboard focus
+	var KeyboardFocusIn = 10; // Widget gains the keyboard focus
+	var KeyboardFocusOut = 11; // Widget loses the keyboard focus
 	var Gesture = 12; // A gesture was triggered
-	var Show = 13;
+	var Show = 13; // Widget was shown
 	var Hide = 14; // Widget was hidden
 	var HoverEnter = 15; // Pointer enters a hoverable widget
 	var HoverLeave = 16; // Pointer leaves a hoverable widget
@@ -50,7 +50,10 @@ abstract EventType(Int) {
 	var GamepadDisconnect = 35; // Gamepad disconnected
 	var GamepadAxisMove = 36; // Gamepad analog stick moved
 	
-	var AccelerometerUpdate = 37; // An accelerometer sent an update
+	var GamepadFocusIn = 37; // Widget gains the gamepad focus
+	var GamepadFocusOut = 38; // Widget loses the gamepad focus
+	
+	var AccelerometerUpdate = 39; // An accelerometer sent an update
 	
 	// ZOrderChange; // The widget's z-order changed
 }
@@ -138,7 +141,11 @@ class EnterEvent extends UIEvent {
 	
 }
 
-class FocusEvent extends UIEvent {
+class KeyboardFocusEvent extends UIEvent {
+	
+}
+
+class GamepadFocusEvent extends UIEvent {
 	
 }
 

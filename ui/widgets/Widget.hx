@@ -9,10 +9,39 @@ import lycan.ui.UIObject;
 import Sure;
 
 enum Direction {
-	LEFT;
-	UP;
-	RIGHT;
-	DOWN;
+	Left;
+	Up;
+	Right;
+	Down;
+}
+
+enum KeyboardFocusReason {
+	ClickFocusReason;
+	TabFocusReason;
+	PopupFocusReason;
+	ShortcutFocusReason;
+	WheelFocus;
+	OtherFocusReason;
+}
+
+enum GamepadFocusReason {
+	PopupFocusReason;
+	OtherFocusReason;
+}
+
+enum KeyboardFocusPolicy {
+	ClickFocus;
+	TabFocus;
+	WheelFocus;
+	StrongFocus;
+	NoFocus;
+}
+
+enum GamepadFocusPolicy {
+	ButtonFocus;
+	AnalogStickFocus;
+	StrongFocus;
+	NoFocus;
 }
 
 class Widget extends UIObject {
@@ -23,13 +52,16 @@ class Widget extends UIObject {
 	public var y:Int = 0;
 	public var width:Int = 0;
 	public var height:Int = 0;
-	public var sizePolicy:SizePolicy;
+	public var sizePolicy:SizePolicy; // TODO
+	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
+	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
 	public var minWidth:Int = 0;
 	public var minHeight:Int = 0;
 	public var maxWidth:Int = 10000;
 	public var maxHeight:Int = 10000;
 	public var sizeIncrement:FlxPoint = FlxPoint.get(1, 1);
-	public var focus:Bool = false;
+	public var keyboardFocus:Bool = false;
+	public var gamepadFocus:Bool = false;
 	public var shown:Bool = true;
 	public var acceptDrops:Bool = true;
 	public var paddingLeft:Int = 2;
@@ -125,10 +157,10 @@ class Widget extends UIObject {
 				keyPressEvent(cast e);
 			case EventType.KeyRelease:
 				keyReleaseEvent(cast e);
-			case EventType.FocusIn:
-				focusInEvent(cast e);
-			case EventType.FocusOut:
-				focusOutEvent(cast e);
+			case EventType.KeyboardFocusIn:
+				keyboardFocusInEvent(cast e);
+			case EventType.KeyboardFocusOut:
+				keyboardFocusOutEvent(cast e);
 			case EventType.HoverEnter:
 				hoverEnterEvent(cast e);
 			case EventType.HoverLeave:
@@ -155,6 +187,10 @@ class Widget extends UIObject {
 				propertyChangeEvent(cast e);
 			case EventType.LayoutRequest:
 				layoutRequestEvent(cast e);
+			case EventType.GamepadFocusIn:
+				gamepadFocusInEvent(cast e);
+			case EventType.GamepadFocusOut:
+				gamepadFocusOutEvent(cast e);
 			case EventType.GamepadAxisMove:
 				gamepadAxisMoveEvent(cast e);
 			case EventType.GamepadButtonDown:
@@ -170,6 +206,52 @@ class Widget extends UIObject {
 		}
 		
 		return true;
+	}
+	
+	public function setKeyboardFocus(reason:KeyboardFocusReason) {
+		if (!enabled) {
+			return;
+		}
+	}
+	
+	public function setGamepadFocus(reason:GamepadFocusReason) {
+		if (!enabled) {
+			return;
+		}
+	}
+	
+	public function clearKeyboardFocus() {
+		
+	}
+	
+	public function clearGamepadFocus() {
+		
+	}
+	
+	// TODO Steal ALL keyboard input until release
+	public function grabKeyboard() {
+		
+	}
+	
+	// TODO Steal ALL gamepad input until release
+	public function grabGamepad() {
+		
+	}
+	
+	public function releaseKeyboard() {
+		
+	}
+	
+	public function releaseGamepad() {
+		
+	}
+	
+	private function focusNextChild():Bool {
+		return false;
+	}
+	
+	private function focusPreviousChild():Bool {
+		return false;
 	}
 	
 	private function pointerPressEvent(e:PointerEvent) {
@@ -208,15 +290,27 @@ class Widget extends UIObject {
 		#end
 	}
 	
-	private function focusInEvent(e:FocusEvent) {
+	private function keyboardFocusInEvent(e:KeyboardFocusEvent) {
 		#if debug
-		trace(name + " gained focus");
+		trace(name + " gained keyboard focus");
 		#end
 	}
 	
-	private function focusOutEvent(e:FocusEvent) {
+	private function keyboardFocusOutEvent(e:KeyboardFocusEvent) {
 		#if debug
-		trace(name + " lost focus");
+		trace(name + " lost keyboard focus");
+		#end
+	}
+	
+	private function gamepadFocusInEvent(e:GamepadFocusEvent) {
+		#if debug
+		trace(name + " gained gamepad focus");
+		#end
+	}
+	
+	private function gamepadFocusOutEvent(e:GamepadFocusEvent) {
+		#if debug
+		trace(name + " lost gamepad focus");
 		#end
 	}
 	
@@ -336,8 +430,8 @@ class Widget extends UIObject {
 		#end
 	}
 	
-	// Returns the widget furthest down the hierarchy with the mouse inside it, or null if the mouse is inside none of them.
-	public static function findHoveredWidget(w:Widget, point:FlxPoint):Widget {
+	// Returns the widget furthest down the object hierarchy with the point within it, or null if the point is inside none of them.
+	public static function getAt(w:Widget, point:FlxPoint):Widget {
 		Sure.sure(w != null);
 		Sure.sure(point != null);
 		
@@ -346,7 +440,7 @@ class Widget extends UIObject {
 		}
 		
 		while (true) {
-			var child = findHoveredChild(w, point);
+			var child = childAt(w, point);
 			
 			if (child == null) {
 				break;
@@ -358,8 +452,8 @@ class Widget extends UIObject {
 		return w;
 	}
 	
-	// Returns the first hovered child, if the widget has one
-	private static function findHoveredChild(w:Widget, point:FlxPoint):Widget {
+	// Returns the first immediate child of the widget that intersects with point, null if there is no intersection
+	private static function childAt(w:Widget, point:FlxPoint):Widget {
 		Sure.sure(w != null);
 		Sure.sure(point != null);
 		
