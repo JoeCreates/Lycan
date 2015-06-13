@@ -4,6 +4,7 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import lycan.ui.renderer.IRenderItem;
 import flixel.util.FlxColor;
+import flixel.group.FlxGroup;
 
 class FlxDebugRenderItem implements IRenderItem {
 	public var graphic:FlxSprite = new FlxSprite();
@@ -12,6 +13,14 @@ class FlxDebugRenderItem implements IRenderItem {
 		graphic.makeGraphic(w, h, FlxColor.fromRGB(cast Math.random() * 255, cast Math.random() * 255, cast Math.random() * 255, 128));
 		set_width(cast graphic.width);
 		set_height(cast graphic.height);
+	}
+	
+	public function addTo(group:FlxGroup) {
+		group.add(graphic);
+	}
+	
+	public function removeFrom(group:FlxGroup) {
+		group.remove(graphic);
 	}
 	
 	public function get_x():Int {

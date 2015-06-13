@@ -33,32 +33,32 @@ class DebugRenderer extends FlxSprite {
 				var inner = w.innerRect();
 				var center = w.innerCenter();
 				
-				var borderRectLineColor = FlxColor.RED;
+				var rectLineColor = FlxColor.RED;
 				
 				if (w.keyboardFocus) {
-					borderRectLineColor.green += 127;
+					rectLineColor.green += 127;
 				}
 				if (w.gamepadFocus) {
-					borderRectLineColor.blue += 127;
+					rectLineColor.blue += 127;
 				}
 				if (!w.shown) {
-					borderRectLineColor = FlxColor.CYAN;
+					rectLineColor = FlxColor.CYAN;
 				}
 				if (!w.enabled) {
-					borderRectLineColor = FlxColor.GRAY;
+					rectLineColor = FlxColor.GRAY;
 				}
 				
-				var outerRectLineStyle:LineStyle = { thickness: 1, color: FlxColor.ORANGE };
-				var borderRectLineStyle:LineStyle = { thickness: 1, color: borderRectLineColor };
-				var innerRectLineStyle:LineStyle = { thickness: 1, color: FlxColor.BLUE };
+				var outerRectLineStyle:LineStyle = { thickness: 1, color: rectLineColor };
+				//var borderRectLineStyle:LineStyle = { thickness: 1, color: rectLineColor };
+				var innerRectLineStyle:LineStyle = { thickness: 1, color: rectLineColor };
 				
 				FlxSpriteUtil.drawRect(this, outer.x, outer.y, outer.width, outer.height, FlxColor.TRANSPARENT, outerRectLineStyle);
-				FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, borderRectLineStyle);
+				//FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, borderRectLineStyle);
 				FlxSpriteUtil.drawRect(this, inner.x, inner.y, inner.width, inner.height, FlxColor.TRANSPARENT, innerRectLineStyle);
 				
 				var centerLineStyle:LineStyle = { thickness: 1, color: FlxColor.MAGENTA };
-				FlxSpriteUtil.drawLine(this, center.x, center.y + inner.height / 4, center.x, center.y - inner.height / 4, centerLineStyle);
-				FlxSpriteUtil.drawLine(this, center.x - inner.width / 4, center.y, center.x + inner.width / 4, center.y, centerLineStyle);
+				FlxSpriteUtil.drawLine(this, center.x, center.y + Math.min(20, inner.width / 6), center.x, center.y - Math.min(20, inner.width / 6), centerLineStyle);
+				FlxSpriteUtil.drawLine(this, center.x - Math.min(20, inner.width / 6), center.y, center.x + Math.min(20, inner.width / 6), center.y, centerLineStyle);
 			}
 		}
 		
@@ -80,7 +80,7 @@ class DebugRenderer extends FlxSprite {
 		
 		if (root.hoveredWidget != null) {
 			var border = root.hoveredWidget.borderRect();
-			var lineStyle:LineStyle = { thickness: 5, color: FlxColor.MAGENTA };
+			var lineStyle:LineStyle = { thickness: 5, color: FlxColor.LIME };
 			FlxSpriteUtil.drawRect(this, border.x, border.y, border.width, border.height, FlxColor.TRANSPARENT, lineStyle);
 		}
 		

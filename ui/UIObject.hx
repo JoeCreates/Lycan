@@ -9,7 +9,7 @@ enum FindChildOptions {
 
 class UIObject {
 	public var dirty:Bool = false;
-	public var parent:UIObject = null;
+	private var parent:UIObject = null;
 	private var children:List<UIObject>;
 	public var name:String = null;
 	public var uid:Int;
@@ -48,6 +48,11 @@ class UIObject {
 	
 	private function customEvent(e:UIEvent) {
 		
+	}
+	
+	public function addChild(child:UIObject) {
+		children.add(child);
+		child.parent = this;
 	}
 	
 	//public function installEventFilter

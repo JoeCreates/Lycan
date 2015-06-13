@@ -3,12 +3,21 @@ package source.lycan.ui.renderer.flixel;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import lycan.ui.renderer.IRenderItem;
+import flixel.group.FlxGroup;
 
 class FlxImageRenderItem implements IRenderItem {
 	public var graphic:FlxSprite;
 	
-	public function new(assetPath:String) {
-		graphic = new FlxSprite(0, 0, assetPath);
+	public function new(graphic:FlxSprite) {
+		this.graphic = graphic;
+	}
+	
+	public function addTo(group:FlxGroup) {
+		group.add(graphic);
+	}
+	
+	public function removeFrom(group:FlxGroup) {
+		group.remove(graphic);
 	}
 	
 	public function get_x():Int {

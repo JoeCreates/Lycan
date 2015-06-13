@@ -25,6 +25,6 @@ class Label extends Widget {
 	
 	override private function set_y(y:Int):Int {
 		graphic.set_y(y);
-		return super.set_x(y);
+		return super.set_y(y);
 	}
 }

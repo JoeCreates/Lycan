@@ -1,13 +1,24 @@
 package source.lycan.ui.renderer.flixel;
 import flixel.text.FlxText;
+import lycan.ui.renderer.flixel.IFlxRenderItem;
 
 import source.lycan.ui.renderer.ITextRenderItem;
 import flixel.math.FlxPoint;
+import flixel.group.FlxGroup;
 
-class FlxTextRenderItem implements ITextRenderItem {
+class FlxTextRenderItem implements IFlxRenderItem implements ITextRenderItem {
 	public var graphic:FlxText;
 	
-	public function new() {
+	public function new(graphic:FlxText) {
+		this.graphic = graphic;
+	}
+	
+	public function addTo(group:FlxGroup) {
+		group.add(graphic);
+	}
+	
+	public function removeFrom(group:FlxGroup) {
+		group.remove(graphic);
 	}
 	
 	public function get_x():Int {

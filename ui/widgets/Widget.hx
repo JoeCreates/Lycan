@@ -45,7 +45,7 @@ enum GamepadFocusPolicy {
 }
 
 class Widget extends UIObject {
-	public var layout:Layout = null;
+	public var layout(default,set):Layout = null;
 	public var enabled:Bool = true;
 	public var modal:Bool = false;
 	public var x(default, set):Int = 0;
@@ -120,6 +120,7 @@ class Widget extends UIObject {
 	}
 	
 	public function updateGeometry() {
+		/*
 		// Invalidates the current layout
 		if(layout != null) {
 			layout.dirty = true;
@@ -139,10 +140,7 @@ class Widget extends UIObject {
 		
 		// Ask the top-level object to recalculate the geometries of the dirty objects
 		p.event(new UIEvent(EventType.LayoutRequest));
-	}
-	
-	public function close() {
-		
+		*/
 	}
 	
 	override public function event(e:UIEvent):Bool {
@@ -445,13 +443,13 @@ class Widget extends UIObject {
 			var child = childAt(w, point);
 			
 			if (child == null) {
-				break;
+				return w;
 			}
 			
 			w = child;
 		}
 		
-		return w;
+		return null;
 	}
 	
 	// Returns the first immediate child of the widget that intersects with point, null if there is no intersection
@@ -459,15 +457,11 @@ class Widget extends UIObject {
 		Sure.sure(w != null);
 		Sure.sure(point != null);
 		
-		if (w.children == null) {
-			return null;
-		}
-		
-		for (child in w.children) {
+		for (child in w.children) {			
 			if (child.isWidgetType) {
 				var childWidget:Widget = cast child;
 				
-				if (isPointOver(w, point)) {
+				if (isPointOver(childWidget, point)) {
 					return childWidget;
 				}
 			}
@@ -484,8 +478,16 @@ class Widget extends UIObject {
 		return true;
 	}
 	
-	// TODO this is ugly, consider attaching layouts to blank widgets rather than having an isWidgetType at all?
-	private function set_x(x:Int):Int {		
+	private function set_layout(layout:Layout):Layout {
+		if (this.layout != null) {
+			throw "Don't support changing layouts yet"; // TODO remove the old layout
+		}		
+		
+		return this.layout = layout;
+	}
+	
+	// TODO this is ugly, consider attaching all layouts to blank widgets rather than having an isWidgetType at all?
+	private function set_x(x:Int):Int {
 		for (child in children) {
 			if (child.isWidgetType) {
 				var w:Widget = cast child;
