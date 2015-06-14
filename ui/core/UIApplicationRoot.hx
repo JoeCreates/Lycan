@@ -45,7 +45,7 @@ class UIApplicationRoot {
 	// TODO need to implement a hover policy, or have a hoverable flag on widgets
 	private var hoveredWidget(default, set):Widget = null;
 	
-	// TODO to be complete this needs to work with several conditions: clicks, keyboard shortcuts, mouse wheel and focus changes
+	// TODO to be complete this needs to work with several conditions: keyboard shortcuts, mouse wheel
 	// TODO require keyboard focus policies to be set on widgets
 	private var keyboardFocusWidget(default, set):Widget = null;
 	
@@ -111,24 +111,45 @@ class UIApplicationRoot {
 	private function onKeyDown(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key down");
-		// TODO pass the key event to the appropriate widget
-		// TODO maintain a list of focus widgets that can receive the input
+		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
+		if (keyboardFocusWidget != null) {
+			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyPress));
+		}
 	}
 	
 	private function onKeyUp(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key up");
-		// TODO pass the key event to the appropriate widget
+		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
+		if (keyboardFocusWidget != null) {
+			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyRelease));
+		}
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Mouse down");
 		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		var mousedWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		hoveredWidget = mousedWidget;
 		
 		if (hoveredWidget != null) {
 			postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
+		}
+		
+		if (keyboardFocusWidget != mousedWidget) {
+			if (mousedWidget != null) {
+				if(mousedWidget.keyboardFocusPolicy == KeyboardFocusPolicy.ClickFocus || mousedWidget.keyboardFocusPolicy == KeyboardFocusPolicy.StrongFocus) {
+					trace("Offered keyboard focus");
+					keyboardFocusWidget = mousedWidget;
+					postEvent(keyboardFocusWidget, new KeyboardFocusEvent(EventType.KeyboardFocusIn));
+				} else {
+					trace("Retracted keyboard focus");
+					keyboardFocusWidget = null;
+				}
+			} else {
+				keyboardFocusWidget = null;
+			}
 		}
 	}
 	

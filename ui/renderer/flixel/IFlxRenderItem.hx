@@ -2,6 +2,6 @@ package lycan.ui.renderer.flixel;
 import flixel.group.FlxGroup;
 
 interface IFlxRenderItem {
-	function addTo(group:FlxGroup):Void;
-	function removeFrom(group:FlxGroup):Void;
+	function addTo(group:FlxGroup):Dynamic;
+	function removeFrom(group:FlxGroup):Dynamic;
 }

@@ -9,7 +9,7 @@ enum FindChildOptions {
 
 class UIObject {
 	public var dirty:Bool = false;
-	private var parent:UIObject = null;
+	private var parent(default,set):UIObject = null;
 	private var children:List<UIObject>;
 	public var name:String = null;
 	public var uid:Int;
@@ -55,6 +55,12 @@ class UIObject {
 		child.parent = this;
 	}
 	
+	public function removeChild(child:UIObject) {
+		var removed = children.remove(child);
+		Sure.sure(removed == true);
+		child.parent = null;
+	}
+	
 	//public function installEventFilter
 	//public function removeEventFilter
 	//public function eventFilter(widget:IWidget, e:UIEvent):Bool {
@@ -92,5 +98,17 @@ class UIObject {
 	
 	private function get_isWidgetType():Bool {
 		return false;
+	}
+	
+	private function set_parent(parent:UIObject):UIObject {
+		if (this.parent != null) {
+			this.parent.removeChild(this);
+		}
+		
+		if(parent != null) {
+			parent.children.add(this);
+		}
+		
+		return this.parent = parent;
 	}
 }

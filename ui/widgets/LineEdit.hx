@@ -1,10 +1,18 @@
 package lycan.ui.widgets;
 
-import msignal.Signal.Signal0;
+import lycan.ui.events.UIEvent.DragEnterEvent;
+import lycan.ui.events.UIEvent.DragLeaveEvent;
+import lycan.ui.events.UIEvent.DragMoveEvent;
+import lycan.ui.events.UIEvent.KeyEvent;
+import lycan.ui.widgets.Widget.KeyboardFocusPolicy;
 import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;
+import source.lycan.ui.renderer.ITextRenderItem;
+import lycan.ui.events.UIEvent.EventType;
 
 class LineEdit extends Widget {
+	public var textGraphic(default, set):ITextRenderItem;
+	
 	public var text:String = "";
 	public var displayText:String = "";
 	public var maxLength:Int = 255;
@@ -17,6 +25,7 @@ class LineEdit extends Widget {
 	
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
+		keyboardFocusPolicy = KeyboardFocusPolicy.StrongFocus;
 	}
 	
 	public function backspace() {
@@ -35,39 +44,25 @@ class LineEdit extends Widget {
 		
 	}
 	
-	// TODO override events
-	/*
-	override public function mousePressEvent(e:MouseEvent) {	
-	}
-	
-	override public function mouseMoveEvent(e:MouseEvent) {
-	}
-	
-	override public function mouseReleaseEvent(e:MouseEvent) {
-	}
-	
-	override public function mouseDoubleClickEvent(e:MouseEvent) {
-	}
-	
 	override public function keyPressEvent(e:KeyEvent) {
+		if(e.type == EventType.KeyPress) {
+			textGraphic.set_text(textGraphic.get_text() + "todo");
+		}
 	}
 	
-	override public function focusInEvent(e:FocusEvent) {
+	private function set_textGraphic(graphic:ITextRenderItem) {		
+		width = graphic.get_width();
+		height = graphic.get_height();
+		return this.textGraphic = graphic;
 	}
 	
-	override public function focusOutEvent(e:FocusEvent) {
+	override private function set_x(x:Int):Int {
+		textGraphic.set_x(x);		
+		return super.set_x(x);
 	}
 	
-	override public function dragMoveEvent(e:DragMoveEvent) {
+	override private function set_y(y:Int):Int {
+		textGraphic.set_y(y);
+		return super.set_y(y);
 	}
-	
-	override public function dragEnterEvent(e:DragEnterEvent) {
-	}
-	
-	override public function dragLeaveEvent(e:DragLeaveEvent) {
-	}
-	
-	override public function dropEvent(e:DropEvent) {
-	}
-	*/
 }

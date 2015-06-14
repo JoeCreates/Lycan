@@ -17,10 +17,12 @@ class FlxDebugRenderItem implements IRenderItem {
 	
 	public function addTo(group:FlxGroup) {
 		group.add(graphic);
+		return this;
 	}
 	
 	public function removeFrom(group:FlxGroup) {
 		group.remove(graphic);
+		return this;
 	}
 	
 	public function get_x():Int {

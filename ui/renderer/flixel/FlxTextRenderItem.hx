@@ -13,12 +13,14 @@ class FlxTextRenderItem implements IFlxRenderItem implements ITextRenderItem {
 		this.graphic = graphic;
 	}
 	
-	public function addTo(group:FlxGroup) {
+	public function addTo(group:FlxGroup):FlxTextRenderItem {
 		group.add(graphic);
+		return this;
 	}
 	
 	public function removeFrom(group:FlxGroup) {
 		group.remove(graphic);
+		return this;
 	}
 	
 	public function get_x():Int {
