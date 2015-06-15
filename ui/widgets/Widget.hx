@@ -432,36 +432,47 @@ class Widget extends UIObject {
 	
 	// Returns the widget furthest down the object hierarchy with the point within it, or null if the point is inside none of them.
 	public static function getAt(w:Widget, point:FlxPoint):Widget {
-		Sure.sure(w != null);
-		Sure.sure(point != null);
+		return meetsCondition(w, isPointOver, point);
+	}
+	
+	// Returns the first immediate child of the widget that intersects with point, null if there is no intersection
+	private static function childAt(w:Widget, point:FlxPoint):Widget {
+		return childMeetsCondition(w, isPointOver, point);
+	}
+	
+	// Returns the widget furthest down the object hierarchy which meets the condition, or null if none do.
+	private static function meetsCondition<T>(root:Widget, f:Widget->T->Bool, p:T):Widget {
+		Sure.sure(root != null);
+		Sure.sure(f != null);
+		Sure.sure(p != null);
 		
-		if (!isPointOver(w, point)) {
+		if (f(root, p)) {
 			return null;
 		}
 		
 		while (true) {
-			var child = childAt(w, point);
+			var child = childMeetsCondition(root, f, p);
 			
 			if (child == null) {
-				return w;
+				return root;
 			}
 			
-			w = child;
+			root = child;
 		}
 		
 		return null;
 	}
 	
-	// Returns the first immediate child of the widget that intersects with point, null if there is no intersection
-	private static function childAt(w:Widget, point:FlxPoint):Widget {
-		Sure.sure(w != null);
-		Sure.sure(point != null);
+	private static function childMeetsCondition<T>(root:Widget, f:Widget->T->Bool, p:T):Widget {
+		Sure.sure(root != null);
+		Sure.sure(f != null);
+		Sure.sure(p != null);
 		
-		for (child in w.children) {			
+		for (child in root.children) {
 			if (child.isWidgetType) {
 				var childWidget:Widget = cast child;
 				
-				if (isPointOver(childWidget, point)) {
+				if (f(childWidget, p)) {
 					return childWidget;
 				}
 			}

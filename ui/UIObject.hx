@@ -16,6 +16,7 @@ class UIObject {
 	public var sendChildEvents:Bool;
 	public var receiveChildEvents:Bool;
 	public var isWidgetType(get, never):Bool;
+	private var eventFilters:List<UIObject> = new List<UIObject>();
 	
 	public function new(?parent:UIObject, ?name:String) {
 		this.parent = parent;
@@ -26,10 +27,38 @@ class UIObject {
 		receiveChildEvents = true;
 	}
 	
+	public function installEventFilter(filter:UIObject):Void {
+		Sure.sure(filter != null);		
+		
+		eventFilters.add(filter);
+	}
+	
+	public function removeEventFilter(filter:UIObject):Void {
+		Sure.sure(filter != null);
+		Sure.sure(eventFilters != null);
+		
+		eventFilters.remove(filter);
+	}
+	
+	// Filters events if this object has been installed as an event filter on a watched object
+	// Return true if you want to filter the event out i.e. stop it being handled further, else false
+	public function eventFilter(object:UIObject, e:UIEvent):Bool {
+		Sure.sure(object != null);
+		Sure.sure(e != null);
+		
+		return false;
+	}
+	
 	public function event(e:UIEvent):Bool {
+		for (filter in eventFilters) {
+			if (filter.event(e)) {
+				return true;
+			}
+		}
+		
 		switch(e.type) {
 			case EventType.ChildAdded, EventType.ChildRemoved:
-				childEvent(cast e);			
+				childEvent(cast e);
 			default:
 				// if(type >= MAX_USER) { // TODO custom events added to e above a max range
 				// customEvent(e);
@@ -42,11 +71,13 @@ class UIObject {
 		return true;
 	}
 	
-	private function childEvent(e:ChildEvent) {
-		
-	}
+	// Handle user-defined events
+	//private function customEvent(e:CustomEvent) {
+	//	
+	//}
 	
-	private function customEvent(e:UIEvent) {
+	// This can be reimplemented to handle a child being added or removed to the object
+	private function childEvent(e:ChildEvent) {
 		
 	}
 	
@@ -60,12 +91,6 @@ class UIObject {
 		Sure.sure(removed == true);
 		child.parent = null;
 	}
-	
-	//public function installEventFilter
-	//public function removeEventFilter
-	//public function eventFilter(widget:IWidget, e:UIEvent):Bool {
-	//	return false;
-	//}
 	
 	// NOTE this WON'T respect the way that each layout/widget might want to specify the children's iteration order
 	// TODO breadth first?
@@ -107,6 +132,7 @@ class UIObject {
 		
 		if(parent != null) {
 			parent.children.add(this);
+			// TODO post childAdded events to the current UIApplicationRoot here - have a singleton accessor or instance variable?
 		}
 		
 		return this.parent = parent;

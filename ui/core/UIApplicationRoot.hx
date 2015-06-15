@@ -6,15 +6,14 @@ import lycan.ui.events.UIEvent.PointerEvent;
 import lycan.ui.events.UIEventLoop;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
+import openfl.events.AccelerometerEvent;
 import openfl.events.Event;
+import openfl.events.FocusEvent;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
-import openfl.events.AccelerometerEvent;
-import openfl.events.FocusEvent;
-import source.lycan.ui.core.GestureRecognizer;
-
 import openfl.Lib;
+import source.lycan.ui.core.GestureRecognizer;
 
 // Interface for translation of platform events into UI events and dispatching them
 interface IApplicationRoot {
@@ -427,6 +426,7 @@ class UIApplicationRoot {
 	// Puts event onto the event loop, to be processed on the next frame
 	private function postEvent(receiver:UIObject, event:UIEvent) {
 		Sure.sure(receiver != null && event != null);
+		
 		eventLoop.add(receiver, event);
 	}
 	
