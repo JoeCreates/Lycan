@@ -189,8 +189,10 @@ class UIApplicationRoot {
 					keyboardFocusWidget = pointerWidget;
 					postEvent(keyboardFocusWidget, new KeyboardFocusEvent(EventType.KeyboardFocusIn));
 				} else {
-					trace("Retracted keyboard focus");
-					keyboardFocusWidget = null;
+					if(keyboardFocusWidget != null) {
+						trace("Retracted keyboard focus");
+						keyboardFocusWidget = null;
+					}
 				}
 			} else {
 				keyboardFocusWidget = null;
