@@ -34,11 +34,10 @@ class UIApplicationRoot {
 	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
 	
 	// Assumes there can only be one top level widget active at any one time
-	// TODO a solution to this is probably to use a stack/priority queue of TLWs
+	// TODO a solution to this is probably to use a stack/priority queue of TLWs - only one gets updated at a time, but multiple ones can still be active and rendering
 	@:isVar public var topLevelWidget(get, set):Widget = null;
 	
 	// TODO this gets screwed if you resize the window on Flash and move the mouse about - probably a mouse coordinate problem
-	// TODO need to implement a hover policy, or have a hoverable flag on widgets
 	private var hoveredWidget(default, set):Widget = null;
 	
 	// TODO to be complete this needs to work with several conditions: keyboard shortcuts, mouse wheel
@@ -48,6 +47,16 @@ class UIApplicationRoot {
 	public function new() {
 		eventLoop = new UIEventLoop(this);
 	}
+	
+	/*
+	// Returns the next selectable selectable widget in the direction given
+	private function getNextSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
+		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
+		// Should be useful for gamepads
+		// TODO could delegate this to layouts?
+		return null;
+	}
+	*/
 	
 	public function destroy() {
 		hoveredWidget = null;
@@ -118,35 +127,6 @@ class UIApplicationRoot {
 		}
 	}
 	
-	private function onMouseDown(e:MouseEvent) {
-		Sure.sure(topLevelWidget != null);
-		trace("Mouse down");
-		
-		var mousedWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
-		hoveredWidget = mousedWidget;
-		
-		if (hoveredWidget != null) {
-			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.EnterExit || hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
-			}
-		}
-		
-		if (keyboardFocusWidget != mousedWidget) {
-			if (mousedWidget != null) {
-				if(mousedWidget.keyboardFocusPolicy == KeyboardFocusPolicy.ClickFocus || mousedWidget.keyboardFocusPolicy == KeyboardFocusPolicy.StrongFocus) {
-					trace("Offered keyboard focus");
-					keyboardFocusWidget = mousedWidget;
-					postEvent(keyboardFocusWidget, new KeyboardFocusEvent(EventType.KeyboardFocusIn));
-				} else {
-					trace("Retracted keyboard focus");
-					keyboardFocusWidget = null;
-				}
-			} else {
-				keyboardFocusWidget = null;
-			}
-		}
-	}
-	
 	private function onMouseWheel(e:MouseEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Mouse wheel");
@@ -159,32 +139,6 @@ class UIApplicationRoot {
 		}
 	}
 	
-	private function onMouseMove(e:MouseEvent) {
-		Sure.sure(topLevelWidget != null);
-		//trace("Mouse move");
-		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
-		
-		if (hoveredWidget != null) {
-			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
-			}
-		}
-	}
-	
-	private function onMouseUp(e:MouseEvent) {
-		Sure.sure(topLevelWidget != null);
-		trace("Mouse up");
-		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
-		
-		if (hoveredWidget != null) {
-			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.EnterExit || hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
-			}
-		}
-	}
-	
 	private function onMouseLeave(e:Event) {
 		Sure.sure(topLevelWidget != null);
 		trace("Mouse leave");
@@ -192,36 +146,82 @@ class UIApplicationRoot {
 		hoveredWidget = null;
 	}
 	
+	private function onMouseDown(e:MouseEvent) {
+		handlePointerDown(e.localX, e.localY);
+	}
+	
+	private function onMouseMove(e:MouseEvent) {
+		handlePointerMove(e.localX, e.localY);
+	}
+	
+	private function onMouseUp(e:MouseEvent) {
+		handlePointerUp(e.localX, e.localY);
+	}
+	
 	private function onTouchBegin(e:TouchEvent) {
-		Sure.sure(topLevelWidget != null);
-		trace("Touch begin");
-		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
-		
-		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
-		}
+		handlePointerDown(e.localX, e.localY);
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
-		Sure.sure(topLevelWidget != null);
-		trace("Touch move");
-		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
-		
-		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
-		}
+		handlePointerMove(e.localX, e.localY);
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
+		handlePointerUp(e.localX, e.localY);
+	}
+	
+	private function handlePointerDown(x:Float, y:Float) {
 		Sure.sure(topLevelWidget != null);
-		trace("Touch end");
+		trace("Pointer down");
 		
-		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
+		var pointerWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
+		hoveredWidget = pointerWidget;
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
+			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
+			}
+		}
+		
+		if (keyboardFocusWidget != pointerWidget) {
+			if (pointerWidget != null) {
+				if(pointerWidget.keyboardFocusPolicy == KeyboardFocusPolicy.ClickFocus || pointerWidget.keyboardFocusPolicy == KeyboardFocusPolicy.StrongFocus) {
+					trace("Offered keyboard focus");
+					keyboardFocusWidget = pointerWidget;
+					postEvent(keyboardFocusWidget, new KeyboardFocusEvent(EventType.KeyboardFocusIn));
+				} else {
+					trace("Retracted keyboard focus");
+					keyboardFocusWidget = null;
+				}
+			} else {
+				keyboardFocusWidget = null;
+			}
+		}
+	}
+	
+	private function handlePointerMove(x:Float, y:Float) {
+		Sure.sure(topLevelWidget != null);
+		//trace("Pointer move");
+		
+		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
+		
+		if (hoveredWidget != null) {
+			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+			}
+		}
+	}
+	
+	private function handlePointerUp(x:Float, y:Float) {
+		Sure.sure(topLevelWidget != null);
+		trace("Pointer up");
+		
+		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
+		
+		if (hoveredWidget != null) {
+			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
+			}
 		}
 	}
 	
@@ -430,7 +430,7 @@ class UIApplicationRoot {
 	}
 	
 	// Sends event directly to receiver, bypassing the event loop
-	private function sendEvent(receiver:UIObject, event:UIEvent):Bool {
+	private static function sendEvent(receiver:UIObject, event:UIEvent):Bool {
 		Sure.sure(receiver != null && event != null);
 		return receiver.event(event);
 	}
