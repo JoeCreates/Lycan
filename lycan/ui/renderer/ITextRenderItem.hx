@@ -1,4 +1,4 @@
-package source.lycan.ui.renderer;
+package lycan.ui.renderer;
 import lycan.ui.renderer.IRenderItem;
 
 interface ITextRenderItem extends IRenderItem {

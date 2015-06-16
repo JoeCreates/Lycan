@@ -13,7 +13,6 @@ import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.Lib;
-import source.lycan.ui.core.GestureRecognizer;
 
 // Interface for translation of platform events into UI events and dispatching them
 interface IApplicationRoot {

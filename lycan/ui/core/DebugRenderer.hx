@@ -1,4 +1,4 @@
-package source.lycan.ui.core;
+package lycan.ui.core;
 
 import flixel.FlxG;
 import flixel.FlxSprite;

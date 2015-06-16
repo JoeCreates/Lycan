@@ -7,7 +7,7 @@ import lycan.ui.events.UIEvent.KeyEvent;
 import lycan.ui.widgets.Widget.KeyboardFocusPolicy;
 import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;
-import source.lycan.ui.renderer.ITextRenderItem;
+import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.events.UIEvent.EventType;
 
 class LineEdit extends Widget {

@@ -1,15 +1,18 @@
-package source.lycan.ui.renderer.flixel;
+package lycan.ui.renderer.flixel;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import lycan.ui.renderer.IRenderItem;
+import flixel.util.FlxColor;
 import flixel.group.FlxGroup;
 
-class FlxImageRenderItem implements IRenderItem {
-	public var graphic:FlxSprite;
+class FlxDebugRenderItem implements IRenderItem {
+	public var graphic:FlxSprite = new FlxSprite();
 	
-	public function new(graphic:FlxSprite) {
-		this.graphic = graphic;
+	public function new(w:Int, h:Int) {
+		graphic.makeGraphic(w, h, FlxColor.fromRGB(cast Math.random() * 255, cast Math.random() * 255, cast Math.random() * 255, 128));
+		set_width(cast graphic.width);
+		set_height(cast graphic.height);
 	}
 	
 	public function addTo(group:FlxGroup) {
@@ -23,35 +26,35 @@ class FlxImageRenderItem implements IRenderItem {
 	}
 	
 	public function get_x():Int {
-		return graphic.x;
+		return cast graphic.x;
 	}
 	
 	public function set_x(x:Int):Int {
-		return graphic.x = x;
+		return cast graphic.x = x;
 	}
 	
 	public function get_y():Int {
-		return graphic.y;
+		return cast graphic.y;
 	}
 	
 	public function set_y(y:Int):Int {
-		return graphic.y = y;
+		return cast graphic.y = y;
 	}
 	
 	public function get_width():Int {
-		return graphic.width;
+		return cast graphic.width;
 	}
 	
 	public function set_width(width:Int):Int {
-		return graphic.width = width;
+		return cast graphic.width = width;
 	}
 	
 	public function get_height():Int {
-		return graphic.height;
+		return cast graphic.height;
 	}
 	
 	public function set_height(height:Int):Int {
-		return graphic.height = height;
+		return cast graphic.height = height;
 	}
 	
 	public function get_scale():FlxPoint {
@@ -59,6 +62,7 @@ class FlxImageRenderItem implements IRenderItem {
 	}
 	
 	public function set_scale(scale:FlxPoint):FlxPoint {
-		return graphic.scale = scale;
+		//return graphic.scale = scale;
+		return scale; // TODO
 	}
 }
