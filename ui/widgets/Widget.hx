@@ -446,7 +446,7 @@ class Widget extends UIObject {
 		Sure.sure(f != null);
 		Sure.sure(p != null);
 		
-		if (f(root, p)) {
+		if (!f(root, p)) {
 			return null;
 		}
 		
