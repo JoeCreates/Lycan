@@ -22,9 +22,6 @@ interface IApplicationRoot {
 	var hoveredWidget(default, set):Widget;
 	var keyboardFocusWidget(default, set):Widget;
 	var gamepadFocusWidget(default, set):Widget;
-	
-	var keyboardGrabWidget(default, set):Widget;
-	var gamepadGrabWidget(default, set):Widget;
 }
 
 // Responsible for translating OpenFL/platform events into UI events and dispatching them
@@ -45,23 +42,19 @@ class UIApplicationRoot {
 	private var hoveredWidget(default, set):Widget = null;
 	
 	// TODO to be complete this needs to work with several conditions: keyboard shortcuts, mouse wheel
-	// TODO require keyboard focus policies to be set on widgets
 	private var keyboardFocusWidget(default, set):Widget = null;
-	
-	// TODO require gamepad focus policies to be set on widgets
 	private var gamepadFocusWidget(default, set):Widget = null;
-	
-	// TODO use these to override the current widget focus
-	//private var keyboardGrabWidget(default, set):Widget = null;
-	//private var gamepadGrabWidget(default, set):Widget = null;
 	
 	public function new() {
 		eventLoop = new UIEventLoop(this);
 	}
 	
 	public function destroy() {
-		topLevelWidget = null;
+		hoveredWidget = null;
+		keyboardFocusWidget = null;
+		gamepadFocusWidget = null;
 		eventLoop = null;
+		topLevelWidget = null;
 	}
 	
 	private function onAppActivate(e:Event) {
@@ -133,7 +126,9 @@ class UIApplicationRoot {
 		hoveredWidget = mousedWidget;
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
+			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.EnterExit || hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
+			}
 		}
 		
 		if (keyboardFocusWidget != mousedWidget) {
@@ -171,7 +166,9 @@ class UIApplicationRoot {
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+			}
 		}
 	}
 	
@@ -182,7 +179,9 @@ class UIApplicationRoot {
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
+			if(hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.EnterExit || hoveredWidget.mouseTrackingPolicy == MouseTrackingPolicy.StrongTracking) {
+				postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
+			}
 		}
 	}
 	

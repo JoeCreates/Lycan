@@ -29,6 +29,12 @@ enum GamepadFocusReason {
 	OtherFocusReason;
 }
 
+enum MouseTrackingPolicy {
+	EnterExit;
+	StrongTracking;
+	NoTracking;
+}
+
 enum KeyboardFocusPolicy {
 	ClickFocus;
 	TabFocus;
@@ -53,6 +59,7 @@ class Widget extends UIObject {
 	public var width:Int = 0;
 	public var height:Int = 0;
 	public var sizePolicy:SizePolicy; // TODO
+	public var mouseTrackingPolicy:MouseTrackingPolicy = MouseTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
 	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
 	public var minWidth:Int = 0;
@@ -72,9 +79,6 @@ class Widget extends UIObject {
 	public var marginTop:Int = 2;
 	public var marginRight:Int = 2;
 	public var marginBottom:Int = 2;
-	
-	public var hoverable:Bool = true;
-	public var selectable:Bool = true;
 	
 	// TODO multitouch?
 	// TODO should probably use gesture detectors for multitouch and propagate them as events to widgets
