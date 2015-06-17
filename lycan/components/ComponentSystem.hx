@@ -1,16 +1,14 @@
 package components;
 
-class ComponentSystem extends FlxGroup {
-	
+import flixel.group.FlxGroup;
+
+class ComponentSystem extends FlxGroup {	
 	public var preUpdateFlag:Bool;
 	public var updateFlag:Bool;
 	public var postUpdateFlag:Bool;
 	
-	public function new() {
-		super();
-		preUpdateFlag = true;
-		updateFlag = true;
-		postUpdateFlag = true;
+	public function init():Void {
+		
 	}
 	
 	public function preUpdate(dt:Float):Void {
@@ -27,6 +25,13 @@ class ComponentSystem extends FlxGroup {
 	
 	public function postUpdate(dt:Float) {
 		
+	}
+	
+	private function new() {
+		super();
+		preUpdateFlag = true;
+		updateFlag = true;
+		postUpdateFlag = true;
 	}
 	
 }

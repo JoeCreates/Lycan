@@ -1,5 +1,8 @@
 package components;
 
+import components.Attachable.AttachableSystem;
+import flixel.FlxObject;
+
 interface Attachable {
 	public var x:Float;
 	public var y:Float;
@@ -7,21 +10,32 @@ interface Attachable {
 }
 
 class AttachableSystem {
-	public function new() {
+	
+	public static var instance(get, null):Void;
+	
+	private function new() {
 		super();
 	}
 	
 	override public function update(dt:Float):Void {
 		// Updates only root nodes
+		// TODO track only roots?
 		for (member in members) {
 			if (member.isRoot) {
 				member.update(dt);
 			}
 		}
 	}
+	
+	private function get_instance():AttachableSystem {
+		if (instance == null) instance = new AttachableSystem();
+		return instance;
+	}
 }
 
 class AttachableComponent extends Component<FlxObject> {
+	public static var system:
+	
 	public var entity:FlxObject;
 	public var parent:Attachable;
 	public var children:Array<Attachable>
@@ -30,9 +44,9 @@ class AttachableComponent extends Component<FlxObject> {
 	public var position:FlxPoint;
 	public var origin:FlxPoint;
 	
-	public function new() {
-		super();
-		
+	public function new(entity:FlxObject) {
+		super(entity);
+		system = AttachableSystem.instance;
 	}
 	
 	override public function update(dt:Float):Void {

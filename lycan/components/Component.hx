@@ -7,12 +7,11 @@ import flixel.FlxObject;
 
 class Component<T> extends FlxBasic {
 	
-	public static var system:ComponentSystem;
+	public var system:ComponentSystem;
 	public var entity:T;
 	
 	public function new(entity:T) {
 		this.entity = entity;
-		
 	}
 	
 	public function preUpdate(dt:Float):Void {}
