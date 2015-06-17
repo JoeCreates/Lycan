@@ -1,10 +1,10 @@
-package source.lycan.ui.renderer.flixel;
+package lycan.ui.renderer.flixel;
+
+import flixel.group.FlxGroup;
+import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import lycan.ui.renderer.flixel.IFlxRenderItem;
-
-import source.lycan.ui.renderer.ITextRenderItem;
-import flixel.math.FlxPoint;
-import flixel.group.FlxGroup;
+import lycan.ui.renderer.ITextRenderItem;
 
 class FlxTextRenderItem implements IFlxRenderItem implements ITextRenderItem {
 	public var graphic:FlxText;

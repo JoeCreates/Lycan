@@ -9,6 +9,7 @@ import openfl.events.Event;
 import openfl.events.TouchEvent;
 
 // TODO macro to just make the enum values increase rather than specifying values manually?
+// TODO macro to add additional user/game-specific events onto the 1000+ range or whatever?
 @:enum
 abstract EventType(Int) {
 	var None = 0;
@@ -63,7 +64,8 @@ class UIEvent {
 	public var type(get, null):EventType;
 	
 	// The receiver usually sets the accept flag to indicate that it wants to consume the event. Unwanted events may be propagated to the parent objects via UIObject.event() 
-	public var accept:Bool = false;
+	@:isVar
+	public var accept(get, set):Bool = false;
 	
 	public function new(type:EventType) {
 		this.type = type;
@@ -73,7 +75,6 @@ class UIEvent {
 		return type;
 	}
 	
-	/*
 	public function get_accept():Bool {
 		return accept;
 	}
@@ -81,7 +82,6 @@ class UIEvent {
 	public function set_accept(accept:Bool):Bool {
 		return this.accept = accept;
 	}
-	*/
 	
 	/*
 	// For extending the Type enum with user generated events
@@ -92,9 +92,9 @@ class UIEvent {
 }
 
 class ChildEvent extends UIEvent {
-	public var child(get, null):Widget;
+	public var child(get, null):UIObject;
 	
-	public function new(type:EventType, child:Widget) {
+	public function new(type:EventType, child:UIObject) {
 		super(type);
 		this.child = child;
 	}
@@ -107,7 +107,7 @@ class ChildEvent extends UIEvent {
 		return type == EventType.ChildRemoved;
 	}
 	
-	public function get_child():Widget {
+	public function get_child():UIObject {
 		return child;
 	}
 }

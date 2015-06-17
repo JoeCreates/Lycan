@@ -1,6 +1,7 @@
 package lycan.ui ;
 
 import lycan.ui.events.UIEvent;
+import lycan.ui.core.UIApplicationRoot;
 
 enum FindChildOptions {
 	FindDirectChildrenOnly;
@@ -92,30 +93,23 @@ class UIObject {
 		child.parent = null;
 	}
 	
-	// NOTE this WON'T respect the way that each layout/widget might want to specify the children's iteration order
-	// TODO breadth first?
-	// TODO should be static method on UIObject instead?
-	public function walkChildren(func:UIObject->Void) {
-	}
-	
-	public function findChildren(name:String, ?findOption:FindChildOptions):List<UIObject> {
+	public function findChildrenForName(name:String, ?findOption:FindChildOptions):List<UIObject> {
 		if(findOption == null) {
-			return findChildrenRecursively(name);
+			return findChildrenRecursivelyForName(name);
 		}
 	
 		return switch(findOption) {
 			case FindDirectChildrenOnly:
-				return findChildrenRecursively(name, 1);
+				return findChildrenRecursivelyForName(name, 1);
 			case FindChildrenRecursively:
-				return findChildrenRecursively(name);
+				return findChildrenRecursivelyForName(name);
 		}
 	}
 	
-	private function findChildrenRecursively(name:String, depth:Int = -1):List<UIObject> {
+	private function findChildrenRecursivelyForName(name:String, depth:Int = -1):List<UIObject> {
 		var list = new List<UIObject>();
 		return list;
 		
-		// TODO
 		if (depth == -1) {
 			
 		}
@@ -128,11 +122,12 @@ class UIObject {
 	private function set_parent(parent:UIObject):UIObject {
 		if (this.parent != null) {
 			this.parent.removeChild(this);
+			parent.event(new ChildEvent(EventType.ChildRemoved, this));
 		}
 		
 		if(parent != null) {
 			parent.children.add(this);
-			// TODO post childAdded events to the current UIApplicationRoot here - have a singleton accessor or instance variable?
+			parent.event(new ChildEvent(EventType.ChildAdded, this));
 		}
 		
 		return this.parent = parent;

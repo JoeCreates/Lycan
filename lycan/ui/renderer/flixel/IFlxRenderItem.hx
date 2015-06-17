@@ -1,4 +1,5 @@
 package lycan.ui.renderer.flixel;
+
 import flixel.group.FlxGroup;
 
 interface IFlxRenderItem {

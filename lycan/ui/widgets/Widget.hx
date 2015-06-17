@@ -29,7 +29,7 @@ enum GamepadFocusReason {
 	OtherFocusReason;
 }
 
-enum MouseTrackingPolicy {
+enum PointerTrackingPolicy {
 	EnterExit;
 	StrongTracking;
 	NoTracking;
@@ -59,7 +59,7 @@ class Widget extends UIObject {
 	public var width:Int = 0;
 	public var height:Int = 0;
 	public var sizePolicy:SizePolicy; // TODO
-	public var mouseTrackingPolicy:MouseTrackingPolicy = MouseTrackingPolicy.EnterExit;
+	public var pointerTrackingPolicy:PointerTrackingPolicy = PointerTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
 	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
 	public var minWidth:Int = 0;
@@ -80,9 +80,6 @@ class Widget extends UIObject {
 	public var marginRight:Int = 2;
 	public var marginBottom:Int = 2;
 	
-	// TODO multitouch?
-	// TODO should probably use gesture detectors for multitouch and propagate them as events to widgets
-	
 	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
 		
@@ -91,13 +88,6 @@ class Widget extends UIObject {
 			this.name = Type.getClassName(Type.getClass(this));
 		}
 		#end
-	}
-	
-	public function getNearestSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
-		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
-		// Should be useful for gamepads
-		// TODO could delegate this to layouts?
-		return null;
 	}
 	
 	// The area that contains the child widgets without inner padding
@@ -435,13 +425,21 @@ class Widget extends UIObject {
 	}
 	
 	// Returns the widget furthest down the object hierarchy with the point within it, or null if the point is inside none of them.
-	public static function getAt(w:Widget, point:FlxPoint):Widget {
-		return meetsCondition(w, isPointOver, point);
+	public static function getAt(root:Widget, point:FlxPoint):Widget {
+		return meetsCondition(root, isPointOver, point);
 	}
 	
 	// Returns the first immediate child of the widget that intersects with point, null if there is no intersection
-	private static function childAt(w:Widget, point:FlxPoint):Widget {
-		return childMeetsCondition(w, isPointOver, point);
+	private static function childAt(root:Widget, point:FlxPoint):Widget {
+		return childMeetsCondition(root, isPointOver, point);
+	}
+	
+	// Returns the next selectable selectable widget in the direction given
+	private function getNextSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
+		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
+		// Should be useful for gamepads
+		// TODO could delegate this to layouts?
+		return null;
 	}
 	
 	// Returns the widget furthest down the object hierarchy which meets the condition, or null if none do.
