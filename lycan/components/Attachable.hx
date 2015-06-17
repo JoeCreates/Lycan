@@ -9,7 +9,7 @@ interface Attachable {
 	public var attachable:AttachableComponent;
 }
 
-class AttachableSystem {
+class AttachableSystem extends ComponentSystem< {
 	
 	public static var instance(get, null):Void;
 	
@@ -20,6 +20,7 @@ class AttachableSystem {
 	override public function update(dt:Float):Void {
 		// Updates only root nodes
 		// TODO track only roots?
+		//TODO add components to the system
 		for (member in members) {
 			if (member.isRoot) {
 				member.update(dt);
