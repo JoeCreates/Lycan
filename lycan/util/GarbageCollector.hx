@@ -21,8 +21,6 @@ class GarbageCollector {
 		
 		#if cpp
 		Gc.enterGCFreeZone();
-		#elseif neko
-		Gc.enterGCFreeZone();
 		#end
 	}
 	
@@ -31,8 +29,6 @@ class GarbageCollector {
 		paused = false;
 		
 		#if cpp
-		Gc.exitGCFreeZone();
-		#elseif neko
 		Gc.exitGCFreeZone();
 		#end
 	}
