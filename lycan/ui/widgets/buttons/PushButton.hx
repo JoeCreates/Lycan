@@ -1,4 +1,4 @@
-package lycan.ui.widgets;
+package lycan.ui.widgets.buttons;
 
 import lycan.ui.renderer.IRenderItem;
 import lycan.ui.UIObject;

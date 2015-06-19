@@ -1,15 +1,15 @@
-package lycan.ui.widgets ;
+package lycan.ui.widgets.buttons ;
 
 import lycan.ui.renderer.IRenderItem;
+import lycan.ui.widgets.buttons.Button;
 
 class CheckBox extends Button {
 	private var uncheckedGraphic:IRenderItem;
 	private var checkedGraphic:IRenderItem;
 	private var disabledGraphic:IRenderItem;
+	private var checked(default, set):Bool;
 	
-	private var checked:Bool = false;
-	
-	public function new(uncheckedGraphic:IRenderItem, checkedGraphic:IRenderItem, disabledGraphic:IRenderItem, ?parent:UIObject, ?name:String) {
+	public function new(uncheckedGraphic:IRenderItem, checkedGraphic:IRenderItem, disabledGraphic:IRenderItem, ?checked:Bool = false, ?parent:UIObject, ?name:String) {
 		super(parent, name);
 		this.uncheckedGraphic = uncheckedGraphic;
 		this.checkedGraphic = checkedGraphic;
@@ -21,6 +21,8 @@ class CheckBox extends Button {
 		updateCheckboxVisibility();
 		updateGeometry();
 		centerButtonGraphics();
+		
+		this.checked = checked;
 		
 		signal_clicked.add(handleClick);
 	}
@@ -69,9 +71,12 @@ class CheckBox extends Button {
 			return;
 		}
 		
-		trace("Checkbox handling click");
-		
 		checked = !checked;
+	}
+	
+	private function set_checked(checked:Bool):Bool {
+		this.checked = checked;
 		updateCheckboxVisibility();
+		return checked;
 	}
 }

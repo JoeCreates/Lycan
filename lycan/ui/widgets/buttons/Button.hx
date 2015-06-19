@@ -1,4 +1,4 @@
-package lycan.ui.widgets ;
+package lycan.ui.widgets.buttons ;
 
 import flixel.FlxSprite;
 import lycan.ui.renderer.IRenderItem;
