@@ -14,6 +14,10 @@ class PushButton extends Button {
 		this.unhoveredGraphic = unhoveredGraphic;
 		this.hoveredGraphic = hoveredGraphic;
 		this.pushedGraphic = pushedGraphic;
+		buttonGraphics.push(unhoveredGraphic);
+		buttonGraphics.push(hoveredGraphic);
+		buttonGraphics.push(pushedGraphic);
+		
 		updateButtonVisibility();
 		updateGeometry();
 		centerButtonGraphics();
@@ -32,13 +36,6 @@ class PushButton extends Button {
 		
 		width = maxWidth;
 		height = maxHeight;
-	}
-	
-	private function centerButtonGraphics():Void {
-		for (graphic in [unhoveredGraphic, hoveredGraphic, pushedGraphic]) {
-			graphic.set_x(x + cast ((width - graphic.get_width()) / 2));
-			graphic.set_y(y + cast ((height - graphic.get_height()) / 2));
-		}
 	}
 	
 	private function updateButtonVisibility():Void {
@@ -69,30 +66,6 @@ class PushButton extends Button {
 	
 	private function set_pushedGraphic(pushedGraphic:IRenderItem) {
 		return this.pushedGraphic = pushedGraphic;
-	}
-	
-	override private function set_x(x:Int):Int {
-		super.set_x(x);
-		centerButtonGraphics();
-		return x;
-	}
-	
-	override private function set_y(y:Int):Int {
-		super.set_y(y);
-		centerButtonGraphics();
-		return y;
-	}
-	
-	override private function set_width(width:Int):Int {
-		super.set_width(width);
-		centerButtonGraphics();
-		return width;
-	}
-	
-	override private function set_height(height:Int):Int {
-		super.set_height(height);
-		centerButtonGraphics();
-		return height;
 	}
 	
 	override private function set_hovered(hovered:Bool):Bool {
