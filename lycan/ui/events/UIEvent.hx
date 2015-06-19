@@ -1,5 +1,6 @@
 package lycan.ui.events;
 
+import haxe.Utf8;
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.widgets.Widget;
 
@@ -7,6 +8,7 @@ import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.Event;
 import openfl.events.TouchEvent;
+import openfl.ui.Keyboard;
 
 // TODO macro to just make the enum values increase rather than specifying values manually?
 // TODO macro to add additional user/game-specific events onto the 1000+ range or whatever?
@@ -186,7 +188,15 @@ class WheelEvent extends UIEvent {
 }
 
 class KeyEvent extends UIEvent {
+	public var charCode:UInt;
+	public var keyCode:UInt;
 	
+	public function text():String {
+		// TODO this may flake for foreign/weird keyboards, and obviously lots of key events don't have glyphs that we can display
+		var u = new Utf8();
+		u.addChar(charCode);
+		return u.toString();
+	}
 }
 
 class MoveEvent extends UIEvent {

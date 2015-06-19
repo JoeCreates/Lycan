@@ -111,18 +111,22 @@ class UIApplicationRoot {
 	private function onKeyDown(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key down");
-		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
 		if (keyboardFocusWidget != null) {
-			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyPress));
+			var evt = new KeyEvent(EventType.KeyPress);
+			evt.charCode = e.charCode;
+			evt.keyCode = e.keyCode;
+			postEvent(keyboardFocusWidget, evt);
 		}
 	}
 	
 	private function onKeyUp(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key up");
-		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
 		if (keyboardFocusWidget != null) {
-			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyRelease));
+			var evt = new KeyEvent(EventType.KeyRelease);
+			evt.charCode = e.charCode;
+			evt.keyCode = e.keyCode;
+			postEvent(keyboardFocusWidget, evt);
 		}
 	}
 	
