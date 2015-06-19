@@ -6,4 +6,8 @@ class GridLayout extends Layout {
 	public function new(?parent:Widget, ?name:String) {
 		super(parent, name);
 	}
+	
+	override public function layout() {
+		
+	}
 }

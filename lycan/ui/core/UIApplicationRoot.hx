@@ -146,30 +146,30 @@ class UIApplicationRoot {
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
-		handlePointerDown(e.localX, e.localY);
+		handlePointerDown(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseMove(e:MouseEvent) {
-		handlePointerMove(e.localX, e.localY);
+		handlePointerMove(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseUp(e:MouseEvent) {
-		handlePointerUp(e.localX, e.localY);
+		handlePointerUp(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
-		handlePointerDown(e.localX, e.localY);
+		handlePointerDown(e.localX, e.localY, true);
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
-		handlePointerMove(e.localX, e.localY);
+		handlePointerMove(e.localX, e.localY, true);
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
-		handlePointerUp(e.localX, e.localY);
+		handlePointerUp(e.localX, e.localY, true);
 	}
 	
-	private function handlePointerDown(x:Float, y:Float) {
+	private function handlePointerDown(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		trace("Pointer down");
 		
@@ -200,7 +200,7 @@ class UIApplicationRoot {
 		}
 	}
 	
-	private function handlePointerMove(x:Float, y:Float) {
+	private function handlePointerMove(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		//trace("Pointer move");
 		
@@ -209,11 +209,15 @@ class UIApplicationRoot {
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
 				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+				
+				if (down) {
+					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
+				}
 			}
 		}
 	}
 	
-	private function handlePointerUp(x:Float, y:Float) {
+	private function handlePointerUp(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		trace("Pointer up");
 		

@@ -13,4 +13,6 @@ interface IRenderItem {
 	function set_height(height:Int):Int;
 	function get_scale():FlxPoint;
 	function set_scale(scale:FlxPoint):FlxPoint;
+	function show():Void;
+	function hide():Void;
 }
