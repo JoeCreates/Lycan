@@ -2,6 +2,7 @@ package components;
 
 import components.Attachable.AttachableSystem;
 import flixel.FlxObject;
+import flixel.math.FlxPoint;
 
 interface Attachable {
 	public var x:Float;
@@ -9,57 +10,29 @@ interface Attachable {
 	public var attachable:AttachableComponent;
 }
 
-class AttachableSystem extends ComponentSystem< {
-	
-	public static var instance(get, null):Void;
-	
-	private function new() {
-		super();
-	}
-	
-	override public function update(dt:Float):Void {
-		// Updates only root nodes
-		// TODO track only roots?
-		//TODO add components to the system
-		for (member in members) {
-			if (member.isRoot) {
-				member.update(dt);
-			}
-		}
-	}
-	
-	private function get_instance():AttachableSystem {
-		if (instance == null) instance = new AttachableSystem();
-		return instance;
-	}
-}
-
-class AttachableComponent extends Component<FlxObject> {
-	public static var system:
-	
-	public var entity:FlxObject;
+class AttachableComponent extends Component<Attachable> {
 	public var parent:Attachable;
-	public var children:Array<Attachable>
+	public var children:Array<Attachable>;
 	public var isRoot(get, never):Bool;
 	
-	public var position:FlxPoint;
-	public var origin:FlxPoint;
+	public var x(default, set):Float;
+	public var y(default, set):Float;
+	public var originX(default, set):Float;
+	public var originY(default, set):Float;
+	
+	// True if attached position or origin have changed since last update
+	private var dirty:Bool;
 	
 	public function new(entity:FlxObject) {
 		super(entity);
-		system = AttachableSystem.instance;
 	}
 	
 	override public function update(dt:Float):Void {
-		// Update position
-		if (!isRoot) {
-			entity.x = parent.entity.x + position.x - origin.x;
-			entity.y = parent.entity.y + position.y - origin.y;
-		}
-		
-		// Recursively update children
-		for (child in children) {
-			child.update(dt);
+		// The root is responsible for recursively updating its children
+		// However, children must also update if their attached position or origin
+		// have changed, which is indicated by the dirty flag
+		if (isRoot || dirty) {
+			recursiveUpdate(dt);
 		}
 	}
 	
@@ -79,7 +52,7 @@ class AttachableComponent extends Component<FlxObject> {
 		children.push(child);
 		child.parent = this;
 		
-		// Init data if necessary
+		// Instatiate properties if necessary
 		if (children == null) children = new Array<Attachable>();
 		if (child.attachPosition == null) child.attachPosition = FlxPoint.get();
 		if (child.attachOrigin == null) child.attachOrigin = FlxPoint.get();
@@ -104,7 +77,46 @@ class AttachableComponent extends Component<FlxObject> {
 		child.parent = null;
 	}
 	
+	@:allow AttachableComponent
+	private function recursiveUpdate(dt:Float:Void {		
+		// Recursively update children
+		for (child in children) {
+			// Update child's position
+			child.x = entity.x + child.attachable.x - child.attachable.origin.x;
+			child.y = entity.y + child.attachable.y - child.attachable.origin.y;
+			// Update child's children
+			child.attachable.recursiveUpdate(dt);
+		}
+		dirty = false;
+	}
+	
 	private inline function get_isRoot():Bool {
 		return parent == null;
+	}
+	
+	private function set_x(x:Float):Float {
+		this.x = x;
+		dirty = true;
+		return x;
+	}
+	private function set_y(y:Float):Float {
+		this.y = y;
+		dirty = true;
+		return y;
+	}
+	
+	private inline function get_isRoot():Bool {
+		return parent == null;
+	}
+	
+	private function set_originX(x:Float):Float {
+		this.originX = x;
+		dirty = true;
+		return x;
+	}
+	private function set_originY(y:Float):Float {
+		this.originY = y;
+		dirty = true;
+		return y;
 	}
 }
