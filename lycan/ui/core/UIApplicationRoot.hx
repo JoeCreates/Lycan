@@ -111,18 +111,22 @@ class UIApplicationRoot {
 	private function onKeyDown(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key down");
-		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
 		if (keyboardFocusWidget != null) {
-			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyPress));
+			var evt = new KeyEvent(EventType.KeyPress);
+			evt.charCode = e.charCode;
+			evt.keyCode = e.keyCode;
+			postEvent(keyboardFocusWidget, evt);
 		}
 	}
 	
 	private function onKeyUp(e:KeyboardEvent) {
 		Sure.sure(topLevelWidget != null);
 		trace("Key up");
-		// TODO maintain a list of focus widgets that can receive the input, process events from widgets that request to gain focus? no need to make keyboard exclusive to 1 widget...
 		if (keyboardFocusWidget != null) {
-			postEvent(keyboardFocusWidget, new KeyEvent(EventType.KeyRelease));
+			var evt = new KeyEvent(EventType.KeyRelease);
+			evt.charCode = e.charCode;
+			evt.keyCode = e.keyCode;
+			postEvent(keyboardFocusWidget, evt);
 		}
 	}
 	
@@ -146,30 +150,30 @@ class UIApplicationRoot {
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
-		handlePointerDown(e.localX, e.localY);
+		handlePointerDown(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseMove(e:MouseEvent) {
-		handlePointerMove(e.localX, e.localY);
+		handlePointerMove(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseUp(e:MouseEvent) {
-		handlePointerUp(e.localX, e.localY);
+		handlePointerUp(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
-		handlePointerDown(e.localX, e.localY);
+		handlePointerDown(e.localX, e.localY, true);
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
-		handlePointerMove(e.localX, e.localY);
+		handlePointerMove(e.localX, e.localY, true);
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
-		handlePointerUp(e.localX, e.localY);
+		handlePointerUp(e.localX, e.localY, true);
 	}
 	
-	private function handlePointerDown(x:Float, y:Float) {
+	private function handlePointerDown(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		trace("Pointer down");
 		
@@ -200,7 +204,7 @@ class UIApplicationRoot {
 		}
 	}
 	
-	private function handlePointerMove(x:Float, y:Float) {
+	private function handlePointerMove(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		//trace("Pointer move");
 		
@@ -209,11 +213,15 @@ class UIApplicationRoot {
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
 				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+				
+				if (down) {
+					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
+				}
 			}
 		}
 	}
 	
-	private function handlePointerUp(x:Float, y:Float) {
+	private function handlePointerUp(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
 		trace("Pointer up");
 		

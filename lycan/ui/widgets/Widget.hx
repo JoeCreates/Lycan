@@ -51,13 +51,13 @@ enum GamepadFocusPolicy {
 }
 
 class Widget extends UIObject {
-	public var layout(default,set):Layout = null;
-	public var enabled:Bool = true;
 	public var modal:Bool = false;
+	public var layout(default,set):Layout = null;
+	public var enabled(default, set):Bool = true;
 	public var x(default, set):Int = 0;
 	public var y(default, set):Int = 0;
-	public var width:Int = 0;
-	public var height:Int = 0;
+	public var width(default, set):Int = 0;
+	public var height(default, set):Int = 0;
 	public var sizePolicy:SizePolicy; // TODO
 	public var pointerTrackingPolicy:PointerTrackingPolicy = PointerTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
@@ -79,6 +79,9 @@ class Widget extends UIObject {
 	public var marginTop:Int = 2;
 	public var marginRight:Int = 2;
 	public var marginBottom:Int = 2;
+	
+	private var hovered(default,set):Bool = false;
+	private var pressed(default,set):Bool = false;
 	
 	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
@@ -167,6 +170,8 @@ class Widget extends UIObject {
 				closeEvent(cast e);
 			case EventType.DragEnter:
 				dragEnterEvent(cast e);
+			case EventType.DragMove:
+				dragMoveEvent(cast e);
 			case EventType.DragLeave:
 				dragLeaveEvent(cast e);
 			case EventType.Drop:
@@ -252,12 +257,16 @@ class Widget extends UIObject {
 		#if debug
 		trace(name + " received pointer press");
 		#end
+		
+		pressed = true;
 	}
 	
 	private function pointerReleaseEvent(e:PointerEvent) {
 		#if debug
 		trace(name + " received pointer release");
 		#end
+		
+		pressed = false;
 	}
 	
 	private function pointerMoveEvent(e:PointerEvent) {
@@ -312,12 +321,17 @@ class Widget extends UIObject {
 		#if debug
 		trace(name + " was hovered");
 		#end
+		
+		hovered = true;
 	}
 	
 	private function hoverLeaveEvent(e:HoverEvent) {
 		#if debug
 		trace(name + " was unhovered");
 		#end
+		
+		pressed = false;
+		hovered = false;
 	}
 	
 	private function moveEvent(e:MoveEvent) {
@@ -342,6 +356,12 @@ class Widget extends UIObject {
 		#if debug
 		trace(name + " got drag enter");
 		#end	
+	}
+	
+	private function dragMoveEvent(e:DragMoveEvent) {
+		#if debug
+		trace(name + " got drag move");
+		#end
 	}
 	
 	private function dragLeaveEvent(e:DragLeaveEvent) {
@@ -520,5 +540,25 @@ class Widget extends UIObject {
 		}
 		
 		return this.y = y;
+	}
+	
+	private function set_width(width:Int):Int {
+		return this.width = width;
+	}
+	
+	private function set_height(height:Int):Int {
+		return this.height = height;
+	}
+	
+	private function set_hovered(hovered:Bool):Bool {		
+		return this.hovered = hovered;
+	}
+	
+	private function set_pressed(pressed:Bool):Bool {
+		return this.pressed = pressed;
+	}
+	
+	private function set_enabled(enabled:Bool):Bool {
+		return this.enabled = enabled;
 	}
 }

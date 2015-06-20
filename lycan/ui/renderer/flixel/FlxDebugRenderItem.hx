@@ -9,9 +9,13 @@ import flixel.group.FlxGroup;
 class FlxDebugRenderItem implements IRenderItem {
 	public var graphic:FlxSprite = new FlxSprite();
 	
-	public function new(w:Int, h:Int) {
-		graphic.makeGraphic(w, h, FlxColor.fromRGB(cast Math.random() * 255, cast Math.random() * 255, cast Math.random() * 255, 128));
-		set_width(cast graphic.width);
+	public function new(w:Int, h:Int, ?color:FlxColor) {
+		if (color == null) {
+			color = FlxColor.fromRGB(Std.int(Math.random() * 255), Std.int(Math.random() * 255), Std.int(Math.random() * 255), 128);
+		}
+		
+		graphic.makeGraphic(w, h, color);
+		set_width(cast graphic.width); 
 		set_height(cast graphic.height);
 	}
 	
@@ -64,5 +68,13 @@ class FlxDebugRenderItem implements IRenderItem {
 	public function set_scale(scale:FlxPoint):FlxPoint {
 		//return graphic.scale = scale;
 		return scale; // TODO
+	}
+	
+	public function show():Void {
+		graphic.visible = true;
+	}
+	
+	public function hide():Void {
+		graphic.visible = false;
 	}
 }

@@ -75,4 +75,12 @@ class FlxTextRenderItem implements IFlxRenderItem implements ITextRenderItem {
 	public function set_sprite(sprite:FlxText):FlxText {
 		return this.graphic = sprite;
 	}
+	
+	public function show():Void {
+		graphic.visible = true;
+	}
+	
+	public function hide():Void {
+		graphic.visible = false;
+	}
 }

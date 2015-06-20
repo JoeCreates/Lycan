@@ -31,4 +31,10 @@ class Layout extends UIObject {
 	public function isEmpty() {
 		return children.isEmpty();
 	}
+	
+	public function layout() {
+		for (child in children) {
+			
+		}
+	}
 }

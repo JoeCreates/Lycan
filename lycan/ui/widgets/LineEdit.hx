@@ -9,19 +9,13 @@ import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;
 import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.events.UIEvent.EventType;
+import openfl.ui.Keyboard;
 
 class LineEdit extends Widget {
 	public var textGraphic(default, set):ITextRenderItem;
-	
-	public var text:String = "";
-	public var displayText:String = "";
+	private var restrictInput:EReg = ~/^[A-Za-z0-9]+$/; // Limit *event input* to English alphanumerics
 	public var maxLength:Int = 255;
-	public var readOnly:Bool = false;
-	public var cursorPosition:Int = 0;
-	
-	public var textChanged = new Signal1<String>();
-	public var textEdited = new Signal1<String>();
-	public var cursorPositionChanged = new Signal2<Int, Int>();
+	public var signal_textEdited = new Signal1<String>();
 	
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
@@ -29,28 +23,37 @@ class LineEdit extends Widget {
 	}
 	
 	public function backspace() {
+		var text = textGraphic.get_text();
+		var len = text.length;
 		
-	}
-	
-	public function delete() {
-		
-	}
-	
-	public function cursorForward(mark:Bool, steps:Int) {
-		
-	}
-	
-	public function cursorBackward(mark:Bool, steps:Int) {
-		
-	}
-	
-	override public function keyPressEvent(e:KeyEvent) {
-		if(e.type == EventType.KeyPress) {
-			textGraphic.set_text(textGraphic.get_text() + "todo");
+		if (len > 0) {
+			textGraphic.set_text(text.substring(0, len - 1));
 		}
 	}
 	
-	private function set_textGraphic(graphic:ITextRenderItem) {		
+	override public function keyPressEvent(e:KeyEvent) {
+		if (e.charCode == Keyboard.BACKSPACE || e.charCode == Keyboard.DELETE) {
+			backspace();
+			return;
+		}
+		
+		if (textGraphic.get_text().length >= maxLength) {
+			return;
+		}
+		
+		if (e.type == EventType.KeyPress) {
+			var evtText = e.text();
+			
+			if (evtText != null && evtText.length == 1) {
+				if (restrictInput.match(evtText)) {
+					textGraphic.set_text(textGraphic.get_text() + evtText);
+					signal_textEdited.dispatch(textGraphic.get_text());
+				}
+			}
+		}
+	}
+	
+	private function set_textGraphic(graphic:ITextRenderItem) {
 		width = graphic.get_width();
 		height = graphic.get_height();
 		return this.textGraphic = graphic;
