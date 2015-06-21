@@ -1,7 +1,9 @@
 package components;
 
 import components.Attachable.AttachableSystem;
+import flixel.FlxG;
 import flixel.FlxObject;
+import flixel.FlxState;
 import flixel.math.FlxPoint;
 
 interface Attachable {
@@ -10,7 +12,7 @@ interface Attachable {
 	public var attachable:AttachableComponent;
 }
 
-class AttachableComponent extends Component<Attachable> {
+class AttachableComponent extends Component<Attachable> implements LateUpdatable {
 	public var parent:Attachable;
 	public var children:Array<Attachable>;
 	public var isRoot(get, never):Bool;
@@ -27,13 +29,20 @@ class AttachableComponent extends Component<Attachable> {
 		super(entity);
 	}
 	
-	override public function update(dt:Float):Void {
+	override public function lateUpdate(dt:Float):Void {
+		
+		var state:FlxState = cast FlxG.state;
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
 		if (isRoot || dirty) {
 			recursiveUpdate(dt);
 		}
+	}
+	
+	override public function update(dt:Float):Void {
+		var lateUpdater:LateUpdater = cast FlxG.state;
+		
 	}
 	
 	/**

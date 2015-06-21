@@ -16,7 +16,7 @@ import openfl.filters.BlurFilter;
  * 
  * @author Joe Williamson
  */
-class GameState extends FlxState {
+class GameState extends State {
 	
 	public var world:World;
 	public var uiGroup:FlxSpriteGroup;
