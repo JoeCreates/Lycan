@@ -1,16 +1,10 @@
 package lycan.components;
 
 import lycan.LateUpdatable;
-import lycan.LateUpdater;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.FlxState;
-import flixel.math.FlxPoint;
-import lycan.LycanState;
 
-interface Attachable {
-	public var x:Float;
-	public var y:Float;
+interface Attachable extends LateUpdatable {
+	public var x(default, set):Float;
+	public var y(default, set):Float;
 	public var attachable:AttachableComponent;
 }
 
@@ -29,22 +23,20 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	
 	public function new(entity:Attachable) {
 		super(entity);
+		
+		x = 0;
+		y = 0;
+		originX = 0;
+		originY = 0;
 	}
 	
-	override public function lateUpdate(dt:Float):Void {
-		
-		var state:FlxState = cast FlxG.state;
+	public function lateUpdate(dt:Float):Void {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
 		if (isRoot || dirty) {
 			recursiveUpdate(dt);
 		}
-	}
-	
-	override public function update(dt:Float):Void {
-		var state:LycanState = cast FlxG.state;
-		state.updateLater(lateUpdate);
 	}
 	
 	/**
@@ -54,26 +46,27 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	 * @param	y The y position of the attachment
 	 */
 	public function attach(child:Attachable, x:Float, y:Float, ?originX:Float, ?originY:Float):Void {
+		Sure.sure(child != null);
+		
 		// Detach child from current parent
-		if (child.parent != null) {
-			child.parent.remove(child);
-		}		
+		if (child.attachable.parent != null) {
+			child.attachable.parent.attachable.remove(child);
+		}
+		
+		// satiate properties if necessary
+		if (children == null) children = new Array<Attachable>();
 		
 		// Attach child to this attachable
 		children.push(child);
-		child.parent = this;
-		
-		// Instatiate properties if necessary
-		if (children == null) children = new Array<Attachable>();
-		if (child.attachPosition == null) child.attachPosition = FlxPoint.get();
-		if (child.attachOrigin == null) child.attachOrigin = FlxPoint.get();
+		child.attachable.parent = entity;
 		
 		// Set child's attached position
-		child.attachPosition.set(x, y);
+		child.attachable.x = x;
+		child.attachable.y = y;
 		
 		// Set child's attachment origin if given
-		if (originX != null) { child.attachOrigin.x = originX; }
-		if (originY != null) { child.attachOrigin.y = originY; }
+		if (originX != null) { child.attachable.originX = originX; }
+		if (originY != null) { child.attachable.originY = originY; }
 	}
 	
 	/**
@@ -82,19 +75,20 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	 */
 	public function remove(child:Attachable):Void {
 		// Return if attachable is not a valid child
-		if (child.parent != this) return;
+		if (child.attachable.parent.attachable != this) return;
 		
 		children.remove(child);
-		child.parent = null;
+		child.attachable.parent = null;
 	}
 	
-	@:allow AttachableComponent
-	private function recursiveUpdate(dt:Float:Void {		
+	@:access(AttachableComponent)
+	private function recursiveUpdate(dt:Float):Void {		
+		if (children == null) return;
 		// Recursively update children
 		for (child in children) {
 			// Update child's position
-			child.x = entity.x + child.attachable.x - child.attachable.origin.x;
-			child.y = entity.y + child.attachable.y - child.attachable.origin.y;
+			child.x = entity.x + child.attachable.x - child.attachable.originX;
+			child.y = entity.y + child.attachable.y - child.attachable.originY;
 			// Update child's children
 			child.attachable.recursiveUpdate(dt);
 		}

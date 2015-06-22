@@ -11,7 +11,6 @@ interface CenterPositionable {
 }
 
 class CenterPositionableComponent extends Component<CenterPositionable> {
-	
 	public var x(get, set):Float;
 	public var y(get, set):Float;
 	
@@ -36,6 +35,4 @@ class CenterPositionableComponent extends Component<CenterPositionable> {
 	private var get_y():Float {
 		return entity.y + entity.height / 2;
 	}
-	
-	
 }
