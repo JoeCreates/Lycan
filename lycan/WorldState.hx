@@ -16,7 +16,7 @@ import openfl.filters.BlurFilter;
  * 
  * @author Joe Williamson
  */
-class GameState extends State {
+class WorldState extends LycanState {
 	
 	public var world:World;
 	public var uiGroup:FlxSpriteGroup;
@@ -34,9 +34,6 @@ class GameState extends State {
 	override public function create():Void {
 		super.create();
 		
-		// TODO
-		
-		/*
 		exclusiveTweens = new Map<String, FlxTween>();
 		
 		// Cameras
@@ -59,7 +56,6 @@ class GameState extends State {
 		var blur:BlurFilter = new BlurFilter();
 		worldCamera.flashSprite.filters.push(blur);
 		worldCamera.flashSprite.filters = worldCamera.flashSprite.filters;
-		*/
 	}
 	
 	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {

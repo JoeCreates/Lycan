@@ -1,10 +1,12 @@
 package components;
 
-import components.Attachable.AttachableSystem;
+import lycan.LateUpdatable;
+import lycan.LateUpdater;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.math.FlxPoint;
+import lycan.LycanState;
 
 interface Attachable {
 	public var x:Float;
@@ -41,8 +43,8 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	}
 	
 	override public function update(dt:Float):Void {
-		var lateUpdater:LateUpdater = cast FlxG.state;
-		
+		var state:LycanState = cast FlxG.state;
+		state.updateLater(lateUpdate);
 	}
 	
 	/**
