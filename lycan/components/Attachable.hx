@@ -1,4 +1,4 @@
-package components;
+package lycan.components;
 
 import lycan.LateUpdatable;
 import lycan.LateUpdater;
@@ -27,7 +27,7 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	// True if attached position or origin have changed since last update
 	private var dirty:Bool;
 	
-	public function new(entity:FlxObject) {
+	public function new(entity:Attachable) {
 		super(entity);
 	}
 	
@@ -114,10 +114,6 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		this.y = y;
 		dirty = true;
 		return y;
-	}
-	
-	private inline function get_isRoot():Bool {
-		return parent == null;
 	}
 	
 	private function set_originX(x:Float):Float {
