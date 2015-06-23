@@ -5,7 +5,7 @@ import flixel.FlxBasic;
 
 class LycanState extends FlxSubState implements LateUpdatable {
 	// Double check lateupdate is being called
-	private var updatesWithoutLateUpdates:Int;
+	private var updatesWithoutLateUpdates:Int = 0;
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
