@@ -8,6 +8,7 @@ import flixel.group.FlxGroup;
 
 class FlxDebugRenderItem implements IRenderItem {
 	public var graphic:FlxSprite = new FlxSprite();
+	public var group:FlxGroup = null;
 	
 	public function new(w:Int, h:Int, ?color:FlxColor) {
 		if (color == null) {
@@ -20,12 +21,16 @@ class FlxDebugRenderItem implements IRenderItem {
 	}
 	
 	public function addTo(group:FlxGroup) {
+		Sure.sure(this.group == null);
+		this.group = group;
 		group.add(graphic);
 		return this;
 	}
 	
 	public function removeFrom(group:FlxGroup) {
+		Sure.sure(this.group != null);
 		group.remove(graphic);
+		this.group = null;
 		return this;
 	}
 	

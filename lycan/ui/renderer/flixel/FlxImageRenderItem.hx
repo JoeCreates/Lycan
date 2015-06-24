@@ -22,6 +22,9 @@ class FlxImageRenderItem implements IRenderItem {
 		return this;
 	}
 	
+	public function raise() {
+	}
+	
 	public function get_x():Int {
 		return graphic.x;
 	}

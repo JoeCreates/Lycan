@@ -14,9 +14,9 @@ class CheckBox extends Button {
 		this.uncheckedGraphic = uncheckedGraphic;
 		this.checkedGraphic = checkedGraphic;
 		this.disabledGraphic = disabledGraphic;
-		buttonGraphics.push(uncheckedGraphic);
-		buttonGraphics.push(checkedGraphic);
-		buttonGraphics.push(disabledGraphic);
+		graphics.push(uncheckedGraphic);
+		graphics.push(checkedGraphic);
+		graphics.push(disabledGraphic);
 		
 		updateCheckboxVisibility();
 		updateGeometry();

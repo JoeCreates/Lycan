@@ -1,7 +1,9 @@
-package lycan.ui.widgets;
+package lycan.ui.widgets.buttons;
 
-class RadioButton extends Widget {
+class RadioButton extends CheckBox {	
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
 	}
+	
+	
 }

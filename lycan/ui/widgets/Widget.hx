@@ -6,6 +6,7 @@ import lycan.ui.events.UIEvent;
 import lycan.ui.layouts.Layout;
 import lycan.ui.layouts.SizePolicy;
 import lycan.ui.UIObject;
+import lycan.ui.renderer.IRenderItem;
 import Sure;
 
 enum Direction {
@@ -51,6 +52,8 @@ enum GamepadFocusPolicy {
 }
 
 class Widget extends UIObject {
+	private var graphics:Array<IRenderItem> = new Array<IRenderItem>();
+	
 	public var modal:Bool = false;
 	public var layout(default,set):Layout = null;
 	public var enabled(default, set):Bool = true;

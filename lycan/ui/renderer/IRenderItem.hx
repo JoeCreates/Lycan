@@ -15,4 +15,5 @@ interface IRenderItem {
 	function set_scale(scale:FlxPoint):FlxPoint;
 	function show():Void;
 	function hide():Void;
+	//function raise():Void;
 }

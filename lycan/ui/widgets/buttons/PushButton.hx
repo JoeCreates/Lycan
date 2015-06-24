@@ -14,9 +14,9 @@ class PushButton extends Button {
 		this.unhoveredGraphic = unhoveredGraphic;
 		this.hoveredGraphic = hoveredGraphic;
 		this.pushedGraphic = pushedGraphic;
-		buttonGraphics.push(unhoveredGraphic);
-		buttonGraphics.push(hoveredGraphic);
-		buttonGraphics.push(pushedGraphic);
+		graphics.push(unhoveredGraphic);
+		graphics.push(hoveredGraphic);
+		graphics.push(pushedGraphic);
 		
 		updateButtonVisibility();
 		updateGeometry();

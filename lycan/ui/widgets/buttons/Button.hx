@@ -16,8 +16,6 @@ class Button extends Widget {
 	public var signal_unhovered = new Signal0();
 	public var signal_clicked = new Signal0(); // Emitted if the button is pressed down and released whilst within the button area
 	
-	private var buttonGraphics:Array<IRenderItem> = new Array<IRenderItem>();
-	
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
 	}
@@ -75,7 +73,7 @@ class Button extends Widget {
 	}
 	
 	private function centerButtonGraphics():Void {
-		for (graphic in buttonGraphics) {
+		for (graphic in graphics) {
 			graphic.set_x(x + cast ((width - graphic.get_width()) / 2));
 			graphic.set_y(y + cast ((height - graphic.get_height()) / 2));
 		}
