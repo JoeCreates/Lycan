@@ -4,32 +4,6 @@ import constraint.Constraint.RelationalOperator;
 import haxe.Int64;
 import openfl.Vector;
 
-@:enum abstract Error(String) {
-	var UnsatisfiableConstraint = "The constraint cannot be satisfied.";
-	var UnknownConstraint = "The constraint has not been added to the solver.";
-	var DuplicateConstraint = "The constraint has already been added to the solver.";
-	var UnknownEditVariable = "The edit variable has not been added to the solver.";
-	var DuplicateEditVariable = "The edit variable has already been added to the solver.";
-	var BadRequiredStrength = "A required strength cannot be used in this context.";
-	var InternalSolverError = "An internal solver error occurred.";
-}
-
-private class Tag {
-	public var marker:Symbol;
-	public var other:Symbol;
-}
-
-private class EditInfo {
-	public var tag:Tag;
-	public var constraint:Constraint;
-	public var constant:Float;
-}
-
-private typedef ConstraintMap = Map<Constraint, Tag>;
-private typedef RowMap = Map<Symbol, Row>;
-private typedef VarMap = Map<Variable, Symbol>;
-private typedef EditMap = Map<Variable, EditInfo>;
-
 @:allow(constraint.DebugHelper)
 class Solver {
 	private var constraints:ConstraintMap;
@@ -45,6 +19,17 @@ class Solver {
 		reset();
 	}
 	
+	public function reset():Void {
+		rows = new RowMap();
+		constraints = new ConstraintMap();
+		vars = new VarMap();
+		edits = new EditMap();
+		infeasibleRows.splice(0, infeasibleRows.length);
+		objective = new Row();
+		artificial = new Row();
+		idTick = 1;
+	}
+	
 	public function addConstraint(constraint:Constraint):Void {
 		if (constraints.exists(constraint)) {
 			throw Error.DuplicateConstraint;
@@ -55,7 +40,7 @@ class Solver {
 		var subject = chooseSubject(row, tag);
 		
 		if (subject.type == SymbolType.INVALID && allDummies(row)) {
-			if (!nearZero(row.constant)) {
+			if (!Util.nearZero(row.constant)) {
 				throw Error.UnsatisfiableConstraint;
 			} else {
 				subject = tag.marker;
@@ -149,13 +134,10 @@ class Solver {
 	
 	public function suggestValue(variable:Variable, value:Float):Void {
 		var info = edits.get(variable);
-		
 		if (info == null) {
 			throw Error.UnknownEditVariable;
 		}
 		
-		/*
-		var guard:DualOptimizeGuard = new DualOptimizeGuard(this)
 		var delta:Float = value - info.constant;
 		info.constant = value;
 		
@@ -166,7 +148,6 @@ class Solver {
 			if (row.add(-delta) < 0.0) {
 				infeasibleRows.push(symbol);
 			}
-			
 			return;
 		}
 		
@@ -176,9 +157,11 @@ class Solver {
 				infeasibleRows.push(symbol);
 			}
 		}
-		*/
 		
 		// TODO
+		
+		// TODO
+		// dualOptimize();
 	}
 	
 	public function updateVariables():Void {
@@ -195,29 +178,6 @@ class Solver {
 		}
 	}
 	
-	public function reset():Void {
-		clearRows();
-		constraints = new ConstraintMap();
-		vars = new VarMap();
-		edits = new EditMap();
-		infeasibleRows.splice(0, infeasibleRows.length);
-		objective = new Row();
-		artificial = new Row();
-		idTick = 1;
-	}
-	
-	public function dump():Void {
-		
-	}
-	
-	private function clearRows():Void {
-		// TODO delete/null out the rows? 
-		for (row in rows) {
-		}
-		
-		rows = new RowMap();
-	}
-	
 	private function getVarSymbol(variable:Variable):Symbol {
 		var symbol:Symbol = vars.get(variable);
 		
@@ -231,63 +191,183 @@ class Solver {
 	}
 	
 	private function createRow(constraint:Constraint, tag:Tag):Row {
+		var expression = constraint.expression;
+		var row = new Row(expression.constant);
 		
+		for (term in expression.terms) {
+			if (!Util.nearZero(term.coefficient)) {
+				var symbol:Symbol = getVarSymbol(term.variable);
+				var existingRow:Row = rows.get(symbol);
+				if (existingRow != null) {
+					row.insert(symbol, term.coefficient);
+				} else {
+					row.insert(existingRow.symbol, term.coefficient);
+				}
+			}
+		}
+		
+		switch(constraint.operator) {
+			case RelationalOperator.LE, RelationalOperator.GE:
+				var coefficient:Float = constraint.operator == RelationalOperator.LE ? 1.0 : -1.0;
+				var slack = new Symbol(SymbolType.Slack, idTick++);
+				tag.marker = slack;
+				row.insertSymbol(slack, coefficient);
+				if (constraint.strength < Strength.required) {
+					var error = new Symbol(SymbolType.Error, idTick++);
+					tag.other = error;
+					row.insertSymbol(error, -coefficient);
+					objective.insertSymbol(error, constraint.strength);
+				}
+				break;
+			case RelationalOperator.EQ:
+				if (constraint.strength < Strength.required) {
+					var errorPlus = new Symbol(SymbolType.Error, idTick++);
+					var errorMinus = new Symbol(SymbolType.Error, idTick++);
+					tag.marker = errorPlus;
+					tag.other = errorMinus;
+					row.insertSymbol(errorPlus, constraint.strength);
+					row.insertSymbol(errorMinus, constraint.strength);
+				} else {
+					var dummy = new Symbol(SymbolType.Dummy, idTick++);
+					tag.marker = dummy;
+					row.insertSymbol(dummy);
+				}
+				break;
+		}
+		
+		if (row.constant < 0.0) {
+			row.reverseSign();
+		}
+		
+		return row;
 	}
 	
 	private function chooseSubject(row:Row, tag:Tag):Symbol {
+		for (key in rows.keys()) {
+			if (rows.get(key).type == SymbolType.External) {
+				return key;
+			}
+		}
 		
+		if (tag.marker.type == SymbolType.Slack || tag.marker.type == SymbolType.Error) {
+			if (row.coefficientFor(tag.marker) < 0.0) {
+				return tag.marker;
+			}
+		}
+		
+		if (tag.other.type == SymbolType.Slack || tag.other.type == Symbol.Error) {
+			return tag.other;
+		}
+		
+		return new Symbol();
 	}
 	
 	private function addWithArtificialVariable(row:Row):Bool {
-		
+		var artificial = new Symbol(SymbolType.Slack, idTick++);
+		// TODO row deep copy
+		return false;
 	}
 	
 	private function substitute(symbol:Symbol, row:Row):Void {
-		
+		// TODO
 	}
 	
 	private function optimize(objective:Row):Void {
-		
+		while (true) {
+			var entering:Symbol = getEnteringSymbol(objective);
+			if (entering.type == SymbolType.Invalid) {
+				return;
+			}
+			// TODO
+		}
 	}
 	
 	private function dualOptimize():Void {
-		
+		// TODO
 	}
 	
 	private function getEnteringSymbol(objective:Row):Symbol {
+		for (key in objective.cells.keys()) {
+			if (key.type != SymbolType.Dummy && objective.cells.get(key) < 0.0) {
+				return key;
+			}
+		}
 		
+		return new Symbol();
 	}
 	
 	private function getDualEnteringSymbol(row:Row):Symbol {
-		
+		// TODO
 	}
 	
 	private function anyPivotableSymbol(row:Row):Symbol {
+		for (symbol in row.cells.keys()) {
+			if (symbol.type == SymbolType.Slack || symbol.type == SymbolType.Error) {
+				return symbol;
+			}
+		}
 		
+		return new Symbol();
 	}
 	
 	private function getLeavingRow(entering:Symbol):RowMap {
-		
+		var ratio:Float = 200000000;
+		// TODO need to return an iterator
 	}
 	
 	private function getMarkerLeavingRow(marker:Symbol):RowMap {
-		
+		// TODO need to return an iterator
 	}
 	
 	private function removeConstraintEffects(constraint:Constraint, tag:Tag):Void {
-		
+		if (tag.marker.type == SymbolType.Error) {
+			removeMarkerEffects(tag.marker, constraint.strength);
+		} else if (tag.other.type == SymbolType.Error) {
+			removeMarkerEffects(tag.other, constraint.strength);
+		}
 	}
 	
 	private function removeMarkerEffects(marker:Symbol, strength:Float):Void {
-		
+		var row:Row = rows.get(marker);
+		if (row != null) {
+			objective.insertRow(row, -strength);
+		} else {
+			objective.insertSymbol(marker, -strength);
+		}
 	}
 	
 	private function allDummies(row:Row):Bool {
-		
-	}
-	
-	public static inline function nearZero(value:Float):Bool {
-		static inline var eps:Float = 0.00000001; // TODO figure out a sensible value for this across platforms
-		return value < 0.0 ? -value < eps : value < eps;
+		for (cell in row.cells) {
+			if (cell.type != SymbolType.Dummy) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
+
+@:enum abstract Error(String) {
+	var UnsatisfiableConstraint = "The constraint cannot be satisfied.";
+	var UnknownConstraint = "The constraint has not been added to the solver.";
+	var DuplicateConstraint = "The constraint has already been added to the solver.";
+	var UnknownEditVariable = "The edit variable has not been added to the solver.";
+	var DuplicateEditVariable = "The edit variable has already been added to the solver.";
+	var BadRequiredStrength = "A required strength cannot be used in this context.";
+	var InternalSolverError = "An internal solver error occurred.";
+}
+
+private class Tag {
+	public var marker:Symbol;
+	public var other:Symbol;
+}
+
+private class EditInfo {
+	public var tag:Tag;
+	public var constraint:Constraint;
+	public var constant:Float;
+}
+
+private typedef ConstraintMap = Map<Constraint, Tag>;
+private typedef RowMap = Map<Symbol, Row>;
+private typedef VarMap = Map<Variable, Symbol>;
+private typedef EditMap = Map<Variable, EditInfo>;

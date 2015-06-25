@@ -30,11 +30,11 @@ class DebugHelper {
 		
 	}
 	
-	public static inline function dumpVars(vars:VarMap):Void {
+	public static inline function dumpSymbols(symbols:Vector<Symbol>):Void {
 		
 	}
 	
-	public static inline function dumpSymbols(symbols:Vector<Symbol>):Void {
+	public static inline function dumpVars(vars:VarMap):Void {
 		
 	}
 	
@@ -51,11 +51,28 @@ class DebugHelper {
 	}
 	
 	public static inline function dumpSymbol(symbol:Symbol):Void {
-		
+		trace(Std.string(symbol.type) + symbol.id);		
 	}
 	
 	public static inline function dumpConstraint(constraint:Constraint):Void {
+		for (term in constraint.expression) {
+			trace(term.coefficient + " * " + term.variable.name " + ";
+		}
+		trace(constraint.expression.constant);
 		
+		switch(constraint.operator) {
+			case OP_LE:
+				trace(" <= 0 ");
+				break;
+			case OP_GE:
+				trace(" >= 0 ");
+				break;
+			case OP_EQ:
+				trace(" == 0 ");
+				break;
+		}
+		
+		trace(" | strength = " constraint.strength);
 	}
 	
 	private static inline function printSpacer():Void {

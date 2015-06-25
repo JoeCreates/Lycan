@@ -1,10 +1,14 @@
 package ai;
 
 class Strength {
-	public static inline var required = create(1000.0, 1000.0, 1000.0);
-	public static inline var strong = create(1.0, 0.0, 0.0);
-	public static inline var medium = create(0.0, 1.0, 0.0);
-	public static inline var weak = create(0.0, 0.0, 1.0);
+	public static inline var required = macro_create(1000.0, 1000.0, 1000.0);
+	public static inline var strong = macro_create(1.0, 0.0, 0.0);
+	public static inline var medium = macro_create(0.0, 1.0, 0.0);
+	public static inline var weak = macro_create(0.0, 0.0, 1.0);
+	
+	macro private static inline function macro_create(a:Float, b:Float, c:Float, ?w:Float = 1.0):Float {
+		return macro $v { create(a, b, c, w); }
+	}
 	
 	// TODO make macro
 	public static inline function create(a:Float, b:Float, c:Float, ?w:Float = 1.0):Float {

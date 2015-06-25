@@ -17,7 +17,7 @@ class Constraint {
 	public function new(expression:Expression, operator:RelationalOperator, strength:Float = Strength.Required) {
 		this.expression = reduce(expression);
 		this.operator = operator;
-		this.strength = strength;
+		this.strength = Strength.clip(strength);
 	}
 	
 	private function get_expression():Expression {
