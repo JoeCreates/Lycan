@@ -30,7 +30,8 @@ private typedef RowMap = Map<Symbol, Row>;
 private typedef VarMap = Map<Variable, Symbol>;
 private typedef EditMap = Map<Variable, EditInfo>;
 
-private class SolverImplementation {
+@:allow(constraint.DebugHelper)
+class Solver {
 	private var constraints:ConstraintMap;
 	private var rows:RowMap;
 	private var vars:VarMap;

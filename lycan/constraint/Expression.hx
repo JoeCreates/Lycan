@@ -1,9 +1,28 @@
 package constraint;
+import openfl.Vector;
+
+private typedef TermParameter = OneOfTwo<Term, Vector<Term>>; // TODO
 
 class Expression {
-	public function new() {
-		
+	private var terms:Vector<Term>;
+	public var constant(get, null):Float;
+	public var value(get, never):Float;
+	
+	public function new(?terms:TermParameter, ?constant:Float = 0.0) {
+		this.terms = terms;
+		this.constant = constant;
 	}
 	
-	private var terms:Array<Term>;
+	private function get_constant():Float {
+		return constant;
+	}
+	
+	private function get_value():Float {
+		var result = constant;
+		for (term in terms) {
+			result += term.value;
+		}
+		
+		return result;
+	}
 }
