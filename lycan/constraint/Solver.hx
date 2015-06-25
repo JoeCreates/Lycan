@@ -1,10 +1,11 @@
-package constraint;
+package lycan.constraint;
 
-import constraint.Constraint.RelationalOperator;
 import haxe.Int64;
+import lycan.constraint.Constraint.RelationalOperator;
+import lycan.constraint.Solver.SolverError;
+import lycan.constraint.Symbol.SymbolType;
 import openfl.Vector;
 
-@:allow(constraint.DebugHelper)
 class Solver {
 	private var constraints:ConstraintMap;
 	private var rows:RowMap;
@@ -13,7 +14,7 @@ class Solver {
 	private var infeasibleRows:Vector<Symbol>;
 	private var objective:Row;
 	private var artificial:Row;
-	private var idTick:Int64;
+	private var idTick:Int;
 	
 	public function new() {
 		reset();
@@ -32,27 +33,27 @@ class Solver {
 	
 	public function addConstraint(constraint:Constraint):Void {
 		if (constraints.exists(constraint)) {
-			throw Error.DuplicateConstraint;
+			throw SolverError.DuplicateConstraint;
 		}
 		
 		var tag = new Tag();
 		var row = createRow(constraint, tag);
 		var subject = chooseSubject(row, tag);
 		
-		if (subject.type == SymbolType.INVALID && allDummies(row)) {
+		if (subject.type == SymbolType.Invalid && allDummies(row)) {
 			if (!Util.nearZero(row.constant)) {
-				throw Error.UnsatisfiableConstraint;
+				throw SolverError.UnsatisfiableConstraint;
 			} else {
 				subject = tag.marker;
 			}
 		}
 		
-		if (subject.type == SymbolType.INVALID) {
+		if (subject.type == SymbolType.Invalid) {
 			if (!addWithArtificialVariable(row)) {
-				throw Error.UnsatisfiableConstraint;
+				throw SolverError.UnsatisfiableConstraint;
 			}
 		} else {
-			row.solveFor(subject);
+			row.solveForSymbol(subject);
 			substitute(subject, row);
 			rows[subject] = row;
 		}
@@ -63,10 +64,10 @@ class Solver {
 	}
 	
 	public function removeConstraint(constraint:Constraint):Void {
-		var tag = constraints.get(constraint);
+		var tag:Tag = constraints.get(constraint);
 		
 		if (tag == null) {
-			throw Error.UnknownConstraint;
+			throw SolverError.UnknownConstraint;
 		}
 		
 		constraints.remove(constraint);
@@ -76,17 +77,17 @@ class Solver {
 		var row:Row = rows.get(tag.marker);
 		
 		if (row != null) {
-			rows.remove(row);
+			rows.remove(tag.marker);
 		} else {
 			row = getMarkerLeavingRow(tag.marker);
 			
 			if (row == null) {
-				throw Error.InternalSolverError;
+				throw SolverError.InternalSolverError;
 			}
 			
-			var leaving = new Symbol(tag.marker);
-			rows.remove(row);
-			row.solveFor(leaving, tag.marker);
+			var leaving:Symbol = new Symbol(tag.marker);
+			rows.remove(tag.marker);
+			row.solveForSymbols(leaving, tag.marker);
 			substitute(tag.marker, row);
 		}
 		
@@ -99,13 +100,13 @@ class Solver {
 	
 	public function addEditVariable(variable:Variable, strength:Float):Void {
 		if (!edits.exists(variable)) {
-			throw Error.DuplicateEditVariable;
+			throw SolverError.DuplicateEditVariable;
 		}
 		
 		strength = Strength.clip(strength);
 		
 		if (strength == Strength.required) {
-			throw Error.BadRequiredStrength;
+			throw SolverError.BadRequiredStrength;
 		}
 		
 		var constraint = new Constraint(new Expression(variable), RelationalOperator.EQ, strength);
@@ -121,11 +122,11 @@ class Solver {
 		var edit = edits.get(variable);
 		
 		if (edit == null) {
-			throw Error.UnknownEditVariable;
+			throw SolverError.UnknownEditVariable;
 		}
 		
 		removeConstraint(edit.constraint);
-		edits.remove(edit);
+		edits.remove(variable);
 	}
 	
 	public function hasEditVariable(variable:Variable):Bool {
@@ -135,7 +136,7 @@ class Solver {
 	public function suggestValue(variable:Variable, value:Float):Void {
 		var info = edits.get(variable);
 		if (info == null) {
-			throw Error.UnknownEditVariable;
+			throw SolverError.UnknownEditVariable;
 		}
 		
 		var delta:Float = value - info.constant;
@@ -165,10 +166,10 @@ class Solver {
 	}
 	
 	public function updateVariables():Void {
-		var variableIterator:Iterator<Symbol> = vars.iterator();
+		var variableIterator:Iterator<Variable> = vars.keys();
 		
 		for (variable in variableIterator) {
-			var row = rows.get(variable);
+			var row = rows.get(vars.get(variable));
 			
 			if (row == null) {
 				variable.value = 0.0;
@@ -185,7 +186,7 @@ class Solver {
 			return symbol;
 		}
 		
-		symbol = new Symbol(Symbol.EXTERNAL, idTick++);
+		symbol = new Symbol(SymbolType.External, idTick++);
 		vars[variable] = symbol;
 		return symbol;
 	}
@@ -199,9 +200,9 @@ class Solver {
 				var symbol:Symbol = getVarSymbol(term.variable);
 				var existingRow:Row = rows.get(symbol);
 				if (existingRow != null) {
-					row.insert(symbol, term.coefficient);
+					row.insertRow(existingRow, term.coefficient);
 				} else {
-					row.insert(existingRow.symbol, term.coefficient);
+					row.insertSymbol(symbol, term.coefficient);
 				}
 			}
 		}
@@ -218,7 +219,6 @@ class Solver {
 					row.insertSymbol(error, -coefficient);
 					objective.insertSymbol(error, constraint.strength);
 				}
-				break;
 			case RelationalOperator.EQ:
 				if (constraint.strength < Strength.required) {
 					var errorPlus = new Symbol(SymbolType.Error, idTick++);
@@ -232,7 +232,6 @@ class Solver {
 					tag.marker = dummy;
 					row.insertSymbol(dummy);
 				}
-				break;
 		}
 		
 		if (row.constant < 0.0) {
@@ -243,8 +242,8 @@ class Solver {
 	}
 	
 	private function chooseSubject(row:Row, tag:Tag):Symbol {
-		for (key in rows.keys()) {
-			if (rows.get(key).type == SymbolType.External) {
+		for (key in row.cells.keys()) {
+			if (key.type == SymbolType.External) {
 				return key;
 			}
 		}
@@ -255,7 +254,7 @@ class Solver {
 			}
 		}
 		
-		if (tag.other.type == SymbolType.Slack || tag.other.type == Symbol.Error) {
+		if (tag.other.type == SymbolType.Slack || tag.other.type == SymbolType.Error) {
 			return tag.other;
 		}
 		
@@ -298,6 +297,7 @@ class Solver {
 	
 	private function getDualEnteringSymbol(row:Row):Symbol {
 		// TODO
+		return new Symbol();
 	}
 	
 	private function anyPivotableSymbol(row:Row):Symbol {
@@ -313,10 +313,12 @@ class Solver {
 	private function getLeavingRow(entering:Symbol):RowMap {
 		var ratio:Float = 200000000;
 		// TODO need to return an iterator
+		return rows;
 	}
 	
 	private function getMarkerLeavingRow(marker:Symbol):RowMap {
 		// TODO need to return an iterator
+		return rows;
 	}
 	
 	private function removeConstraintEffects(constraint:Constraint, tag:Tag):Void {
@@ -337,8 +339,8 @@ class Solver {
 	}
 	
 	private function allDummies(row:Row):Bool {
-		for (cell in row.cells) {
-			if (cell.type != SymbolType.Dummy) {
+		for (key in row.cells.keys()) {
+			if (key.type != SymbolType.Dummy) {
 				return false;
 			}
 		}
@@ -346,7 +348,7 @@ class Solver {
 	}
 }
 
-@:enum abstract Error(String) {
+@:enum abstract SolverError(String) {
 	var UnsatisfiableConstraint = "The constraint cannot be satisfied.";
 	var UnknownConstraint = "The constraint has not been added to the solver.";
 	var DuplicateConstraint = "The constraint has already been added to the solver.";
@@ -357,17 +359,25 @@ class Solver {
 }
 
 private class Tag {
-	public var marker:Symbol;
-	public var other:Symbol;
+	public function new() {
+		
+	}
+	
+	public var marker:Symbol = null;
+	public var other:Symbol = null;
 }
 
 private class EditInfo {
-	public var tag:Tag;
-	public var constraint:Constraint;
-	public var constant:Float;
+	public function new() {
+		
+	}
+	
+	public var tag:Tag = null;
+	public var constraint:Constraint = null;
+	public var constant:Float = 0.0;
 }
 
-private typedef ConstraintMap = Map<Constraint, Tag>;
-private typedef RowMap = Map<Symbol, Row>;
-private typedef VarMap = Map<Variable, Symbol>;
-private typedef EditMap = Map<Variable, EditInfo>;
+typedef ConstraintMap = Map<Constraint, Tag>;
+typedef RowMap = Map<Symbol, Row>;
+typedef VarMap = Map<Variable, Symbol>;
+typedef EditMap = Map<Variable, EditInfo>;

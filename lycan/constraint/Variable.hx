@@ -1,8 +1,8 @@
-package constraint;
+package lycan.constraint;
 
 class Variable {
-	public var name:String(get, set);
-	public var value:Float(get, set);
+	@:isVar public var name(get, set):String;
+	@:isVar public var value(get, set):Float;
 	
 	public function new(name:String) {
 		this.name = name;
@@ -17,7 +17,7 @@ class Variable {
 		return this.name = name;
 	}
 	
-	private function get_value:Float {
+	private function get_value():Float {
 		return value;
 	}
 	

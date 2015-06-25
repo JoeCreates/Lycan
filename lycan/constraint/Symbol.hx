@@ -1,6 +1,4 @@
-package constraint;
-
-import haxe.Int64;
+package lycan.constraint;
 
 enum SymbolType {
 	Invalid;
@@ -12,9 +10,13 @@ enum SymbolType {
 
 class Symbol {
 	public var type(get, null):SymbolType;
-	public var id(get, null):Int64;
+	public var id(get, null):Int;
 	
-	public function new(?type:SymbolType = Invalid, ?id:Int64 = 0) {
+	public function new(?type:SymbolType, ?id:Int = 0) {
+		if (type == null) {
+			type = SymbolType.Invalid;
+		}
+		
 		this.type = type;
 		this.id = id;
 	}
@@ -23,7 +25,7 @@ class Symbol {
 		return type;
 	}
 	
-	private function get_id():Int64 {
+	private function get_id():Int {
 		return id;
 	}
 }

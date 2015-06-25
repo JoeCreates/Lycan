@@ -1,4 +1,4 @@
-package constraint;
+package lycan.constraint;
 
 class Symbolics {
 	// TODO need a nice way to handle this without having any overloading

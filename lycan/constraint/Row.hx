@@ -1,4 +1,4 @@
-package constraint;
+package lycan.constraint;
 
 typedef CellMap = Map<Symbol, Float>;
 
@@ -71,7 +71,7 @@ class Row {
 	
 	public function solveForSymbols(lhs:Symbol, rhs:Symbol):Void {
 		insertSymbol(lhs, -1.0);
-		solveFor(rhs);
+		solveForSymbol(rhs);
 	}
 	
 	public function coefficientFor(symbol:Symbol):Float {
@@ -83,10 +83,10 @@ class Row {
 	}
 	
 	public function substitute(symbol:Symbol, row:Row):Void {
-		var cell = cells.find(symbol);
+		var cell:Float = cells.get(symbol);
 		if (cell != null) {
 			var coefficient:Float = cell;
-			cells.remove(cell);
+			cells.remove(symbol);
 			insertRow(row, coefficient);
 		}
 	}

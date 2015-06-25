@@ -1,4 +1,4 @@
-package constraint;
+package lycan.constraint;
 
 class Term {
 	public var value(get, null):Float;
@@ -11,7 +11,7 @@ class Term {
 	}
 	
 	private function get_value():Float {
-		return variable.value() * coefficient;
+		return variable.value * coefficient;
 	}
 	
 	private function get_variable():Variable {

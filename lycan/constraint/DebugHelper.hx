@@ -1,28 +1,34 @@
-package constraint;
+package lycan.constraint;
 
+import lycan.constraint.Constraint.RelationalOperator;
+import lycan.constraint.Solver.ConstraintMap;
+import lycan.constraint.Solver.EditMap;
+import lycan.constraint.Solver.RowMap;
+import lycan.constraint.Solver.VarMap;
 import openfl.Vector;
 
+@:access(lycan.constraint.Solver)
 class DebugHelper {
 	public static inline function dumpSolverState(solver:Solver):Void {
 		trace("Objective");
 		printSpacer();
-		trace(dumpRow(solver.objective));
+		dumpRow(solver.objective);
 		printSpacer();
 		trace("Tableau");
 		printSpacer();
-		trace(dumpRows(solver.rows));
+		dumpRows(solver.rows);
 		printSpacer();
 		trace("Infeasible");
 		printSpacer();
-		trace(dumpRowMap(solver.infeasibleRows));
+		dumpSymbols(solver.infeasibleRows);
 		printSpacer();
 		trace("Variables");
 		printSpacer();
-		trace(dumpVars(solver.vars));
+		dumpVars(solver.vars);
 		printSpacer();
 		trace("Constraints");
 		printSpacer();
-		trace(dumpConstraints(solver.constraints));
+		dumpConstraints(solver.constraints);
 		printSpacer();
 	}
 	
@@ -38,7 +44,7 @@ class DebugHelper {
 		
 	}
 	
-	public static inline function dumpConstraints(constraints:ConstantMap):Void {
+	public static inline function dumpConstraints(constraints:ConstraintMap):Void {
 		
 	}
 	
@@ -55,24 +61,21 @@ class DebugHelper {
 	}
 	
 	public static inline function dumpConstraint(constraint:Constraint):Void {
-		for (term in constraint.expression) {
-			trace(term.coefficient + " * " + term.variable.name " + ";
+		for (term in constraint.expression.terms) {
+			trace(term.coefficient + " * " + term.variable.name + " + ");
 		}
 		trace(constraint.expression.constant);
 		
 		switch(constraint.operator) {
-			case OP_LE:
+			case RelationalOperator.LE:
 				trace(" <= 0 ");
-				break;
-			case OP_GE:
+			case RelationalOperator.GE:
 				trace(" >= 0 ");
-				break;
-			case OP_EQ:
+			case RelationalOperator.EQ:
 				trace(" == 0 ");
-				break;
 		}
 		
-		trace(" | strength = " constraint.strength);
+		trace(" | strength = " + constraint.strength);
 	}
 	
 	private static inline function printSpacer():Void {
