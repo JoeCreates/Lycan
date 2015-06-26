@@ -11,89 +11,128 @@ import openfl.Vector;
 class DebugHelper {
 	public static inline function dumpSolverState(solver:Solver):Void {
 		trace("Objective");
-		printSpacer();
-		dumpRow(solver.objective);
+		trace(spacer());
+		trace(dumpRow(solver.objective));
 		trace("Tableau");
-		printSpacer();
-		dumpRows(solver.rows);
+		trace(spacer());
+		trace(dumpRows(solver.rows));
 		trace("Infeasible");
-		printSpacer();
-		dumpSymbols(solver.infeasibleRows);
+		trace(spacer());
+		trace(dumpSymbols(solver.infeasibleRows));
 		trace("Variables");
-		printSpacer();
-		dumpVars(solver.vars);
+		trace(spacer());
+		trace(dumpVars(solver.vars));
 		trace("Constraints");
-		printSpacer();
-		dumpConstraints(solver.constraints);
+		trace(spacer());
+		trace(dumpConstraints(solver.constraints));
 	}
 	
-	public static inline function dumpRows(rows:RowMap):Void {
+	public static inline function dumpRows(rows:RowMap):String {
+		var dump:String = "";
+		
 		for (key in rows.keys()) {
-			dumpSymbol(key);
-			trace(" | ");
-			dumpRow(rows.get(key));
+			dump += dumpSymbol(key);
+			dump += " | ";
+			dump += dumpRow(rows.get(key));
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpSymbols(symbols:Vector<Symbol>):Void {
+	public static inline function dumpSymbols(symbols:Vector<Symbol>):String {
+		var dump:String = "";
+		
 		for (symbol in symbols) {
-			dumpSymbol(symbol);
-			trace("\n");
+			dump += dumpSymbol(symbol);
+			dump += "\n";
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpVars(vars:VarMap):Void {
+	public static inline function dumpVars(vars:VarMap):String {
+		var dump:String = "";
+		
 		for (key in vars.keys()) {
-			trace(key.name + " = ");
-			dumpSymbol(vars.get(key));
-			trace("\n");
+			dump += key.name + " = ";
+			dump += dumpSymbol(vars.get(key));
+			dump += "\n";
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpConstraints(constraints:ConstraintMap):Void {
+	public static inline function dumpConstraints(constraints:ConstraintMap):String {
+		var dump:String = "";
+		
 		for (key in constraints.keys()) {
-			dumpConstraint(key);
+			dump += dumpConstraint(key);
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpEdits(edits:EditMap):Void {
+	public static inline function dumpEdits(edits:EditMap):String {
+		var dump:String = "";
+		
 		for (key in edits.keys()) {
-			trace(key.name);
-			trace("\n");
+			dump += key.name;
+			dump += "\n";
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpRow(row:Row):Void {
-		trace(row.constant);
+	public static inline function dumpRow(row:Row):String {
+		if (row == null) {
+			return "null row";
+		}
+		
+		var dump:String = "";
+		dump += Std.string(row.constant);
 		for (key in row.cells.keys()) {
-			trace(" + " + row.cells.get(key) + " * ");
-			dumpSymbol(key);
+			dump += (" + " + row.cells.get(key) + " * ");
+			dump += dumpSymbol(key);
 		}
+		
+		return dump;
 	}
 	
-	public static inline function dumpSymbol(symbol:Symbol):Void {
-		trace(Std.string(symbol.type) + symbol.id);
+	public static inline function dumpSymbol(symbol:Symbol):String {
+		if (symbol == null) {
+			return "null symbol";
+		}
+		
+		return (Std.string(symbol.type) + symbol.id);
 	}
 	
-	public static inline function dumpConstraint(constraint:Constraint):Void {
+	public static inline function dumpConstraint(constraint:Constraint):String {
+		if (constraint == null) {
+			return "null constraint";
+		}
+		
+		var dump:String = "";
+		
 		for (term in constraint.expression.terms) {
-			trace(term.coefficient + " * " + term.variable.name + " + ");
+			dump = (term.coefficient + " * " + term.variable.name + " + ");
 		}
-		trace(constraint.expression.constant);
+		dump += Std.string(constraint.expression.constant);
 		
 		switch(constraint.operator) {
 			case RelationalOperator.LE:
-				trace(" <= 0 ");
+				dump += " <= 0 ";
 			case RelationalOperator.GE:
-				trace(" >= 0 ");
+				dump += " >= 0 ";
 			case RelationalOperator.EQ:
-				trace(" == 0 ");
+				dump += " == 0 ";
 		}
 		
-		trace(" | strength = " + constraint.strength);
+		dump += (" | strength = " + constraint.strength);
+		
+		return dump;
 	}
 	
-	private static inline function printSpacer():Void {
-		trace("\n ---------- \n");
+	private static inline function spacer():String {
+		return new String("----------");
 	}
 }
