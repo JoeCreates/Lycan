@@ -10,21 +10,31 @@ import openfl.Vector;
 @:access(lycan.constraint.Solver)
 class DebugHelper {
 	public static inline function dumpSolverState(solver:Solver):Void {
-		trace("Objective");
-		trace(spacer());
-		trace(dumpRow(solver.objective));
-		trace("Tableau");
-		trace(spacer());
-		trace(dumpRows(solver.rows));
-		trace("Infeasible");
-		trace(spacer());
-		trace(dumpSymbols(solver.infeasibleRows));
-		trace("Variables");
-		trace(spacer());
-		trace(dumpVars(solver.vars));
-		trace("Constraints");
-		trace(spacer());
-		trace(dumpConstraints(solver.constraints));
+		traceHelper(spacer());
+		traceHelper("Objective");
+		traceHelper(dumpRow(solver.objective));
+		traceHelper(spacer());
+		traceHelper("Tableau");
+		traceHelper(dumpRows(solver.rows));
+		traceHelper(spacer());
+		traceHelper("Infeasible");
+		traceHelper(dumpSymbols(solver.infeasibleRows));
+		traceHelper(spacer());
+		traceHelper("Variables");
+		traceHelper(dumpVars(solver.vars));
+		traceHelper(spacer());
+		traceHelper("Constraints");
+		traceHelper(dumpConstraints(solver.constraints));
+		traceHelper(spacer());
+	}
+	
+	private static inline function traceHelper(str:String):Void {
+		if (str == null || StringTools.trim(str).length == 0) {
+			trace("NONE");
+			return;
+		}
+		
+		trace(str);
 	}
 	
 	public static inline function dumpRows(rows:RowMap):String {

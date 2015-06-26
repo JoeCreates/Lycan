@@ -7,7 +7,7 @@ class Expression {
 	public var constant(get, null):Float;
 	public var value(get, never):Float;
 	
-	public function new(?terms:Vector<Term>, ?constant:Float = 0.0) {
+	public function new(?terms:Vector<Term>, constant:Float = 0.0) {
 		this.terms = terms;
 		this.constant = constant;
 	}
@@ -26,5 +26,9 @@ class Expression {
 			result += term.value;
 		}
 		return result;
+	}
+	
+	private function isConstant():Bool {
+		return terms.length == 0;
 	}
 }
