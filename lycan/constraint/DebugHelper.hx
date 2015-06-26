@@ -13,51 +13,66 @@ class DebugHelper {
 		trace("Objective");
 		printSpacer();
 		dumpRow(solver.objective);
-		printSpacer();
 		trace("Tableau");
 		printSpacer();
 		dumpRows(solver.rows);
-		printSpacer();
 		trace("Infeasible");
 		printSpacer();
 		dumpSymbols(solver.infeasibleRows);
-		printSpacer();
 		trace("Variables");
 		printSpacer();
 		dumpVars(solver.vars);
-		printSpacer();
 		trace("Constraints");
 		printSpacer();
 		dumpConstraints(solver.constraints);
-		printSpacer();
 	}
 	
 	public static inline function dumpRows(rows:RowMap):Void {
-		
+		for (key in rows.keys()) {
+			dumpSymbol(key);
+			trace(" | ");
+			dumpRow(rows.get(key));
+		}
 	}
 	
 	public static inline function dumpSymbols(symbols:Vector<Symbol>):Void {
-		
+		for (symbol in symbols) {
+			dumpSymbol(symbol);
+			trace("\n");
+		}
 	}
 	
 	public static inline function dumpVars(vars:VarMap):Void {
-		
+		for (key in vars.keys()) {
+			trace(key.name + " = ");
+			dumpSymbol(vars.get(key));
+			trace("\n");
+		}
 	}
 	
 	public static inline function dumpConstraints(constraints:ConstraintMap):Void {
-		
+		for (key in constraints.keys()) {
+			dumpConstraint(key);
+		}
 	}
 	
 	public static inline function dumpEdits(edits:EditMap):Void {
-		
+		for (key in edits.keys()) {
+			trace(key.name);
+			trace("\n");
+		}
 	}
 	
 	public static inline function dumpRow(row:Row):Void {
-		
+		trace(row.constant);
+		for (key in row.cells.keys()) {
+			trace(" + " + row.cells.get(key) + " * ");
+			dumpSymbol(key);
+		}
 	}
 	
 	public static inline function dumpSymbol(symbol:Symbol):Void {
-		trace(Std.string(symbol.type) + symbol.id);		
+		trace(Std.string(symbol.type) + symbol.id);
 	}
 	
 	public static inline function dumpConstraint(constraint:Constraint):Void {

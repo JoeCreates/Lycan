@@ -2,10 +2,10 @@ package lycan.constraint;
 
 import openfl.Vector;
 
-@:enum abstract RelationalOperator(Int) {
-	var LE = -1;
-	var EQ = 0;
-	var GE = 1;
+@:enum abstract RelationalOperator(String) {
+	var LE = "<=";
+	var EQ = "==";
+	var GE = ">=";
 }
 
 class Constraint {
@@ -13,7 +13,7 @@ class Constraint {
 	public var operator(get, null):RelationalOperator;
 	public var strength(get, null):Float;
 	
-	public function new(expression:Expression, operator:RelationalOperator, ?strength:Float) {
+	public function new(expression:Expression, operator:RelationalOperator, ?strength:Null<Float>) {
 		if (strength == null) {
 			strength = Strength.required;
 		}

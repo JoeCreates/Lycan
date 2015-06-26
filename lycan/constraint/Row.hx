@@ -6,9 +6,18 @@ class Row {
 	public var constant(get, null):Float;
 	public var cells(get, null):CellMap;
 	
-	public function new(?constant:Float = 0.0) {
+	public function new(constant:Float = 0.0) {
 		this.cells = new CellMap();
 		this.constant = constant;
+	}
+	
+	public function deepCopy():Row {
+		var row = new Row();
+		row.constant = this.constant;
+		for (key in cells.keys()) {
+			row.cells.set(key, cells.get(key));
+		}
+		return row;
 	}
 	
 	public function add(value:Float):Float {
@@ -21,7 +30,7 @@ class Row {
 		if (cell == null) {
 			cells.set(symbol, coefficient);
 		} else {
-			if (Util.nearZero(cells.get(symbol) += coefficient)) {
+			if (Util.nearZero(cells[symbol] += coefficient)) {
 				cells.remove(symbol);
 			}
 		}
@@ -32,13 +41,13 @@ class Row {
 		
 		var keys:Iterator<Symbol> = row.cells.keys();
 		for (key in keys) {
-			var cell:Float = cells.get(key);
+			var cell:Null<Float> = cells.get(key);
 			if (cell != null) {
 				var coeff:Float = cell * coefficient;
 				if (cell == null) {
 					cells.set(key, coefficient);
 				} else {
-					if (Util.nearZero(cells.get(key) += coeff)) {
+					if (Util.nearZero(cells[key] += coeff)) {
 						cells.remove(key);
 					}
 				}
@@ -83,7 +92,7 @@ class Row {
 	}
 	
 	public function substitute(symbol:Symbol, row:Row):Void {
-		var cell:Float = cells.get(symbol);
+		var cell:Null<Float> = cells.get(symbol);
 		if (cell != null) {
 			var coefficient:Float = cell;
 			cells.remove(symbol);

@@ -1,7 +1,7 @@
-package lycan.constraint;
+package lycan.constraint.frontend;
 
 class Symbolics {
-	// TODO need a nice way to handle this without having any overloading
+	// TODO need a nice way to handle this without overloading available
 	
 	inline public static function mul(variable:Variable, coefficient:Float):Term {
 		return new Term(variable, coefficient);

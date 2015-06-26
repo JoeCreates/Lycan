@@ -1,12 +1,13 @@
 package lycan.constraint;
 
-import haxe.Int64;
 import lycan.constraint.Constraint.RelationalOperator;
 import lycan.constraint.Solver.SolverError;
 import lycan.constraint.Symbol.SymbolType;
 import openfl.Vector;
 
 class Solver {
+	// TODO ObjectMap use object references as keys, which might be a problem?
+	// TODO Haxe maps don't have key,value pair iteration, which makes this implementation less 1:1 and way more inefficient currently
 	private var constraints:ConstraintMap;
 	private var rows:RowMap;
 	private var vars:VarMap;
@@ -25,7 +26,7 @@ class Solver {
 		constraints = new ConstraintMap();
 		vars = new VarMap();
 		edits = new EditMap();
-		infeasibleRows.splice(0, infeasibleRows.length);
+		infeasibleRows = new Vector<Symbol>();
 		objective = new Row();
 		artificial = new Row();
 		idTick = 1;
@@ -85,7 +86,7 @@ class Solver {
 				throw SolverError.InternalSolverError;
 			}
 			
-			var leaving:Symbol = new Symbol(tag.marker);
+			var leaving:Symbol = tag.marker;
 			rows.remove(tag.marker);
 			row.solveForSymbols(leaving, tag.marker);
 			substitute(tag.marker, row);
@@ -99,7 +100,7 @@ class Solver {
 	}
 	
 	public function addEditVariable(variable:Variable, strength:Float):Void {
-		if (!edits.exists(variable)) {
+		if (edits.exists(variable)) {
 			throw SolverError.DuplicateEditVariable;
 		}
 		
@@ -109,7 +110,9 @@ class Solver {
 			throw SolverError.BadRequiredStrength;
 		}
 		
-		var constraint = new Constraint(new Expression(variable), RelationalOperator.EQ, strength);
+		var terms = new Vector<Term>();
+		terms.push(new Term(variable)); // TODO check the original code, why did it work there?
+		var constraint = new Constraint(new Expression(terms), RelationalOperator.EQ, strength);
 		addConstraint(constraint);
 		var info = new EditInfo();
 		info.constant = 0.0;
@@ -157,12 +160,18 @@ class Solver {
 			if (row.add(delta) < 0.0) {
 				infeasibleRows.push(symbol);
 			}
+			return;
 		}
 		
-		// TODO
+		for (key in rows.keys()) {
+			var current_row:Row = rows.get(key);
+			var coefficient:Float = current_row.coefficientFor(info.tag.marker);
+			if (coefficient != 0.0 && current_row.add(delta * coefficient) < 0.0 && key.type != SymbolType.External) {
+				infeasibleRows.push(key);
+			}
+		}
 		
-		// TODO
-		// dualOptimize();
+		dualOptimize();
 	}
 	
 	public function updateVariables():Void {
@@ -262,13 +271,60 @@ class Solver {
 	}
 	
 	private function addWithArtificialVariable(row:Row):Bool {
-		var artificial = new Symbol(SymbolType.Slack, idTick++);
-		// TODO row deep copy
-		return false;
+		var art = new Symbol(SymbolType.Slack, idTick++);
+		rows.set(art, row.deepCopy());
+		this.artificial = row.deepCopy();
+		
+		optimize(this.artificial);
+		var success:Bool = Util.nearZero(this.artificial.constant);
+		this.artificial = row.deepCopy(); // TODO probably wrong here
+		
+		var row:Row = null;
+		for (key in rows.keys()) {
+			if (key == art) {
+				row = rows.get(key);
+				break;
+			}
+		}
+		
+		if (row != null) {
+			for (key in rows.keys()) {
+				if (rows.get(key) == row) {
+					rows.remove(key);
+				}
+				if (Lambda.count(row.cells) == 0) {
+					return success;
+				}
+				var entering:Symbol = anyPivotableSymbol(row);
+				if (entering.type == SymbolType.Invalid) {
+					return false;
+				}
+				row.solveForSymbols(art, entering);
+				substitute(entering, row);
+				rows.set(entering, row);
+			}
+		}
+		
+		for (row in rows) {
+			row.remove(art);
+		}
+		objective.remove(art);
+		return success;
 	}
 	
 	private function substitute(symbol:Symbol, row:Row):Void {
-		// TODO
+		for (key in rows.keys()) {
+			var current_row:Row = rows.get(key);
+			current_row.substitute(symbol, row);
+			if (key.type != SymbolType.External && current_row.constant < 0.0) {
+				infeasibleRows.push(key);
+			}
+		}
+		
+		objective.substitute(symbol, row);
+		if (artificial != null) {
+			artificial.substitute(symbol, row);
+		}
 	}
 	
 	private function optimize(objective:Row):Void {
@@ -277,12 +333,38 @@ class Solver {
 			if (entering.type == SymbolType.Invalid) {
 				return;
 			}
-			// TODO
+			var leavingRow:Row = getLeavingRow(entering);
+			if (leavingRow == null) {
+				throw SolverError.InternalSolverError;
+			}
+			var leaving:Symbol = null;
+			for (key in rows.keys()) {
+				if (rows.get(key) == leavingRow) {
+					leaving= key;
+				}
+			}
+			rows.remove(leaving);
+			leavingRow.solveForSymbols(leaving, entering);
+			substitute(entering, leavingRow);
+			rows.set(entering, leavingRow);
 		}
 	}
 	
 	private function dualOptimize():Void {
-		// TODO
+		while (infeasibleRows.length > 0) {
+			var leaving:Symbol = infeasibleRows.pop();
+			var row:Row = rows.get(leaving);
+			if (row != null && row.constant < 0.0) {
+				var entering:Symbol = getDualEnteringSymbol(row);
+				if (entering.type == SymbolType.Invalid) {
+					throw SolverError.InternalSolverError;
+				}
+				rows.remove(entering);
+				row.solveForSymbols(leaving, entering);
+				substitute(entering, row);
+				rows.set(entering, row);
+			}
+		}
 	}
 	
 	private function getEnteringSymbol(objective:Row):Symbol {
@@ -296,8 +378,22 @@ class Solver {
 	}
 	
 	private function getDualEnteringSymbol(row:Row):Symbol {
-		// TODO
-		return new Symbol();
+		var entering = new Symbol();
+		var ratio:Float = 200000000.0; // TODO float max
+		for (key in row.cells.keys()) {
+			if (key.type != SymbolType.Dummy) {
+				var current_cell:Float = row.cells.get(key);
+				if (current_cell > 0.0) {
+					var coefficient:Float = objective.coefficientFor(key);
+					var r:Float = coefficient / current_cell;
+					if (r < ratio) {
+						ratio = r;
+						entering = key;
+					}
+				}
+			}
+		}
+		return entering;
 	}
 	
 	private function anyPivotableSymbol(row:Row):Symbol {
@@ -310,15 +406,65 @@ class Solver {
 		return new Symbol();
 	}
 	
-	private function getLeavingRow(entering:Symbol):RowMap {
+	private function getLeavingRow(entering:Symbol):Row {
 		var ratio:Float = 200000000;
-		// TODO need to return an iterator
-		return rows;
+		
+		var row:Row = null;
+		for (key in rows.keys()) {
+			if (key.type != SymbolType.External) {
+				var candidateRow:Row = rows.get(key);
+				var temp = candidateRow.coefficientFor(entering);
+				if (temp < 0.0) {
+					var temp_ratio = ( -candidateRow.constant / temp);
+					if (temp_ratio < ratio) {
+						ratio = temp_ratio;
+						row = candidateRow;
+					}
+				}
+			}
+		}
+		
+		return row;
 	}
 	
-	private function getMarkerLeavingRow(marker:Symbol):RowMap {
-		// TODO need to return an iterator
-		return rows;
+	private function getMarkerLeavingRow(marker:Symbol):Row {
+		var fmax:Float = 200000000; // TODO need float max
+		var r1:Float = fmax;
+		var r2:Float = fmax;
+		
+		var first:Row = null;
+		var second:Row = null;
+		var third:Row = null;
+		
+		for (key in rows.keys()) {
+			var candidateRow:Row = rows.get(key);
+			var c:Float = candidateRow.coefficientFor(marker);
+			if (c == 0.0) {
+				continue;
+			}
+			if (key.type == SymbolType.External) {
+				third = candidateRow;
+			} else if (c < 0.0) {
+				var r:Float = -(candidateRow.constant / c);
+				if (r < r1) {
+					r1 = r;
+					first = candidateRow;
+				}
+			} else {
+				var r:Float = candidateRow.constant / c;
+				if (r < r2) {
+					r2 = r;
+					second = candidateRow;
+				}
+			}
+		}
+		if (first != null) {
+			return first;
+		}
+		if (second != null) {
+			return second;
+		}
+		return third;
 	}
 	
 	private function removeConstraintEffects(constraint:Constraint, tag:Tag):Void {
