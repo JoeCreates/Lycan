@@ -12,7 +12,7 @@ enum UnprioritizedBehaviourHandlingMode {
 
 // AI for an NPC
 class Brain {
-	public var signal_behaviourChanged = new Signal1<Node>(); // Attach to this to handle a change in the behaviour
+	public var signal_behaviourChanged = new Signal1<Node>(); // Attach to this to listen for changes in behaviour
 	
 	private var activeBehaviours = new List<Node>(); // TODO prefer a set, not a list - there's no inherent ordering to active behaviours
 	private var behaviourPriorityWeights:StringMap<Float>; // Maps named behaviours to this brain's priorities

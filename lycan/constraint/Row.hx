@@ -24,44 +24,34 @@ class Row {
 	}
 	
 	public function insertSymbol(symbol:Symbol, ?coefficient:Float = 1.0):Void {
-		var cell = cells.get(symbol);
+		var existingCoefficient:Null<Float> = cells.get(symbol);
+		if (existingCoefficient != null) {
+			coefficient += existingCoefficient;
+		}
 		
-		if (cell == null) {
-			cells.set(symbol, coefficient);
+		if (Util.nearZero(coefficient)) {
+			cells.remove(symbol);
 		} else {
-			if (Util.nearZero(cells[symbol] += coefficient)) {
-				cells.remove(symbol);
-			}
+			cells.set(symbol, coefficient);
 		}
 	}
 	
-	public function insertRow(row:Row, ?coefficient:Float = 1.0):Void {
+	public function insertRow(row:Row, ?coefficient:Float = 0.0):Void {
+		// TODO java kiwi and original kiwi differ here
 		constant += row.constant * coefficient;
 		
-		var keys:Iterator<Symbol> = row.cells.keys();
-		for (key in keys) {
-			var cell:Null<Float> = cells.get(key);
-			if (cell != null) {
-				var coeff:Float = cell * coefficient;
-				if (cell == null) {
-					cells.set(key, coefficient);
-				} else {
-					if (Util.nearZero(cells[key] += coeff)) {
-						cells.remove(key);
-					}
-				}
-			}
+		for (key in row.cells.keys()) {
+			var coeff:Float = row.cells.get(key) * coefficient;
+			insertSymbol(key, coeff);
 		}
 	}
 	
 	public function remove(symbol:Symbol):Void {
 		var removed = cells.remove(symbol);
-		Sure.sure(removed);
 	}
 	
 	public function reverseSign():Void {
 		constant = -constant;
-		
 		for (cell in cells) {
 			cell = -cell;
 		}
@@ -83,11 +73,12 @@ class Row {
 	}
 	
 	public function coefficientFor(symbol:Symbol):Float {
-		var cell = cells.get(symbol);
+		var cell:Null<Float> = cells.get(symbol);
 		if (cell == null) {
 			return 0;
+		} else {
+			return cell;
 		}
-		return cell;
 	}
 	
 	public function substitute(symbol:Symbol, row:Row):Void {

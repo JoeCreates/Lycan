@@ -45,7 +45,6 @@ class DebugHelper {
 			dump += " | ";
 			dump += dumpRow(rows.get(key));
 		}
-		
 		return dump;
 	}
 	
@@ -53,10 +52,9 @@ class DebugHelper {
 		var dump:String = "";
 		
 		for (symbol in symbols) {
-			dump += dumpSymbol(symbol);
 			dump += "\n";
+			dump += dumpSymbol(symbol);
 		}
-		
 		return dump;
 	}
 	
@@ -64,11 +62,10 @@ class DebugHelper {
 		var dump:String = "";
 		
 		for (key in vars.keys()) {
+			dump += "\n";
 			dump += key.name + " = ";
 			dump += dumpSymbol(vars.get(key));
-			dump += "\n";
 		}
-		
 		return dump;
 	}
 	
@@ -76,9 +73,9 @@ class DebugHelper {
 		var dump:String = "";
 		
 		for (key in constraints.keys()) {
+			dump += "\n";
 			dump += dumpConstraint(key);
 		}
-		
 		return dump;
 	}
 	
@@ -89,7 +86,6 @@ class DebugHelper {
 			dump += key.name;
 			dump += "\n";
 		}
-		
 		return dump;
 	}
 	
@@ -137,7 +133,18 @@ class DebugHelper {
 				dump += " == 0 ";
 		}
 		
-		dump += (" | strength = " + constraint.strength);
+		dump += (" | strength = ");
+		if (constraint.strength == Strength.required) {
+			dump += "REQUIRED";
+		} else if (constraint.strength == Strength.strong) {
+			dump += "STRONG";
+		} else if (constraint.strength == Strength.medium) {
+			dump += "MEDIUM";
+		} else if (constraint.strength == Strength.weak) {
+			dump += "WEAK";
+		} else {
+			dump += constraint.strength;
+		}
 		
 		return dump;
 	}

@@ -6,6 +6,6 @@ class Variable {
 	
 	public function new(name:String) {
 		this.name = name;
-		this.value = 0;
+		this.value;
 	}
 }

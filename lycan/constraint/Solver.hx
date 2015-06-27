@@ -28,7 +28,7 @@ class Solver {
 		edits = new EditMap();
 		infeasibleRows = new Vector<Symbol>();
 		objective = new Row();
-		artificial = new Row();
+		artificial = null;
 		idTick = 1;
 	}
 	
@@ -56,10 +56,10 @@ class Solver {
 		} else {
 			row.solveForSymbol(subject);
 			substitute(subject, row);
-			rows[subject] = row;
+			rows.set(subject, row);
 		}
 		
-		constraints[constraint] = tag;
+		constraints.set(constraint, tag);
 		
 		optimize(objective);
 	}
@@ -175,49 +175,46 @@ class Solver {
 	}
 	
 	public function updateVariables():Void {
-		var variableIterator:Iterator<Variable> = vars.keys();
-		
-		for (variable in variableIterator) {
-			var row = rows.get(vars.get(variable));
+		for (key in vars.keys()) {
+			var row:Row = rows.get(vars.get(key));
 			
 			if (row == null) {
-				variable.value = 0.0;
+				key.value = 0.0;
 			} else {
-				variable.value = row.constant;
+				key.value = row.constant;
 			}
 		}
 	}
 	
 	private function getVarSymbol(variable:Variable):Symbol {
-		var symbol:Symbol = vars.get(variable);
-		
-		if (symbol != null) {
-			return symbol;
+		var symbol:Symbol = null;
+		if (vars.exists(variable)) {
+			symbol = vars.get(variable);
+		} else {
+			symbol = new Symbol(SymbolType.Slack, idTick++);
+			vars.set(variable, symbol);
 		}
-		
-		symbol = new Symbol(SymbolType.External, idTick++);
-		vars[variable] = symbol;
 		return symbol;
 	}
 	
 	private function createRow(constraint:Constraint, tag:Tag):Row {
-		var expression = constraint.expression;
-		var row = new Row(expression.constant);
+		var expression:Expression = constraint.expression;
+		var row:Row = new Row(expression.constant);
 		
 		for (term in expression.terms) {
 			if (!Util.nearZero(term.coefficient)) {
 				var symbol:Symbol = getVarSymbol(term.variable);
-				var existingRow:Row = rows.get(symbol);
-				if (existingRow != null) {
-					row.insertRow(existingRow, term.coefficient);
-				} else {
+				var otherRow:Row = rows.get(symbol);
+				if (otherRow == null) {
 					row.insertSymbol(symbol, term.coefficient);
+				} else {
+					row.insertRow(otherRow, term.coefficient);
 				}
 			}
 		}
 		
 		switch(constraint.operator) {
-			case RelationalOperator.LE, RelationalOperator.GE:
+			case RelationalOperator.LE, RelationalOperator.GE: {
 				var coefficient:Float = constraint.operator == RelationalOperator.LE ? 1.0 : -1.0;
 				var slack = new Symbol(SymbolType.Slack, idTick++);
 				tag.marker = slack;
@@ -228,7 +225,8 @@ class Solver {
 					row.insertSymbol(error, -coefficient);
 					objective.insertSymbol(error, constraint.strength);
 				}
-			case RelationalOperator.EQ:
+			}
+			case RelationalOperator.EQ: {
 				if (constraint.strength < Strength.required) {
 					var errorPlus = new Symbol(SymbolType.Error, idTick++);
 					var errorMinus = new Symbol(SymbolType.Error, idTick++);
@@ -236,11 +234,14 @@ class Solver {
 					tag.other = errorMinus;
 					row.insertSymbol(errorPlus, constraint.strength);
 					row.insertSymbol(errorMinus, constraint.strength);
+					objective.insertSymbol(errorPlus, constraint.strength);
+					objective.insertSymbol(errorMinus, constraint.strength);
 				} else {
 					var dummy = new Symbol(SymbolType.Dummy, idTick++);
 					tag.marker = dummy;
 					row.insertSymbol(dummy);
 				}
+			}
 		}
 		
 		if (row.constant < 0.0) {
@@ -263,8 +264,10 @@ class Solver {
 			}
 		}
 		
-		if (tag.other.type == SymbolType.Slack || tag.other.type == SymbolType.Error) {
-			return tag.other;
+		if (tag.other != null && (tag.other.type == SymbolType.Slack || tag.other.type == SymbolType.Error)) {
+			if (row.coefficientFor(tag.other) < 0.0) {
+				return tag.other;
+			}
 		}
 		
 		return new Symbol();
@@ -506,7 +509,6 @@ class Solver {
 
 private class Tag {
 	public function new() {
-		
 	}
 	
 	public var marker:Symbol = null;
@@ -515,7 +517,6 @@ private class Tag {
 
 private class EditInfo {
 	public function new() {
-		
 	}
 	
 	public var tag:Tag = null;

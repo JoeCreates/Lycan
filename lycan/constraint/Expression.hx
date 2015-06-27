@@ -28,7 +28,7 @@ class Expression {
 		return result;
 	}
 	
-	private function isConstant():Bool {
+	public function isConstant():Bool {
 		return terms.length == 0;
 	}
 }
