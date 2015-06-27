@@ -14,6 +14,8 @@ abstract AExpression(Expression) to Expression from Expression {
 }
 */
 
+// TODO add null assertions
+
 // TODO look at @:op and @:commutative, can they be used for this kind of thing
 class VariableSymbolics {
 	inline public static function multiplyByFloat(variable:Variable, coefficient:Float):Term {
@@ -275,11 +277,11 @@ class ExpressionSymbolics {
 		return new Expression(terms, first.constant + second.constant);
 	}
 	
-	inline public static function addTerm(expression:Expression, term:Term):Expression {
+	inline public static function addTerm(expression:Expression, term:Term):Expression {		
 		var terms = new Vector<Term>();
 		
 		if(expression.terms != null) {
-			terms.concat(expression.terms);
+			terms = terms.concat(expression.terms);
 		}
 		
 		terms.push(term);

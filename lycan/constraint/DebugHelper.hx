@@ -120,7 +120,11 @@ class DebugHelper {
 		var dump:String = "";
 		
 		for (term in constraint.expression.terms) {
-			dump = (term.coefficient + " * " + term.variable.name + " + ");
+			if (term.variable.name != null) {
+				dump += (term.coefficient + " * " + term.variable.name + " + ");
+			} else {
+				dump += (term.coefficient + " + ");
+			}
 		}
 		dump += Std.string(constraint.expression.constant);
 		

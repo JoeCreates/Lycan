@@ -14,6 +14,9 @@ class Constraint {
 	public var strength(get, null):Float;
 	
 	public function new(expression:Expression, operator:RelationalOperator, ?strength:Null<Float>) {
+		Sure.sure(expression != null);
+		Sure.sure(operator != null);
+		
 		if (strength == null) {
 			strength = Strength.required;
 		}
@@ -36,6 +39,8 @@ class Constraint {
 	}
 	
 	private static function reduce(expr:Expression):Expression {
+		Sure.sure(expr != null);
+		
 		var vars = new Map<Variable, Float>();
 		
 		for (term in expr.terms) {
