@@ -26,7 +26,7 @@ class Row {
 	public function insertSymbol(symbol:Symbol, ?coefficient:Float = 1.0):Void {
 		var existingCoefficient:Null<Float> = cells.get(symbol);
 		if (existingCoefficient != null) {
-			coefficient += existingCoefficient;
+			coefficient = existingCoefficient; // TODO = or +=?? kiwi-java is =
 		}
 		
 		if (Util.nearZero(coefficient)) {

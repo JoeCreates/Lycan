@@ -265,11 +265,11 @@ class ExpressionSymbolics {
 		var terms = new Vector<Term>();
 		
 		if(first.terms != null) {
-			terms.concat(first.terms);
+			terms = terms.concat(first.terms);
 		}
 		
 		if(second.terms != null) {
-			terms.concat(second.terms);
+			terms = terms.concat(second.terms);
 		}
 		
 		return new Expression(terms, first.constant + second.constant);

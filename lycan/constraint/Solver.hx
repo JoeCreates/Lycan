@@ -232,8 +232,8 @@ class Solver {
 					var errorMinus = new Symbol(SymbolType.Error, idTick++);
 					tag.marker = errorPlus;
 					tag.other = errorMinus;
-					row.insertSymbol(errorPlus, constraint.strength);
-					row.insertSymbol(errorMinus, constraint.strength);
+					row.insertSymbol(errorPlus, -1.0);
+					row.insertSymbol(errorMinus, 1.0);
 					objective.insertSymbol(errorPlus, constraint.strength);
 					objective.insertSymbol(errorMinus, constraint.strength);
 				} else {
@@ -274,44 +274,39 @@ class Solver {
 	}
 	
 	private function addWithArtificialVariable(row:Row):Bool {
-		var art = new Symbol(SymbolType.Slack, idTick++);
+		var art:Symbol = new Symbol(SymbolType.Slack, idTick++);
 		rows.set(art, row.deepCopy());
 		this.artificial = row.deepCopy();
 		
 		optimize(this.artificial);
 		var success:Bool = Util.nearZero(this.artificial.constant);
-		this.artificial = row.deepCopy(); // TODO probably wrong here
+		this.artificial = null;
 		
-		var row:Row = null;
-		for (key in rows.keys()) {
-			if (key == art) {
-				row = rows.get(key);
-				break;
-			}
-		}
-		
+		var row:Row = rows.get(art);
 		if (row != null) {
 			for (key in rows.keys()) {
 				if (rows.get(key) == row) {
 					rows.remove(key);
 				}
-				if (Lambda.count(row.cells) == 0) {
-					return success;
-				}
-				var entering:Symbol = anyPivotableSymbol(row);
-				if (entering.type == SymbolType.Invalid) {
-					return false;
-				}
-				row.solveForSymbols(art, entering);
-				substitute(entering, row);
-				rows.set(entering, row);
 			}
+			if (Lambda.count(row.cells) == 0) {
+				return success;
+			}
+			var entering:Symbol = anyPivotableSymbol(row);
+			if (entering.type == SymbolType.Invalid) {
+				return false;
+			}
+			row.solveForSymbols(art, entering);
+			substitute(entering, row);
+			rows.set(entering, row);
 		}
 		
 		for (row in rows) {
 			row.remove(art);
 		}
+		
 		objective.remove(art);
+		
 		return success;
 	}
 	
@@ -336,20 +331,28 @@ class Solver {
 			if (entering.type == SymbolType.Invalid) {
 				return;
 			}
-			var leavingRow:Row = getLeavingRow(entering);
-			if (leavingRow == null) {
+			var entry:Row = getLeavingRow(entering);
+			if (entry == null) {
 				throw SolverError.InternalSolverError;
 			}
 			var leaving:Symbol = null;
 			for (key in rows.keys()) {
-				if (rows.get(key) == leavingRow) {
-					leaving= key;
+				if (rows.get(key) == entry) {
+					leaving = key;
 				}
 			}
-			rows.remove(leaving);
-			leavingRow.solveForSymbols(leaving, entering);
-			substitute(entering, leavingRow);
-			rows.set(entering, leavingRow);
+			
+			var entryKey:Symbol = null;
+			for (key in rows.keys()) {
+				if (rows.get(key) == entry) {
+					entryKey = key;
+				}
+			}
+			
+			rows.remove(entryKey);
+			entry.solveForSymbols(leaving, entering);
+			substitute(entering, entry);
+			rows.set(entering, entry);
 		}
 	}
 	
