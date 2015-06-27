@@ -1,34 +1,74 @@
 package lycan.constraint.frontend;
 
+import haxe.ds.GenericStack;
 import lycan.constraint.Constraint.RelationalOperator;
 import lycan.constraint.Expression;
 import lycan.constraint.Solver;
 import lycan.constraint.Strength;
+import lycan.constraint.Term;
 import lycan.constraint.Variable;
 import openfl.Vector;
+import lycan.constraint.Symbolics.VariableSymbolics;
+import lycan.constraint.Symbolics.ExpressionSymbolics;
 
 // Runtime parser for strings -> constraints/expressions
 class ConstraintParser {
 	private static inline var relationalOperators:String = "-+/*^";
 	private static inline var equalityOperator:String = "==";
 	
-	private static var pattern = ~/\\s*(.*?)\\s*(<=|==|>=|[GL]?EQ)\\s*(.*?)\\s*(!(required|strong|medium|weak))?/;
+	private static var pattern = new EReg("\\s*(.*?)\\s*(<=|==|>=|[GL]?EQ)\\s*(.*?)", "");
 	
-	private static function parseConstraint(constraintString:String, ?strengthString:String = "required", variableResolver:Solver):Constraint {
-		pattern.match(constraintString);
+	public static function parseConstraint(constraintString:String, ?strengthString:String = "required", solver:Solver):Constraint {
+		var matched:Bool = pattern.match(constraintString);
 		
-		// TODO postfix -> infix
-		// TODO
-		// Get variable
-		// Get operator
-		// Resolve expression
-		// Resolve strength
+		if (!matched) {
+			throw "Failed to parse " + constraintString;
+		}
 		
-		throw "Failed to parse " + constraintString;
+		var variable:Variable = solver.resolveVariable(pattern.matched(1));
+		var relationalOperator:RelationalOperator = parseRelationalOperator(pattern.matched(2));
+		var expression:Expression = resolveExpression(pattern.matched(3), solver);
+		
+		var strength:Float = parseStrength(strengthString);
+		
+		return new Constraint(VariableSymbolics.subtractExpression(variable, expression), relationalOperator, strength);		
 	}
 	
 	private static function resolveExpression(expressionString:String, solver:Solver):Expression {
-		throw "Failed to parse " + expressionString;
+		var postFixExpression:Vector<String> = infixToPostfix(tokenizeExpression(expressionString));
+		var expressionStack = new GenericStack<Expression>();
+		
+		for (expression in postFixExpression) {
+			if (expression == "+") {
+				expressionStack.add(ExpressionSymbolics.addExpression(expressionStack.pop(), expressionStack.pop()));
+			} else if (expression == "-") {
+				var a = expressionStack.pop();
+				var b = expressionStack.pop();
+				expressionStack.add(ExpressionSymbolics.subtractExpression(b, a));
+			} else if (expression == "/") {
+				var denominator = expressionStack.pop();
+				var numerator = expressionStack.pop();
+				expressionStack.add(ExpressionSymbolics.divideByExpression(numerator, denominator));
+			} else if (expression == "*") {
+				var a = expressionStack.pop();
+				var b = expressionStack.pop();
+				expressionStack.add(ExpressionSymbolics.multiplyByExpression(a, b));
+			} else {
+				var linearExpression:Expression = solver.resolveConstant(expression);
+				if (linearExpression == null) {
+					var term = new Vector<Term>();
+					term.push(new Term(solver.resolveVariable(expression)));
+					linearExpression = new Expression(term);
+				}
+				expressionStack.add(linearExpression);
+			}
+		}
+		
+		if (expressionStack.isEmpty()) {
+			return null;
+		}
+		
+		return expressionStack.pop();
 	}
 	
 	private static function parseRelationalOperator(operatorString:String):RelationalOperator {
@@ -82,5 +122,46 @@ class ConstraintParser {
 			tokens.push(builder);
 		}
 		return tokens;
+	}
+	
+	private static function infixToPostfix(tokens:Vector<String>):Vector<String> {
+		var s = new GenericStack<Int>();
+		var postfix = new Vector<String>();
+		
+		for (token in tokens) {
+			var c:String = token.charAt(0);
+			var idx:Int = relationalOperators.indexOf(c);
+			if (idx != -1 && token.length == 1) {
+				if (s.isEmpty()) {
+					s.add(idx);
+				} else {
+					while (!s.isEmpty()) {
+						var prec2:Int = Std.int(s.first() / 2);
+						var prec1:Int = Std.int(idx / 2);
+						if (prec2 > prec1 || (prec2 == prec1 && c != "^")) {
+							postfix.push(relationalOperators.charAt(s.pop()));
+						} else {
+							break;
+						}
+					}
+					s.add(idx);
+				}
+			} else if (c == "(") {
+				s.add( -2);
+			} else if (c == ")") {
+				while (s.first() != 2) {
+					postfix.push(relationalOperators.charAt(s.pop()));
+				}
+				s.pop();
+			} else {
+				postfix.push(token);
+			}
+		}
+		
+		while (!s.isEmpty()) {
+			postfix.push(relationalOperators.charAt(s.pop()));
+		}
+		
+		return postfix;
 	}
 }

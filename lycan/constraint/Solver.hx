@@ -21,6 +21,15 @@ class Solver {
 		reset();
 	}
 	
+	// TODO
+	public function resolveVariable(name:String):Variable {
+		return new Variable(name);
+	}
+	
+	public function resolveConstant(expression:String):Expression {
+		return null; // TODO
+	}
+	
 	public function reset():Void {
 		rows = new RowMap();
 		constraints = new ConstraintMap();
