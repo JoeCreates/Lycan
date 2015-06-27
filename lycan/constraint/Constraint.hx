@@ -2,10 +2,10 @@ package lycan.constraint;
 
 import openfl.Vector;
 
-@:enum abstract RelationalOperator(String) {
-	var LE = "<=";
-	var EQ = "==";
-	var GE = ">=";
+enum RelationalOperator {
+	LE;
+	EQ;
+	GE;
 }
 
 class Constraint {

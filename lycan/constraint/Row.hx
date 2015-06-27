@@ -51,9 +51,14 @@ class Row {
 	
 	public function reverseSign():Void {
 		constant = -constant;
-		for (cell in cells) {
-			cell = -cell;
+		
+		var newCells = new CellMap(); // TODO is this really necessary?
+		for (key in cells.keys()) {
+			var value:Float = -cells.get(key);
+			newCells.set(key, value);
 		}
+		
+		this.cells = newCells;
 	}
 	
 	public function solveForSymbol(symbol:Symbol):Void {
