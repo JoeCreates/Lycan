@@ -37,9 +37,9 @@ class Solver {
 			throw SolverError.DuplicateConstraint;
 		}
 		
-		var tag = new Tag();
-		var row = createRow(constraint, tag);
-		var subject = chooseSubject(row, tag);
+		var tag:Tag = new Tag();
+		var row:Row = createRow(constraint, tag);
+		var subject:Symbol = chooseSubject(row, tag);
 		
 		if (subject.type == SymbolType.Invalid && allDummies(row)) {
 			if (!Util.nearZero(row.constant)) {

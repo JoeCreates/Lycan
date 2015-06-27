@@ -1,7 +1,6 @@
 package lycan.constraint;
 
 class Term {
-	public var value(get, null):Float;
 	public var variable(get, null):Variable;
 	public var coefficient(get, null):Float;
 	
@@ -10,7 +9,7 @@ class Term {
 		this.coefficient = coefficient;
 	}
 	
-	private function get_value():Float {
+	public function value():Float {
 		return variable.value * coefficient;
 	}
 	

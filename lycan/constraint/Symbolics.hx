@@ -4,6 +4,16 @@ import haxe.macro.Expr.Constant;
 import openfl.Vector;
 import lycan.constraint.Constraint.RelationalOperator;
 
+/*
+abstract AExpression(Expression) to Expression from Expression {
+	public function new(?terms:Vector<Term>, constant:Float = 0.0) {
+		this = new Expression(terms, constant);
+	}
+	
+	@:op(A + B) static public function add(lhs:AExpression, rhs:AExpression) { return 0; }
+}
+*/
+
 // TODO look at @:op and @:commutative, can they be used for this kind of thing
 class VariableSymbolics {
 	inline public static function multiplyByFloat(variable:Variable, coefficient:Float):Term {

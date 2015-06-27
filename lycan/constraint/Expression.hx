@@ -5,7 +5,6 @@ import openfl.Vector;
 class Expression {
 	public var terms(get, null):Vector<Term>;
 	public var constant(get, null):Float;
-	public var value(get, never):Float;
 	
 	public function new(?terms:Vector<Term>, constant:Float = 0.0) {
 		this.terms = terms;
@@ -20,10 +19,10 @@ class Expression {
 		return constant;
 	}
 	
-	private function get_value():Float {
+	public function value():Float {
 		var result = constant;
 		for (term in terms) {
-			result += term.value;
+			result += term.value();
 		}
 		return result;
 	}

@@ -37,7 +37,6 @@ class Row {
 	}
 	
 	public function insertRow(row:Row, ?coefficient:Float = 0.0):Void {
-		// TODO java kiwi and original kiwi differ here
 		constant += row.constant * coefficient;
 		
 		for (key in row.cells.keys()) {
@@ -47,7 +46,7 @@ class Row {
 	}
 	
 	public function remove(symbol:Symbol):Void {
-		var removed = cells.remove(symbol);
+		cells.remove(symbol);
 	}
 	
 	public function reverseSign():Void {
@@ -59,8 +58,7 @@ class Row {
 	
 	public function solveForSymbol(symbol:Symbol):Void {
 		var coefficient:Float = -1.0 / cells.get(symbol);
-		var removed = cells.remove(symbol);
-		Sure.sure(removed);
+		cells.remove(symbol);
 		constant *= coefficient;
 		for (cell in cells) {
 			cell *= coefficient;
