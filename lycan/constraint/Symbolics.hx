@@ -1,7 +1,5 @@
 package lycan.constraint;
 
-import haxe.macro.Expr.Constant;
-import openfl.Vector;
 import lycan.constraint.Constraint.RelationalOperator;
 
 /*
@@ -418,8 +416,4 @@ class FloatSymbolics {
 	inline public static function greaterThanOrEqualToVariable(constant:Float, variable:Variable):Constraint {
 		return VariableSymbolics.greaterThanOrEqualToFloat(variable, constant);
 	}
-}
-
-class Symbolics {
-	// TODO expression strength
 }

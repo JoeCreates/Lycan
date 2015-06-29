@@ -1,7 +1,5 @@
 package lycan.constraint;
 
-import openfl.Vector;
-
 @:enum abstract RelationalOperator(String) {
 	var LE = "<=";
 	var EQ = "==";

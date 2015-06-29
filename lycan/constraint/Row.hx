@@ -10,6 +10,7 @@ class Row {
 		this.constant = constant;
 	}
 	
+	// TODO do we really need to deep copy?
 	public function deepCopy():Row {
 		var row = new Row();
 		row.constant = this.constant;

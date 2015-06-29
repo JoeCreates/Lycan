@@ -8,6 +8,6 @@ class Variable {
 		Sure.sure(name != null);
 		
 		this.name = name;
-		this.value = 0;
+		this.value = 0.0;
 	}
 }

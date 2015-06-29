@@ -3,11 +3,11 @@ package lycan.constraint;
 import lycan.constraint.Constraint.RelationalOperator;
 import lycan.constraint.Solver.SolverError;
 import lycan.constraint.Symbol.SymbolType;
-import openfl.Vector;
 
 class Solver {
-	// TODO ObjectMap use object references as keys, which might be a problem?
-	// TODO Haxe maps don't have key,value pair iteration, which makes this implementation less 1:1 and way more inefficient currently
+	// TODO Haxe maps don't have key,value pair iteration, which makes this implementation less 1:1 and probably way more inefficient - what do?
+	private static inline var fMax:Float = 1e20;
+	
 	private var constraints:ConstraintMap;
 	private var rows:RowMap;
 	private var vars:VarMap;
@@ -22,8 +22,8 @@ class Solver {
 	}
 	
 	public function reset():Void {
-		rows = new RowMap();
 		constraints = new ConstraintMap();
+		rows = new RowMap();
 		vars = new VarMap();
 		edits = new EditMap();
 		infeasibleRows = new Array<Symbol>();
@@ -119,13 +119,10 @@ class Solver {
 		}
 		
 		var terms = new Array<Term>();
-		terms.push(new Term(variable)); // TODO check the original code, why did it work there?
+		terms.push(new Term(variable));
 		var constraint = new Constraint(new Expression(terms), RelationalOperator.EQ, strength);
 		addConstraint(constraint);
-		var info = new EditInfo();
-		info.constant = 0.0;
-		info.constraint = constraint;
-		info.tag = constraints.get(constraint);
+		var info = new EditInfo(constraint, constraints.get(constraint), 0.0);
 		edits.set(variable, info);
 	}
 	
@@ -413,7 +410,7 @@ class Solver {
 		Sure.sure(row != null);
 		
 		var entering = new Symbol();
-		var ratio:Float = 200000000.0; // TODO float max
+		var ratio:Float = fMax;
 		for (key in row.cells.keys()) {
 			if (key.type != SymbolType.Dummy) {
 				var current_cell:Float = row.cells.get(key);
@@ -445,7 +442,7 @@ class Solver {
 	private function getLeavingRow(entering:Symbol):Row {
 		Sure.sure(entering != null);
 		
-		var ratio:Float = 200000000;
+		var ratio:Float = fMax;
 		
 		var row:Row = null;
 		for (key in rows.keys()) {
@@ -468,7 +465,7 @@ class Solver {
 	private function getMarkerLeavingRow(marker:Symbol):Row {
 		Sure.sure(marker != null);
 		
-		var fmax:Float = 200000000; // TODO need float max
+		var fmax:Float = fMax;
 		var r1:Float = fmax;
 		var r2:Float = fmax;
 		
@@ -553,7 +550,7 @@ class Solver {
 private class Tag {
 	public function new() {
 		marker = new Symbol();
-		other = new Symbol(); // TODO is this necessary?
+		other = new Symbol();
 	}
 	
 	public var marker:Symbol;
@@ -561,13 +558,19 @@ private class Tag {
 }
 
 private class EditInfo {
-	public function new() {
-		tag = new Tag();
+	public function new(constraint:Constraint, tag:Tag, constant:Float) {
+		Sure.sure(constraint != null);
+		Sure.sure(tag != null);
+		Sure.sure(Math.isFinite(constant));
+		
+		this.constraint = constraint;
+		this.tag = tag;
+		this.constant = constant;
 	}
 	
-	public var constraint:Constraint = null;
+	public var constraint:Constraint;
 	public var tag:Tag;
-	public var constant:Float = 0.0;
+	public var constant:Float;
 }
 
 typedef ConstraintMap = Map<Constraint, Tag>;
