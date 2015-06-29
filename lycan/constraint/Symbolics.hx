@@ -6,7 +6,7 @@ import lycan.constraint.Constraint.RelationalOperator;
 
 /*
 abstract AExpression(Expression) to Expression from Expression {
-	public function new(?terms:Vector<Term>, constant:Float = 0.0) {
+	public function new(?terms:Array<Term>, constant:Float = 0.0) {
 		this = new Expression(terms, constant);
 	}
 	
@@ -129,7 +129,7 @@ class TermSymbolics {
 	}
 	
 	inline public static function addTerm(first:Term, second:Term):Expression {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(first);
 		terms.push(second);
 		return new Expression(terms);
@@ -140,7 +140,7 @@ class TermSymbolics {
 	}
 	
 	inline public static function addFloat(term:Term, constant:Float):Expression {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return new Expression(terms, constant);
 	}
@@ -166,19 +166,19 @@ class TermSymbolics {
 	}
 	
 	inline public static function equalsTerm(first:Term, second:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(first);
 		return ExpressionSymbolics.equalsTerm(new Expression(terms), second);
 	}
 	
 	inline public static function equalsVariable(term:Term, variable:Variable):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.equalsVariable(new Expression(terms), variable);
 	}
 	
 	inline public static function equalsFloat(term:Term, constant:Float):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.equalsFloat(new Expression(terms), constant);
 	}
@@ -188,19 +188,19 @@ class TermSymbolics {
 	}
 	
 	inline public static function lessThanOrEqualToTerm(first:Term, second:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(first);
 		return ExpressionSymbolics.lessThanOrEqualToTerm(new Expression(terms), second);
 	}
 	
 	inline public static function lessThanOrEqualToVariable(term:Term, variable:Variable):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.lessThanOrEqualToVariable(new Expression(terms), variable);
 	}
 	
 	inline public static function lessThanOrEqualToFloat(term:Term, constant:Float):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.lessThanOrEqualToFloat(new Expression(terms), constant);
 	}
@@ -210,19 +210,19 @@ class TermSymbolics {
 	}
 	
 	inline public static function greaterThanOrEqualToTerm(first:Term, second:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(first);
 		return ExpressionSymbolics.greaterThanOrEqualToTerm(new Expression(terms), second);
 	}
 	
 	inline public static function greaterThanOrEqualToVariable(term:Term, variable:Variable):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.greaterThanOrEqualToVariable(new Expression(terms), variable);
 	}
 	
 	inline public static function greaterThanOrEqualToFloat(term:Term, constant:Float):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return ExpressionSymbolics.greaterThanOrEqualToFloat(new Expression(terms), constant);
 	}
@@ -230,7 +230,7 @@ class TermSymbolics {
 
 class ExpressionSymbolics {
 	inline public static function multiplyByFloat(expression:Expression, coefficient:Float):Expression {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		for (term in expression.terms) {
 			terms.push(TermSymbolics.multiplyByFloat(term, coefficient));
 		}
@@ -264,7 +264,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function addExpression(first:Expression, second:Expression):Expression {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		
 		if(first.terms != null) {
 			terms = terms.concat(first.terms);
@@ -278,7 +278,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function addTerm(expression:Expression, term:Term):Expression {		
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		
 		if(expression.terms != null) {
 			terms = terms.concat(expression.terms);
@@ -318,7 +318,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function equalsTerm(expression:Expression, term:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return equalsExpression(expression, new Expression(terms));
 	}
@@ -328,7 +328,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function equalsFloat(expression:Expression, constant:Float):Constraint {
-		return equalsExpression(expression, new Expression(new Vector<Term>(), constant));
+		return equalsExpression(expression, new Expression(new Array<Term>(), constant));
 	}
 	
 	inline public static function lessThanOrEqualToExpression(first:Expression, second:Expression):Constraint {
@@ -336,7 +336,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function lessThanOrEqualToTerm(expression:Expression, term:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return lessThanOrEqualToExpression(expression, new Expression(terms));
 	}
@@ -346,7 +346,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function lessThanOrEqualToFloat(expression:Expression, constant:Float):Constraint {
-		return lessThanOrEqualToExpression(expression, new Expression(new Vector<Term>(), constant));
+		return lessThanOrEqualToExpression(expression, new Expression(new Array<Term>(), constant));
 	}
 	
 	inline public static function greaterThanOrEqualToExpression(first:Expression, second:Expression):Constraint {
@@ -354,7 +354,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function greaterThanOrEqualToTerm(expression:Expression, term:Term):Constraint {
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(term);
 		return greaterThanOrEqualToExpression(expression, new Expression(terms));
 	}
@@ -364,7 +364,7 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function greaterThanOrEqualToFloat(expression:Expression, constant:Float):Constraint {
-		return greaterThanOrEqualToExpression(expression, new Expression(new Vector<Term>(), constant));
+		return greaterThanOrEqualToExpression(expression, new Expression(new Array<Term>(), constant));
 	}
 }
 

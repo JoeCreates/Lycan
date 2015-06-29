@@ -4,10 +4,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import lycan.ui.events.UIEvent;
 import lycan.ui.layouts.Layout;
-import lycan.ui.layouts.SizePolicy;
-import lycan.ui.UIObject;
 import lycan.ui.renderer.IRenderItem;
-import Sure;
+import lycan.ui.UIObject;
 
 enum Direction {
 	Left;
@@ -53,15 +51,14 @@ enum GamepadFocusPolicy {
 
 class Widget extends UIObject {
 	private var graphics:Array<IRenderItem> = new Array<IRenderItem>();
-	
-	public var modal:Bool = false;
 	public var layout(default,set):Layout = null;
 	public var enabled(default, set):Bool = true;
 	public var x(default, set):Int = 0;
 	public var y(default, set):Int = 0;
 	public var width(default, set):Int = 0;
 	public var height(default, set):Int = 0;
-	public var sizePolicy:SizePolicy; // TODO
+	public var widthHint:Int = -1;
+	public var heightHint:Int = -1;
 	public var pointerTrackingPolicy:PointerTrackingPolicy = PointerTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
 	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
@@ -69,7 +66,6 @@ class Widget extends UIObject {
 	public var minHeight:Int = 0;
 	public var maxWidth:Int = 10000;
 	public var maxHeight:Int = 10000;
-	public var sizeIncrement:FlxPoint = FlxPoint.get(1, 1);
 	public var keyboardFocus:Bool = false;
 	public var gamepadFocus:Bool = false;
 	public var shown:Bool = true;

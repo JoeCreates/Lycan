@@ -1,9 +1,9 @@
 package lycan.constraint.frontend;
-import haxe.ds.HashMap;
-import haxe.ds.ObjectMap;
+
+import lycan.constraint.Expression;
 import lycan.constraint.Variable;
 
-class Resolver {
+class Resolver implements IResolver {
 	private var variables:Map<String, Variable>;
 	
 	public function new() {

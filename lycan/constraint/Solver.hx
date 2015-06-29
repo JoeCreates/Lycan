@@ -12,7 +12,7 @@ class Solver {
 	private var rows:RowMap;
 	private var vars:VarMap;
 	private var edits:EditMap;
-	private var infeasibleRows:Vector<Symbol>;
+	private var infeasibleRows:Array<Symbol>;
 	private var objective:Row;
 	private var artificial:Row;
 	private var idTick:Int;
@@ -26,13 +26,15 @@ class Solver {
 		constraints = new ConstraintMap();
 		vars = new VarMap();
 		edits = new EditMap();
-		infeasibleRows = new Vector<Symbol>();
+		infeasibleRows = new Array<Symbol>();
 		objective = new Row();
 		artificial = null;
 		idTick = 1;
 	}
 	
 	public function addConstraint(constraint:Constraint):Void {
+		Sure.sure(constraint != null);
+		
 		if (constraints.exists(constraint)) {
 			throw SolverError.DuplicateConstraint;
 		}
@@ -65,6 +67,8 @@ class Solver {
 	}
 	
 	public function removeConstraint(constraint:Constraint):Void {
+		Sure.sure(constraint != null);
+		
 		var tag:Tag = constraints.get(constraint);
 		
 		if (tag == null) {
@@ -96,10 +100,14 @@ class Solver {
 	}
 	
 	public function hasConstraint(constraint:Constraint):Bool {
+		Sure.sure(constraint != null);
+		
 		return constraints.exists(constraint);
 	}
 	
 	public function addEditVariable(variable:Variable, strength:Float):Void {
+		Sure.sure(variable != null);
+		
 		if (edits.exists(variable)) {
 			throw SolverError.DuplicateEditVariable;
 		}
@@ -110,18 +118,20 @@ class Solver {
 			throw SolverError.BadRequiredStrength;
 		}
 		
-		var terms = new Vector<Term>();
+		var terms = new Array<Term>();
 		terms.push(new Term(variable)); // TODO check the original code, why did it work there?
 		var constraint = new Constraint(new Expression(terms), RelationalOperator.EQ, strength);
 		addConstraint(constraint);
 		var info = new EditInfo();
 		info.constant = 0.0;
 		info.constraint = constraint;
-		info.tag = constraints[constraint];
-		edits[variable] = info;
+		info.tag = constraints.get(constraint);
+		edits.set(variable, info);
 	}
 	
 	public function removeEditVariable(variable:Variable):Void {
+		Sure.sure(variable != null);
+		
 		var edit = edits.get(variable);
 		
 		if (edit == null) {
@@ -133,11 +143,15 @@ class Solver {
 	}
 	
 	public function hasEditVariable(variable:Variable):Bool {
+		Sure.sure(variable != null);
+		
 		return edits.exists(variable);
 	}
 	
 	public function suggestValue(variable:Variable, value:Float):Void {
-		var info = edits.get(variable);
+		Sure.sure(variable != null);
+		
+		var info:EditInfo = edits.get(variable);
 		if (info == null) {
 			throw SolverError.UnknownEditVariable;
 		}
@@ -145,12 +159,10 @@ class Solver {
 		var delta:Float = value - info.constant;
 		info.constant = value;
 		
-		var symbol = info.tag.marker;
-		var row:Row = rows.get(symbol);
-		
+		var row:Row = rows.get(info.tag.marker);
 		if (row != null) {
 			if (row.add(-delta) < 0.0) {
-				infeasibleRows.push(symbol);
+				infeasibleRows.push(info.tag.marker);
 			}
 			return;
 		}
@@ -158,7 +170,7 @@ class Solver {
 		row = rows.get(info.tag.other);
 		if (row != null) {
 			if (row.add(delta) < 0.0) {
-				infeasibleRows.push(symbol);
+				infeasibleRows.push(info.tag.other);
 			}
 			return;
 		}
@@ -187,17 +199,21 @@ class Solver {
 	}
 	
 	private function getVarSymbol(variable:Variable):Symbol {
+		Sure.sure(variable != null);
+		
 		var symbol:Symbol = null;
 		if (vars.exists(variable)) {
 			symbol = vars.get(variable);
 		} else {
-			symbol = new Symbol(SymbolType.Slack, idTick++);
+			symbol = new Symbol(SymbolType.External, idTick++);
 			vars.set(variable, symbol);
 		}
 		return symbol;
 	}
 	
 	private function createRow(constraint:Constraint, tag:Tag):Row {
+		Sure.sure(constraint != null);
+		
 		var expression:Expression = constraint.expression;
 		var row:Row = new Row(expression.constant);
 		
@@ -252,6 +268,8 @@ class Solver {
 	}
 	
 	private function chooseSubject(row:Row, tag:Tag):Symbol {
+		Sure.sure(row != null && tag != null);
+		
 		for (key in row.cells.keys()) {
 			if (key.type == SymbolType.External) {
 				return key;
@@ -274,6 +292,8 @@ class Solver {
 	}
 	
 	private function addWithArtificialVariable(row:Row):Bool {
+		Sure.sure(row != null);
+		
 		var art:Symbol = new Symbol(SymbolType.Slack, idTick++);
 		rows.set(art, row.deepCopy());
 		this.artificial = row.deepCopy();
@@ -311,6 +331,8 @@ class Solver {
 	}
 	
 	private function substitute(symbol:Symbol, row:Row):Void {
+		Sure.sure(symbol != null && row != null);
+		
 		for (key in rows.keys()) {
 			var current_row:Row = rows.get(key);
 			current_row.substitute(symbol, row);
@@ -326,6 +348,8 @@ class Solver {
 	}
 	
 	private function optimize(objective:Row):Void {
+		Sure.sure(objective != null);
+		
 		while (true) {
 			var entering:Symbol = getEnteringSymbol(objective);
 			if (entering.type == SymbolType.Invalid) {
@@ -374,6 +398,8 @@ class Solver {
 	}
 	
 	private function getEnteringSymbol(objective:Row):Symbol {
+		Sure.sure(objective != null);
+		
 		for (key in objective.cells.keys()) {
 			if (key.type != SymbolType.Dummy && objective.cells.get(key) < 0.0) {
 				return key;
@@ -384,6 +410,8 @@ class Solver {
 	}
 	
 	private function getDualEnteringSymbol(row:Row):Symbol {
+		Sure.sure(row != null);
+		
 		var entering = new Symbol();
 		var ratio:Float = 200000000.0; // TODO float max
 		for (key in row.cells.keys()) {
@@ -403,6 +431,8 @@ class Solver {
 	}
 	
 	private function anyPivotableSymbol(row:Row):Symbol {
+		Sure.sure(row != null);
+		
 		for (symbol in row.cells.keys()) {
 			if (symbol.type == SymbolType.Slack || symbol.type == SymbolType.Error) {
 				return symbol;
@@ -413,6 +443,8 @@ class Solver {
 	}
 	
 	private function getLeavingRow(entering:Symbol):Row {
+		Sure.sure(entering != null);
+		
 		var ratio:Float = 200000000;
 		
 		var row:Row = null;
@@ -434,6 +466,8 @@ class Solver {
 	}
 	
 	private function getMarkerLeavingRow(marker:Symbol):Row {
+		Sure.sure(marker != null);
+		
 		var fmax:Float = 200000000; // TODO need float max
 		var r1:Float = fmax;
 		var r2:Float = fmax;
@@ -474,6 +508,8 @@ class Solver {
 	}
 	
 	private function removeConstraintEffects(constraint:Constraint, tag:Tag):Void {
+		Sure.sure(constraint != null && tag != null);
+		
 		if (tag.marker.type == SymbolType.Error) {
 			removeMarkerEffects(tag.marker, constraint.strength);
 		} else if (tag.other.type == SymbolType.Error) {
@@ -482,6 +518,8 @@ class Solver {
 	}
 	
 	private function removeMarkerEffects(marker:Symbol, strength:Float):Void {
+		Sure.sure(marker != null);
+		
 		var row:Row = rows.get(marker);
 		if (row != null) {
 			objective.insertRow(row, -strength);
@@ -491,6 +529,8 @@ class Solver {
 	}
 	
 	private function allDummies(row:Row):Bool {
+		Sure.sure(row != null);
+		
 		for (key in row.cells.keys()) {
 			if (key.type != SymbolType.Dummy) {
 				return false;
@@ -512,18 +552,21 @@ class Solver {
 
 private class Tag {
 	public function new() {
+		marker = new Symbol();
+		other = new Symbol(); // TODO is this necessary?
 	}
 	
-	public var marker:Symbol = null;
-	public var other:Symbol = null;
+	public var marker:Symbol;
+	public var other:Symbol;
 }
 
 private class EditInfo {
 	public function new() {
+		tag = new Tag();
 	}
 	
-	public var tag:Tag = null;
 	public var constraint:Constraint = null;
+	public var tag:Tag;
 	public var constant:Float = 0.0;
 }
 

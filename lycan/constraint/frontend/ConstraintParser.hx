@@ -17,7 +17,7 @@ class ConstraintParser {
 	private static inline var relationalOperators:String = "-+/*^";
 	private static var pattern = new EReg("\\s*(.*?)\\s*(<=|==|>=)\\s*(.*?$)", "i");
 	
-	public static function parseConstraint(constraintString:String, ?strengthString:String = "required", resolver:Resolver):Constraint {
+	public static function parseConstraint(constraintString:String, ?strengthString:String = "required", resolver:IResolver):Constraint {
 		var matched:Bool = pattern.match(constraintString);
 		
 		if (!matched) {
@@ -32,7 +32,7 @@ class ConstraintParser {
 		return new Constraint(VariableSymbolics.subtractExpression(variable, expression), relationalOperator, strength);		
 	}
 	
-	private static function resolveExpression(expressionString:String, resolver:Resolver):Expression {
+	private static function resolveExpression(expressionString:String, resolver:IResolver):Expression {
 		var postFixExpression:Vector<String> = infixToPostfix(tokenizeExpression(expressionString));
 		var expressionStack = new GenericStack<Expression>();
 		

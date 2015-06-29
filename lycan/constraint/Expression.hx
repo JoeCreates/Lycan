@@ -1,20 +1,18 @@
 package lycan.constraint;
 
-import openfl.Vector;
-
 class Expression {
-	public var terms(get, null):Vector<Term>;
+	public var terms(get, null):Array<Term>;
 	public var constant(get, null):Float;
 	
-	public function new(?terms:Vector<Term>, constant:Float = 0.0) {
+	public function new(?terms:Array<Term>, constant:Float = 0.0) {
 		if(terms == null) {
-			terms = new Vector<Term>();
+			terms = new Array<Term>();
 		}
 		this.terms = terms;
 		this.constant = constant;
 	}
 	
-	private function get_terms():Vector<Term> {
+	private function get_terms():Array<Term> {
 		return terms;
 	}
 	

@@ -20,13 +20,16 @@ class Row {
 	}
 	
 	public function add(value:Float):Float {
-		return constant += value;
+		constant += value;
+		return constant;
 	}
 	
 	public function insertSymbol(symbol:Symbol, ?coefficient:Float = 1.0):Void {
+		Sure.sure(symbol != null);
+		
 		var existingCoefficient:Null<Float> = cells.get(symbol);
 		if (existingCoefficient != null) {
-			coefficient = existingCoefficient; // TODO = or +=?? kiwi-java is =
+			coefficient = existingCoefficient; // TODO = or += ... kiwi-java is =
 		}
 		
 		if (Util.nearZero(coefficient)) {
@@ -36,7 +39,9 @@ class Row {
 		}
 	}
 	
-	public function insertRow(row:Row, ?coefficient:Float = 0.0):Void {
+	public function insertRow(row:Row, ?coefficient:Float = 1.0):Void {
+		Sure.sure(row != null);
+		
 		constant += row.constant * coefficient;
 		
 		for (key in row.cells.keys()) {
@@ -62,6 +67,8 @@ class Row {
 	}
 	
 	public function solveForSymbol(symbol:Symbol):Void {
+		Sure.sure(symbol != null);
+		
 		var coefficient:Float = -1.0 / cells.get(symbol);
 		cells.remove(symbol);
 		constant *= coefficient;
@@ -71,11 +78,15 @@ class Row {
 	}
 	
 	public function solveForSymbols(lhs:Symbol, rhs:Symbol):Void {
+		Sure.sure(lhs != null && rhs != null);
+		
 		insertSymbol(lhs, -1.0);
 		solveForSymbol(rhs);
 	}
 	
 	public function coefficientFor(symbol:Symbol):Float {
+		Sure.sure(symbol != null);
+		
 		var cell:Null<Float> = cells.get(symbol);
 		if (cell == null) {
 			return 0;
@@ -85,6 +96,8 @@ class Row {
 	}
 	
 	public function substitute(symbol:Symbol, row:Row):Void {
+		Sure.sure(symbol != null && row != null);
+		
 		var cell:Null<Float> = cells.get(symbol);
 		if (cell != null) {
 			var coefficient:Float = cell;

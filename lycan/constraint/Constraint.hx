@@ -14,8 +14,7 @@ class Constraint {
 	public var strength(get, null):Float;
 	
 	public function new(expression:Expression, operator:RelationalOperator, ?strength:Null<Float>) {
-		Sure.sure(expression != null);
-		Sure.sure(operator != null);
+		Sure.sure(expression != null && operator != null);
 		
 		if (strength == null) {
 			strength = Strength.required;
@@ -51,7 +50,7 @@ class Constraint {
 			vars.set(term.variable, value += term.coefficient);
 		}
 		
-		var reducedTerms = new Vector<Term>();
+		var reducedTerms = new Array<Term>();
 		for (variable in vars.keys()) {
 			reducedTerms.push(new Term(variable, vars.get(variable)));
 		}

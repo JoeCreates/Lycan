@@ -5,7 +5,6 @@ import lycan.constraint.Solver.ConstraintMap;
 import lycan.constraint.Solver.EditMap;
 import lycan.constraint.Solver.RowMap;
 import lycan.constraint.Solver.VarMap;
-import openfl.Vector;
 
 @:access(lycan.constraint.Solver)
 class DebugHelper {
@@ -22,6 +21,9 @@ class DebugHelper {
 		traceHelper(spacer());
 		traceHelper("Variables");
 		traceHelper(dumpVars(solver.vars));
+		traceHelper(spacer());
+		traceHelper("Edit Variables");
+		traceHelper(dumpEdits(solver.edits));
 		traceHelper(spacer());
 		traceHelper("Constraints");
 		traceHelper(dumpConstraints(solver.constraints));
@@ -41,6 +43,7 @@ class DebugHelper {
 		var dump:String = "";
 		
 		for (key in rows.keys()) {
+			dump += "\n";
 			dump += dumpSymbol(key);
 			dump += " | ";
 			dump += dumpRow(rows.get(key));
@@ -48,7 +51,7 @@ class DebugHelper {
 		return dump;
 	}
 	
-	public static inline function dumpSymbols(symbols:Vector<Symbol>):String {
+	public static inline function dumpSymbols(symbols:Array<Symbol>):String {
 		var dump:String = "";
 		
 		for (symbol in symbols) {
@@ -69,22 +72,22 @@ class DebugHelper {
 		return dump;
 	}
 	
+	public static inline function dumpEdits(edits:EditMap):String {
+		var dump:String = "";
+		
+		for (key in edits.keys()) {
+			dump += "\n";
+			dump += key.name;
+		}
+		return dump;
+	}
+	
 	public static inline function dumpConstraints(constraints:ConstraintMap):String {
 		var dump:String = "";
 		
 		for (key in constraints.keys()) {
 			dump += "\n";
 			dump += dumpConstraint(key);
-		}
-		return dump;
-	}
-	
-	public static inline function dumpEdits(edits:EditMap):String {
-		var dump:String = "";
-		
-		for (key in edits.keys()) {
-			dump += key.name;
-			dump += "\n";
 		}
 		return dump;
 	}
