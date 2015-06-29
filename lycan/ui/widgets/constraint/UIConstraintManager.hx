@@ -65,8 +65,10 @@ class UIConstraintManager {
 		var width:Variable = resolveVariable(widget, Width);
 		var height:Variable = resolveVariable(widget, Height);
 		
-		solver.addEditVariable(width, Strength.strong);
-		solver.addEditVariable(height, Strength.strong);
+		if(widget == root) {
+			solver.addEditVariable(width, Strength.strong);
+			solver.addEditVariable(height, Strength.strong);
+		}
 		
 		var left:Variable = resolveVariable(widget, Left);
 		var right:Variable = resolveVariable(widget, Right);
@@ -100,8 +102,8 @@ class UIConstraintManager {
 			//addDef(top.name + " >= " + Std.string(0));
 			//addDef(bottom.name + " <= " + Std.string(10000));
 		} else {
-			//var parentWidth:Variable = resolveVariable(cast widget.parent, Width);
-			//var parentHeight:Variable = resolveVariable(cast widget.parent, Height);
+			var parentWidth:Variable = resolveVariable(cast widget.parent, Width);
+			var parentHeight:Variable = resolveVariable(cast widget.parent, Height);
 			
 			//var parentLeft:Variable = resolveVariable(cast widget.parent, Left);
 			//var parentRight:Variable = resolveVariable(cast widget.parent, Right);
@@ -109,14 +111,14 @@ class UIConstraintManager {
 			//var parentBottom:Variable = resolveVariable(cast widget.parent, Bottom);
 			
 			if (widget.widthHint != -1) {
-				//addDef(width.name + " == " + Std.string(widget.widthHint)); // TODO take into account the widget margin and parent padding
+				//addDef(width.name + " == " + Std.string(widget.widthHint), "weak"); // TODO take into account the widget margin and parent padding
 			}
-			//addDef(width.name + " <= " + parentWidth.name);
+			addDef(width.name + " == " + parentWidth.name);
 			
 			if (widget.heightHint != -1) {
-				//addDef(height.name + " == " + Std.string(widget.heightHint));
+				//addDef(height.name + " == " + Std.string(widget.heightHint), "weak");
 			}
-			//addDef(height.name + " <= " + parentHeight.name);
+			addDef(height.name + " == " + parentHeight.name);
 			
 			//addDef(left.name + " >= " + parentLeft.name);
 			//addDef(right.name + " <= " + parentRight.name + "-" + width.name);
@@ -144,7 +146,7 @@ class UIConstraintManager {
 		ctx.context = resolver.widgetVarMap.get(widget);
 
 		if(widget.parent != null) {
-			ctx.context.concat(resolver.widgetVarMap.get(cast widget.parent));
+			ctx.context = ctx.context.concat(resolver.widgetVarMap.get(cast widget.parent));
 		}
 		
 		for (def in constraintDefs) {
@@ -171,14 +173,12 @@ class UIConstraintManager {
 		
 		var w = resolver.resolveVariable(root, Width);
 		var h = resolver.resolveVariable(root, Height);
-		solver.suggestValue(resolveVariable(root, Width), -width); // TODO why is it negated?
-		solver.suggestValue(resolveVariable(root, Height), -height);
+		solver.suggestValue(resolveVariable(root, Width), width);
+		solver.suggestValue(resolveVariable(root, Height), height);
+		trace("Suggested width: " + width + " and height: " + height);
 		
 		update();
-		
-		trace("Suggested width: " + width + " and height: " + height);
-		trace("Root has width: " + w.value + " and height: " + h.value);
-		
+
 		DebugHelper.dumpSolverState(solver);
 	}
 	
@@ -232,7 +232,6 @@ private class UIResolver {
 				}
 			}
 		}
-		
 		var v = new Variable(widget.name + constraintType);
 		variables.push(v);
 		widgetVarMap.set(widget, variables);

@@ -140,7 +140,7 @@ class DebugHelper {
 				dump += " == 0 ";
 		}
 		
-		dump += (" | strength = ");
+		dump += ("| strength = ");
 		if (constraint.strength == Strength.required) {
 			dump += "REQUIRED";
 		} else if (constraint.strength == Strength.strong) {
