@@ -13,8 +13,10 @@ import lycan.constraint.Symbolics.ExpressionSymbolics;
 
 // Adapted from Alex Birkett's kiwi-java port: https://github.com/alexbirkett/kiwi-java
 // Runtime parser for strings -> Kiwi constraints
+
+// TODO this is pretty broken
 class ConstraintParser {
-	private static inline var relationalOperators:String = "-+/*^";
+	private static inline var ops:String = "-+/*^";
 	private static var pattern = new EReg("\\s*(.*?)\\s*(<=|==|>=)\\s*(.*?$)", "i");
 	
 	public static function parseConstraint(constraintString:String, ?strengthString:String = "required", resolver:IResolver):Constraint {
@@ -33,16 +35,18 @@ class ConstraintParser {
 	}
 	
 	private static function resolveExpression(expressionString:String, resolver:IResolver):Expression {
-		var postFixExpression:Vector<String> = infixToPostfix(tokenizeExpression(expressionString));
+		var postFixExpression:Array<String> = infixToPostfix(tokenizeExpression(expressionString));
 		var expressionStack = new GenericStack<Expression>();
 		
 		for (expression in postFixExpression) {
 			if (expression == "+") {
-				expressionStack.add(ExpressionSymbolics.addExpression(expressionStack.pop(), expressionStack.pop()));
+				var a = expressionStack.pop();
+				var b = expressionStack.pop();
+				expressionStack.add(ExpressionSymbolics.addExpression(a, b));
 			} else if (expression == "-") {
 				var a = expressionStack.pop();
 				var b = expressionStack.pop();
-				expressionStack.add(ExpressionSymbolics.subtractExpression(b, a));
+				expressionStack.add(ExpressionSymbolics.subtractExpression(a, b));
 			} else if (expression == "/") {
 				var denominator = expressionStack.pop();
 				var numerator = expressionStack.pop();
@@ -54,7 +58,7 @@ class ConstraintParser {
 			} else {
 				var linearExpression:Expression = resolver.resolveConstant(StringTools.trim(expression));
 				if (linearExpression == null) {
-					var term = new Vector<Term>();
+					var term = new Array<Term>();
 					term.push(new Term(resolver.resolveVariable(StringTools.trim(expression))));
 					linearExpression = new Expression(term);
 				}
@@ -94,13 +98,17 @@ class ConstraintParser {
 			strength = Strength.weak;
 		} else {
 			strength = Std.parseFloat(strengthString);
+			
+			if (Math.isNaN(strength)) {
+				throw "Failed to parse strength string: " + strengthString;
+			}
 		}
 		
 		return strength;
 	}
 	
-	private static function tokenizeExpression(expressionString:String):Vector<String> {
-		var tokens = new Vector<String>();
+	private static function tokenizeExpression(expressionString:String):Array<String> {
+		var tokens = new Array<String>();
 		var builder:String = "";
 		var i = 0;
 		for (i in 0...expressionString.length) {
@@ -123,13 +131,13 @@ class ConstraintParser {
 		return tokens;
 	}
 	
-	private static function infixToPostfix(tokens:Vector<String>):Vector<String> {
+	private static function infixToPostfix(tokens:Array<String>):Array<String> {
 		var s = new GenericStack<Int>();
-		var postfix = new Vector<String>();
+		var postfix = new Array<String>();
 		
 		for (token in tokens) {
 			var c:String = token.charAt(0);
-			var idx:Int = relationalOperators.indexOf(c);
+			var idx:Int = ops.indexOf(c);
 			if (idx != -1 && token.length == 1) {
 				if (s.isEmpty()) {
 					s.add(idx);
@@ -138,7 +146,7 @@ class ConstraintParser {
 						var prec2:Int = Std.int(s.first() / 2);
 						var prec1:Int = Std.int(idx / 2);
 						if (prec2 > prec1 || (prec2 == prec1 && c != "^")) {
-							postfix.push(relationalOperators.charAt(s.pop()));
+							postfix.push(ops.charAt(s.pop()));
 						} else {
 							break;
 						}
@@ -146,10 +154,10 @@ class ConstraintParser {
 					s.add(idx);
 				}
 			} else if (c == "(") {
-				s.add( -2);
+				s.add(-2);
 			} else if (c == ")") {
-				while (s.first() != 2) {
-					postfix.push(relationalOperators.charAt(s.pop()));
+				while (s.first() != -2) {
+					postfix.push(ops.charAt(s.pop()));
 				}
 				s.pop();
 			} else {
@@ -158,7 +166,7 @@ class ConstraintParser {
 		}
 		
 		while (!s.isEmpty()) {
-			postfix.push(relationalOperators.charAt(s.pop()));
+			postfix.push(ops.charAt(s.pop()));
 		}
 		
 		return postfix;

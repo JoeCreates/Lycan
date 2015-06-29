@@ -7,3 +7,16 @@ class BasicTest extends TestCase {
 		
 	}
 }
+
+class InfixToPostfixTest extends TestCase {
+	public function new() {
+		
+	}
+}
+
+class ExpressionTokenizerTest extends TestCase {
+	public function new() {
+		
+	}
+}
+

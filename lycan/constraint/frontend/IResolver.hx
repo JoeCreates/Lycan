@@ -1,4 +1,4 @@
-package lycan.constraint;
+package lycan.constraint.frontend;
 
 interface IResolver {
 	public function resolveVariable(name:String):Variable;

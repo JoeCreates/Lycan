@@ -3,7 +3,7 @@ package lycan.ui.widgets.constraint;
 import lycan.constraint.Expression;
 import lycan.constraint.frontend.ConstraintParser;
 import lycan.constraint.frontend.JsonTypes.ConstraintDef;
-import lycan.constraint.IResolver;
+import lycan.constraint.frontend.IResolver;
 import lycan.constraint.Solver;
 import lycan.constraint.Strength;
 import lycan.constraint.Variable;

@@ -29,7 +29,7 @@ class Row {
 		
 		var existingCoefficient:Null<Float> = cells.get(symbol);
 		if (existingCoefficient != null) {
-			coefficient = existingCoefficient; // TODO = or += ... kiwi-java is =
+			coefficient = existingCoefficient; // TODO = or += ... kiwi-java is = ?? POTENTIAL BUG
 		}
 		
 		if (Util.nearZero(coefficient)) {
@@ -62,7 +62,6 @@ class Row {
 			var value:Float = -cells.get(key);
 			newCells.set(key, value);
 		}
-		
 		this.cells = newCells;
 	}
 	
@@ -72,9 +71,13 @@ class Row {
 		var coefficient:Float = -1.0 / cells.get(symbol);
 		cells.remove(symbol);
 		constant *= coefficient;
-		for (cell in cells) {
-			cell *= coefficient;
+		
+		var newCells = new CellMap(); // TODO is this really necessary?
+		for (key in cells.keys()) {
+			var value:Float = cells.get(key) * coefficient;
+			newCells.set(key, value);
 		}
+		this.cells = newCells;
 	}
 	
 	public function solveForSymbols(lhs:Symbol, rhs:Symbol):Void {

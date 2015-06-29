@@ -252,7 +252,9 @@ class ExpressionSymbolics {
 	}
 	
 	inline public static function divideByExpression(expression1:Expression, expression2:Expression):Expression {
-		if (expression2.isConstant()) {
+		if (expression1.isConstant()) {
+			return divideByFloat(expression2, expression1.constant);
+		} else if (expression2.isConstant()) {
 			return divideByFloat(expression1, expression2.constant);
 		} else {
 			throw "Cannot divide with non linear expression";

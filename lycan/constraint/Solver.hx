@@ -201,13 +201,13 @@ class Solver {
 	private function getVarSymbol(variable:Variable):Symbol {
 		Sure.sure(variable != null);
 		
-		var symbol:Symbol = null;
-		if (vars.exists(variable)) {
-			symbol = vars.get(variable);
-		} else {
-			symbol = new Symbol(SymbolType.External, idTick++);
-			vars.set(variable, symbol);
+		var symbol:Symbol = vars.get(variable);
+		if (symbol != null) {
+			return symbol;
 		}
+			
+		symbol = new Symbol(SymbolType.External, idTick++);
+		vars.set(variable, symbol);
 		return symbol;
 	}
 	
@@ -453,7 +453,7 @@ class Solver {
 				var candidateRow:Row = rows.get(key);
 				var temp = candidateRow.coefficientFor(entering);
 				if (temp < 0.0) {
-					var temp_ratio = ( -candidateRow.constant / temp);
+					var temp_ratio = (-candidateRow.constant / temp);
 					if (temp_ratio < ratio) {
 						ratio = temp_ratio;
 						row = candidateRow;
@@ -485,7 +485,7 @@ class Solver {
 			if (key.type == SymbolType.External) {
 				third = candidateRow;
 			} else if (c < 0.0) {
-				var r:Float = -(candidateRow.constant / c);
+				var r:Float = -candidateRow.constant / c;
 				if (r < r1) {
 					r1 = r;
 					first = candidateRow;
