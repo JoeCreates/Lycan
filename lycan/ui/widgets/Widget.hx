@@ -57,8 +57,8 @@ class Widget extends UIObject {
 	public var y(default, set):Int = 0;
 	public var width(default, set):Int = 0;
 	public var height(default, set):Int = 0;
-	public var widthHint:Int = -1;
-	public var heightHint:Int = -1;
+	public var widthHint(default, set):Int = -1;
+	public var heightHint(default, set):Int = -1;
 	public var pointerTrackingPolicy:PointerTrackingPolicy = PointerTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
 	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
@@ -79,8 +79,8 @@ class Widget extends UIObject {
 	public var marginRight:Int = 2;
 	public var marginBottom:Int = 2;
 	
-	private var hovered(default,set):Bool = false;
-	private var pressed(default,set):Bool = false;
+	private var hovered(default, set):Bool = false;
+	private var pressed(default, set):Bool = false;
 	
 	public function new(?parent:UIObject = null, ?name:String) {
 		super(parent, name);
@@ -518,7 +518,6 @@ class Widget extends UIObject {
 		return this.layout = layout;
 	}
 	
-	// TODO this is ugly, consider attaching all layouts to blank widgets rather than having an isWidgetType at all?
 	private function set_x(x:Int):Int {
 		for (child in children) {
 			if (child.isWidgetType) {
@@ -559,5 +558,13 @@ class Widget extends UIObject {
 	
 	private function set_enabled(enabled:Bool):Bool {
 		return this.enabled = enabled;
+	}
+	
+	private function set_widthHint(widthHint:Int):Int {
+		return this.widthHint = widthHint;
+	}
+	
+	private function set_heightHint(heightHint:Int):Int {
+		return this.heightHint = heightHint;
 	}
 }

@@ -1,10 +1,7 @@
-package ai;
+package lycan.ai;
 
 import haxe.ds.StringMap;
-import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
-import msignal.Signal.Signal2;
-import util.queue.PriorityQueue;
 
 enum UnprioritizedBehaviourHandlingMode {
 	IGNORE_UNWEIGHTED; // Ignore suggested behaviours that the brain doesn't have a priority for

@@ -1,40 +1,43 @@
 package lycan.ui.layouts;
+
 import lycan.ui.events.UIEvent;
-import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
 
-class Layout extends UIObject {	
-	public function new(?parent:UIObject = null, ?name:String) {
-		super(parent, name);
-		
-		#if debug
-		if(name == null) {
-			this.name = Type.getClassName(Type.getClass(this));
-		}
-		#end
+// Base class of geometry managers
+@:access(lycan.ui.UIObject)
+class Layout {
+	public var owner(default, set):Widget;
+	//public var dirty(default, set):Bool; // TODO
+	//public var enabled:Bool; // TODO
+	
+	public function new() {
+		//dirty = false;
+		//enabled = true;
 	}
 	
-	override public function event(e:UIEvent):Bool {
-		var handled = super.event(e);
-		
-		if(!handled) {
-			parent.event(e);
-		}
-		
-		return handled;
+	public function event(e:UIEvent):Bool {
+		return false;
 	}
 	
 	public function count() {
-		return children.length;
+		return owner.children.length;
 	}
 	
 	public function isEmpty() {
-		return children.isEmpty();
+		return owner.children.isEmpty();
 	}
 	
-	public function layout() {
-		for (child in children) {
-			
-		}
+	public function update() {
+		Sure.sure(owner != null);
+	}
+	
+	public function set_owner(owner:Widget):Widget {
+		Sure.sure(owner != null);
+		Sure.sure(this.owner == null); // TODO Don't support changing owners yet
+		this.owner = owner;
+		
+		// TODO dispatch owner change/relayout event
+		
+		return this.owner;
 	}
 }

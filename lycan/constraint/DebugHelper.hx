@@ -103,7 +103,6 @@ class DebugHelper {
 			dump += (" + " + row.cells.get(key) + " * ");
 			dump += dumpSymbol(key);
 		}
-		
 		return dump;
 	}
 	

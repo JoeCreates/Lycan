@@ -3,18 +3,14 @@ package lycan.constraint.frontend;
 import haxe.ds.GenericStack;
 import lycan.constraint.Constraint.RelationalOperator;
 import lycan.constraint.Expression;
-import lycan.constraint.Solver;
 import lycan.constraint.Strength;
+import lycan.constraint.Symbolics.ExpressionSymbolics;
+import lycan.constraint.Symbolics.VariableSymbolics;
 import lycan.constraint.Term;
 import lycan.constraint.Variable;
-import openfl.Vector;
-import lycan.constraint.Symbolics.VariableSymbolics;
-import lycan.constraint.Symbolics.ExpressionSymbolics;
 
 // Adapted from Alex Birkett's kiwi-java port: https://github.com/alexbirkett/kiwi-java
 // Runtime parser for strings -> Kiwi constraints
-
-// TODO this is pretty broken
 class ConstraintParser {
 	private static inline var ops:String = "-+/*^";
 	private static var pattern = new EReg("\\s*(.*?)\\s*(<=|==|>=)\\s*(.*?$)", "i");

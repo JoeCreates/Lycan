@@ -1,11 +1,11 @@
-package;
+package lycan.ai;
 
 // Definition of the priority of a task
 class NodePriority {
 	public var priority(get, null):Float;
 	public var name(get, null):String;
 	
-	public function new(priority:Float, name:String) {
+	public inline function new(priority:Float, name:String) {
 		this.priority = priority;
 		this.name = name;
 	}

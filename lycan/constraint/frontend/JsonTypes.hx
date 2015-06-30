@@ -1,6 +1,6 @@
 package lycan.constraint.frontend;
 
-typedef ConstraintDef = {
-	var ineq:String;
-	var str:String;
+typedef ConstraintDefinition = {
+	var inequality:String;
+	var strength:String;
 }

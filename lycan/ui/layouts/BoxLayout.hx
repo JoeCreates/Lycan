@@ -3,7 +3,10 @@ package lycan.ui.layouts;
 import lycan.ui.widgets.Widget;
 
 class BoxLayout extends Layout {
-	public function new(?parent:Widget, ?name:String) {
-		super(parent, name);
+	private var spacing:Int;
+	
+	public function new(spacing:Int) {
+		super();
+		this.spacing = spacing;
 	}
 }

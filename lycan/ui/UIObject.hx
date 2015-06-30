@@ -1,35 +1,39 @@
-package lycan.ui ;
+package lycan.ui;
 
 import lycan.ui.events.UIEvent;
-import lycan.ui.core.UIApplicationRoot;
 
 enum FindChildOptions {
 	FindDirectChildrenOnly;
-	FindChildrenRecursively;
 }
 
 class UIObject {
-	public var dirty:Bool = false;
-	public var parent(default,set):UIObject = null;
-	private var children:List<UIObject>;
-	public var name:String = null;
-	public var uid:Int;
+	private static var idTick:Int = 0;
+	
+	public var parent(default, set):UIObject;
+	public var name(get, null):String;
+	public var id(get, null):Int;
 	public var sendChildEvents:Bool;
 	public var receiveChildEvents:Bool;
-	public var isWidgetType(get, never):Bool;
-	private var eventFilters:List<UIObject> = new List<UIObject>();
 	
-	public function new(?parent:UIObject, ?name:String) {
+	public var isWidgetType(get, never):Bool;
+	
+	public var children(default, null):List<UIObject>;
+	
+	private var eventFilters:List<UIObject>;
+	
+	public function new(?parent:UIObject = null, ?name:String = null) {
 		this.parent = parent;
-		children = new List<UIObject>();
 		this.name = name;
-		uid = cast (Math.random() * 1073741824);
+		id = idTick++;
 		sendChildEvents = true;
 		receiveChildEvents = true;
+		
+		children = new List<UIObject>();
+		eventFilters = new List<UIObject>();
 	}
 	
 	public function installEventFilter(filter:UIObject):Void {
-		Sure.sure(filter != null);		
+		Sure.sure(filter != null);	
 		
 		eventFilters.add(filter);
 	}
@@ -51,6 +55,8 @@ class UIObject {
 	}
 	
 	public function event(e:UIEvent):Bool {
+		Sure.sure(e != null);
+		
 		for (filter in eventFilters) {
 			if (filter.event(e)) {
 				return true;
@@ -79,47 +85,65 @@ class UIObject {
 	
 	// This can be reimplemented to handle a child being added or removed to the object
 	private function childEvent(e:ChildEvent) {
-		
+		Sure.sure(e != null);
 	}
 	
 	public function addChild(child:UIObject) {
+		Sure.sure(child != null);
+		
 		children.add(child);
 		child.parent = this;
 	}
 	
 	public function removeChild(child:UIObject) {
+		Sure.sure(child != null);
+		
 		var removed = children.remove(child);
 		Sure.sure(removed == true);
 		child.parent = null;
 	}
 	
-	public function findChildrenForName(name:String, ?findOption:FindChildOptions):List<UIObject> {
+	public function findChildren(name:String, ?findOption:FindChildOptions):List<UIObject> {
+		Sure.sure(name != null);
+		
 		if(findOption == null) {
-			return findChildrenRecursivelyForName(name);
+			findOption = FindDirectChildrenOnly;
 		}
 	
 		return switch(findOption) {
 			case FindDirectChildrenOnly:
-				return findChildrenRecursivelyForName(name, 1);
-			case FindChildrenRecursively:
-				return findChildrenRecursivelyForName(name);
+				return findChildrenHelper(name, new List<UIObject>());
 		}
 	}
 	
-	private function findChildrenRecursivelyForName(name:String, depth:Int = -1):List<UIObject> {
-		var list = new List<UIObject>();
-		return list;
+	private function findChildrenHelper(name:String, list:List<UIObject>):List<UIObject> {
+		Sure.sure(name != null);
 		
-		if (depth == -1) {
-			
+		for (child in children) {
+			if (name == child.name) {
+				list.push(child);
+			}
 		}
+		return list;
+	}
+	
+	private function get_id():Int {
+		return id;
+	}
+	
+	private function get_name():String {
+		if (name == null) {
+			return Std.string(id);
+		}
+		
+		return name;
 	}
 	
 	private function get_isWidgetType():Bool {
 		return false;
 	}
 	
-	private function set_parent(parent:UIObject):UIObject {
+	private function set_parent(parent:UIObject):UIObject {		
 		if (this.parent != null) {
 			this.parent.removeChild(this);
 			parent.event(new ChildEvent(EventType.ChildRemoved, this));

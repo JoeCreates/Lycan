@@ -1,4 +1,4 @@
-package ai;
+package lycan.ai;
 
 // Some levels to base AI behavioural priorities off of
 @:enum abstract PriorityRank(Float) {

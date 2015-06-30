@@ -1,13 +1,13 @@
-package ai;
+package lycan.ai;
 
 import haxe.ds.GenericStack;
 
 class Node {
 	private var history = new GenericStack<Node>();
 	private var children = new List<Node>();
-	private var parent:Node = null;
+	private var parent:Node;
 	
-	public function new(?parent:Node) {
+	public inline function new(?parent:Node) {
 		if (parent != null) {
 			this.parent = parent;
 		}
@@ -29,5 +29,6 @@ class Node {
 	}
 	
 	private function clone():Void {
+		
 	}
 }

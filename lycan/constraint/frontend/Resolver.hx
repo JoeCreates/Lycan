@@ -10,7 +10,9 @@ class Resolver implements IResolver {
 		variables = new Map<String, Variable>();
 	}
 	
-	public function resolveVariable(name:String):Variable {		
+	public function resolveVariable(name:String):Variable {
+		Sure.sure(name != null);
+		
 		var v = variables.get(name);
 		if (v != null) {
 			return v;
@@ -24,16 +26,19 @@ class Resolver implements IResolver {
 	}
 	
 	public function resolveConstant(expression:String):Expression {
+		Sure.sure(expression != null);
+		
 		var constant:Float = Std.parseFloat(expression);
 		
 		if (Math.isNaN(constant)) {
+			throw "Failed to parse constant expression: " + expression;
 			return null;
 		}
 		
 		return new Expression(constant);
 	}
 	
-	public function traceValues():Void {
+	public function traceVariables():Void {
 		for (variable in variables) {
 			trace(variable.name + ": " + variable.value);
 		}

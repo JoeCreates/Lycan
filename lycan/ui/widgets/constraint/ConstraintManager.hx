@@ -1,15 +1,14 @@
 package lycan.ui.widgets.constraint;
 
+import lycan.constraint.DebugHelper;
 import lycan.constraint.Expression;
 import lycan.constraint.frontend.ConstraintParser;
-import lycan.constraint.frontend.JsonTypes.ConstraintDef;
 import lycan.constraint.frontend.IResolver;
+import lycan.constraint.frontend.JsonTypes.ConstraintDefinition;
 import lycan.constraint.Solver;
 import lycan.constraint.Strength;
 import lycan.constraint.Variable;
 import lycan.ui.widgets.Widget;
-import flixel.FlxG;
-import lycan.constraint.DebugHelper;
 
 @:enum abstract UIConstraintType(String) {
 	var Width = "width";
@@ -28,16 +27,26 @@ import lycan.constraint.DebugHelper;
 	var OuterBottom = "outerbottom";
 }
 
-class UIConstraintManager {
-	private var resolver:UIResolver;
-	private var solver:Solver;
+class ConstraintManager {
 	private var root:Widget;
+	private var widgets:Map<Widget, Array<Variable>>;
+	private var solver:Solver;
 	
 	public function new(root:Widget) {
-		resolver = new UIResolver();
 		solver = new Solver();
+		widgets = new Map<Widget, Array<Variable>>();
 		this.root = root;
-		register(root);
+		registerRoot(root);
+	}
+	
+	private function registerRoot(root:Widget):Void {
+		Sure.sure(root != null);
+		
+		var width:Variable = resolveVariable(root, Width);
+		var height:Variable = resolveVariable(root, Height);
+		
+		solver.addEditVariable(width, Strength.strong);
+		solver.addEditVariable(height, Strength.strong);
 	}
 	
 	public function register(widget:Widget):Void {
@@ -49,7 +58,7 @@ class UIConstraintManager {
 		}
 		
 		#if debug
-		for (w in resolver.widgetVarMap.keys()) {
+		for (w in widgets.keys()) {
 			if (widget == w) {
 				throw "Duplicate widget registered on UI constraint solver";
 			}
@@ -64,11 +73,6 @@ class UIConstraintManager {
 		
 		var width:Variable = resolveVariable(widget, Width);
 		var height:Variable = resolveVariable(widget, Height);
-		
-		if(widget == root) {
-			solver.addEditVariable(width, Strength.strong);
-			solver.addEditVariable(height, Strength.strong);
-		}
 		
 		var left:Variable = resolveVariable(widget, Left);
 		var right:Variable = resolveVariable(widget, Right);
@@ -85,15 +89,17 @@ class UIConstraintManager {
 		var outerTop:Variable = resolveVariable(widget, OuterTop);
 		var outerBottom:Variable = resolveVariable(widget, OuterBottom);
 		
+		// TODO it's really up to the layouts/widgets and their parents to provide the constraints, we should just register the absolutely required ones here e.g. padding constraints between child and parent?
+		
 		// TODO constructing stuff to then be parsed like this is incredibly inefficient
 		
 		// TODO note that only the variable should go on the LHS or the parser will screw up and may add variables with names like "x1 + x2"
-		var constraintDefs = new Array<ConstraintDef>();
+		var constraintDefinitions = new Array<ConstraintDefinition>();
 		var addDef = function(inequality:String, ?strength:String):Void {
 			if (strength == null) {
 				strength = "required";
 			}
-			constraintDefs.push( { ineq: inequality, str: strength } );
+			constraintDefinitions.push( { inequality: inequality, strength: strength } );
 		}
 		
 		if (widget == root) {			
@@ -126,10 +132,10 @@ class UIConstraintManager {
 			//addDef(bottom.name + " <= " + parentBottom.name + "-" + height.name);
 		}
 		
-		//addDef(width.name + " <= " + Std.string(widget.maxWidth), "strong");
-		//addDef(height.name + " <= " + Std.string(widget.maxHeight), "strong");
-		//addDef(width.name + " >= " + Std.string(widget.minWidth), "strong");
-		//addDef(height.name + " >= " + Std.string(widget.minHeight), "strong");
+		addDef(width.name + " <= " + Std.string(widget.maxWidth), "strong");
+		addDef(height.name + " <= " + Std.string(widget.maxHeight), "strong");
+		addDef(width.name + " >= " + Std.string(widget.minWidth), "strong");
+		addDef(height.name + " >= " + Std.string(widget.minHeight), "strong");
 		
 		//addDef(innerLeft.name + " == " + left.name + " + " + Std.string(widget.paddingLeft));
 		//addDef(innerRight.name + " == " + right.name + " - " + Std.string(widget.paddingRight));
@@ -142,15 +148,14 @@ class UIConstraintManager {
 		//addDef(outerBottom.name + " == " + bottom.name + " + " + Std.string(widget.marginBottom));
 		
 		// Makes the parser reuse variables, rather than creating new ones
-		var ctx = new WidgetContextResolver();
-		ctx.context = resolver.widgetVarMap.get(widget);
-
+		var resolver = new WidgetContextResolver();
+		resolver.context = widgets.get(widget);
 		if(widget.parent != null) {
-			ctx.context = ctx.context.concat(resolver.widgetVarMap.get(cast widget.parent));
+			resolver.context = resolver.context.concat(widgets.get(cast widget.parent));
 		}
 		
-		for (def in constraintDefs) {
-			var constraint = ConstraintParser.parseConstraint(def.ineq, def.str, ctx);
+		for (def in constraintDefinitions) {
+			var constraint = ConstraintParser.parseConstraint(def.inequality, def.strength, resolver);
 			solver.addConstraint(constraint);
 		}
 		
@@ -160,19 +165,18 @@ class UIConstraintManager {
 	public function deregisterWidget(widget:Widget):Void {
 		Sure.sure(widget != null);
 		// TODO
+		
+		// TODO remove all variables from solver that reference the widget? or zero them out...?
 	}
 	
 	// TODO generalize this
-	public function resizeRoot(width:Int, height:Int):Void {
-		Sure.sure(width >= 0);
-		Sure.sure(height >= 0);
-		
+	public function resizeRoot(width:Int, height:Int):Void {		
 		if (width <= 0 || height <= 0) {
 			return;
 		}
 		
-		var w = resolver.resolveVariable(root, Width);
-		var h = resolver.resolveVariable(root, Height);
+		var w:Variable = resolveVariable(root, Width);
+		var h:Variable = resolveVariable(root, Height);
 		solver.suggestValue(resolveVariable(root, Width), width);
 		solver.suggestValue(resolveVariable(root, Height), height);
 		trace("Suggested width: " + width + " and height: " + height);
@@ -187,7 +191,7 @@ class UIConstraintManager {
 	public function update():Void {
 		solver.updateVariables();
 		
-		for (widget in resolver.widgetVarMap.keys()) {
+		for (widget in widgets.keys()) {
 			//widget.x = Std.int(resolveVariable(widget, OuterLeft).value);
 			//widget.y = Std.int(resolveVariable(widget, OuterTop).value);
 			widget.width = Std.int(resolveVariable(widget, Width).value);
@@ -201,27 +205,15 @@ class UIConstraintManager {
 			//widget.marginTop = Std.int(resolveVariable(widget, OuterTop).value);
 			//widget.marginBottom = Std.int(resolveVariable(widget, OuterBottom).value);
 		}
+		
+		
 	}
 	
-	private inline function resolveVariable(widget:Widget, constraintType:UIConstraintType):Variable {
+	private function resolveVariable(widget:Widget, constraintType:UIConstraintType):Variable {
 		Sure.sure(widget != null);
 		Sure.sure(constraintType != null);
-		return resolver.resolveVariable(widget, constraintType);
-	}
-}
-
-// TODO optimize this whole implementation - maybe use unique ids for names and make the solver use ints rather than strings. also avoid use of map stuff for lookup when the usual widget constraint names can be known in advance
-// TODO the resolver isn't going to receive messages when widget properties change currently, but it should - we should attach to various signals when registering a widget so that we can update constraints when stuff like the widget's minWidth changes
-
-// Maps constraint solver variables to properties of widgets
-private class UIResolver {	
-	public var widgetVarMap = new Map<Widget, Array<Variable>>();
-	
-	public function new() {
-	}
-	
-	public function resolveVariable(widget:Widget, constraintType:UIConstraintType):Variable {	
-		var variables:Array<Variable> = widgetVarMap.get(widget);
+		
+		var variables:Array<Variable> = widgets.get(widget);
 		
 		if (variables == null) {
 			variables = new Array<Variable>();
@@ -234,11 +226,13 @@ private class UIResolver {
 		}
 		var v = new Variable(widget.name + constraintType);
 		variables.push(v);
-		widgetVarMap.set(widget, variables);
+		widgets.set(widget, variables);
 		return v;
 	}
 }
 
+// TODO optimize this whole implementation - maybe use unique ids for names and make the solver use ints rather than strings. also avoid use of map stuff for lookup when the usual widget constraint names can be known in advance
+// TODO the resolver isn't going to receive messages when widget properties change currently, but it should - we should attach to various signals when registering a widget so that we can update constraints when stuff like the widget's minWidth changes
 private class WidgetContextResolver implements IResolver {
 	public var context:Array<Variable>;
 	
