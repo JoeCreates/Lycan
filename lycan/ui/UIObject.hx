@@ -90,8 +90,6 @@ class UIObject {
 	
 	public function addChild(child:UIObject) {
 		Sure.sure(child != null);
-		
-		children.add(child);
 		child.parent = this;
 	}
 	
