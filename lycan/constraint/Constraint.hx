@@ -11,7 +11,7 @@ class Constraint {
 	public var operator(get, null):RelationalOperator;
 	public var strength(get, null):Float;
 	
-	public function new(expression:Expression, operator:RelationalOperator, ?strength:Null<Float>) {
+	public inline function new(expression:Expression, operator:RelationalOperator, ?strength:Null<Float>) {
 		Sure.sure(expression != null && operator != null);
 		
 		if (strength == null) {

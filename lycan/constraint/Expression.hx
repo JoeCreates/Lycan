@@ -4,7 +4,8 @@ class Expression {
 	public var terms(get, null):Array<Term>;
 	public var constant(get, null):Float;
 	
-	public function new(?terms:Array<Term>, constant:Float = 0.0) {
+	// TODO is there a way to get around having to create a new array and add the item manually if we only have 1 term?
+	public inline function new(?terms:Array<Term>, constant:Float = 0.0) {
 		if(terms == null) {
 			terms = new Array<Term>();
 		}

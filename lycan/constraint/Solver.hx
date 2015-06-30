@@ -21,7 +21,7 @@ class Solver {
 		reset();
 	}
 	
-	public function reset():Void {
+	public inline function reset():Void {
 		constraints = new ConstraintMap();
 		rows = new RowMap();
 		vars = new VarMap();
@@ -99,7 +99,7 @@ class Solver {
 		optimize(objective);
 	}
 	
-	public function hasConstraint(constraint:Constraint):Bool {
+	public inline function hasConstraint(constraint:Constraint):Bool {
 		Sure.sure(constraint != null);
 		
 		return constraints.exists(constraint);
@@ -139,7 +139,7 @@ class Solver {
 		edits.remove(variable);
 	}
 	
-	public function hasEditVariable(variable:Variable):Bool {
+	public inline function hasEditVariable(variable:Variable):Bool {
 		Sure.sure(variable != null);
 		
 		return edits.exists(variable);
@@ -548,7 +548,7 @@ class Solver {
 }
 
 private class Tag {
-	public function new() {
+	public inline function new() {
 		marker = new Symbol();
 		other = new Symbol();
 	}
@@ -558,7 +558,7 @@ private class Tag {
 }
 
 private class EditInfo {
-	public function new(constraint:Constraint, tag:Tag, constant:Float) {
+	public inline function new(constraint:Constraint, tag:Tag, constant:Float) {
 		Sure.sure(constraint != null);
 		Sure.sure(tag != null);
 		Sure.sure(Math.isFinite(constant));

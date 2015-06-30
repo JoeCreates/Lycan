@@ -4,7 +4,7 @@ class Term {
 	public var variable(get, null):Variable;
 	public var coefficient(get, null):Float;
 	
-	public function new(variable:Variable, coefficient:Float = 1.0) {
+	public inline function new(variable:Variable, coefficient:Float = 1.0) {
 		Sure.sure(variable != null);
 		
 		this.variable = variable;

@@ -12,7 +12,7 @@ class Symbol {
 	public var type(get, null):SymbolType;
 	public var id(get, null):Int;
 	
-	public function new(?type:SymbolType, id:Int = 0) {
+	public inline function new(?type:SymbolType, id:Int = 0) {
 		if (type == null) {
 			type = SymbolType.Invalid;
 		}

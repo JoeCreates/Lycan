@@ -2,6 +2,7 @@ package lycan.ui.core;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 import lycan.ui.core.UIApplicationRoot;
@@ -13,10 +14,12 @@ import lycan.ui.widgets.Widget;
 @:access(lycan.ui.UIObject)
 class DebugRenderer extends FlxSprite {
 	private var root:UIApplicationRoot;
+	private var text:FlxText;
 	
 	public function new(root:UIApplicationRoot) {
 		super(0, 0);
 		this.root = root;
+		this.text = new FlxText();
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
 	}
 	
@@ -59,6 +62,11 @@ class DebugRenderer extends FlxSprite {
 				var centerLineStyle:LineStyle = { thickness: 1, color: FlxColor.MAGENTA };
 				FlxSpriteUtil.drawLine(this, center.x, center.y + Math.min(20, inner.width / 6), center.x, center.y - Math.min(20, inner.width / 6), centerLineStyle);
 				FlxSpriteUtil.drawLine(this, center.x - Math.min(20, inner.width / 6), center.y, center.x + Math.min(20, inner.width / 6), center.y, centerLineStyle);
+				
+				text.text = w.name + ": (" + w.x + "," + w.y + "), (" + w.width + "," + w.height + ")";
+				text.x = w.x;
+				text.y = w.y;
+				text.draw();
 			}
 		}
 		

@@ -3,10 +3,11 @@ package lycan.constraint;
 typedef CellMap = Map<Symbol, Float>;
 
 class Row {
-	public var cells(get, null):CellMap = new CellMap();
+	public var cells(get, null):CellMap;
 	public var constant(get, null):Float;
 	
-	public function new(constant:Float = 0.0) {
+	public inline function new(constant:Float = 0.0) {
+		this.cells = new CellMap();
 		this.constant = constant;
 	}
 	
