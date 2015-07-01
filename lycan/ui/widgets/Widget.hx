@@ -443,6 +443,16 @@ class Widget extends UIObject {
 		#end
 	}
 	
+	override private function childEvent(e:ChildEvent) {
+		#if debug
+		trace(name + " got a child event");
+		#end
+		
+		if(layout != null) {
+			layout.event(e);
+		}
+	}
+	
 	// Returns the widget furthest down the object hierarchy with the point within it, or null if the point is inside none of them.
 	public static function getAt(root:Widget, point:FlxPoint):Widget {
 		return meetsCondition(root, isPointOver, point);
