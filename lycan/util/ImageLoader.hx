@@ -8,15 +8,19 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import openfl.Assets;
 
 // TODO for localization asset paths will need substituting. Could do that here or elsewhere...
+// TODO assumes png and json assets
 class ImageLoader {
 	/* Whether to use packed textures or not */
-	private static inline var useTexturePacker:Bool = false;
+	private static var useTexturePacker:Bool = false;
+	
+	private static var atlasImagePath:String = "assets/images/sheets/";
+	private static var atlasDataPath:String = "assets/data/sheets/";
 	
 	/* Handles for all the loaded atlas textures */
 	private static var atlases:Array<FlxAtlasFrames> = new Array<FlxAtlasFrames>();
 	
 	public static function loadAtlas(filename:String):FlxAtlasFrames {
-		var frames = FlxAtlasFrames.fromTexturePackerJson("assets/images/packed/" + filename + ".png", Assets.getText("assets/data/textureatlases/" + filename + ".json"));
+		var frames = FlxAtlasFrames.fromTexturePackerJson(atlasImagePath + filename + ".png", Assets.getText(atlasDataPath + filename + ".json"));
 		atlases.push(frames);
 		return frames;
 	}
