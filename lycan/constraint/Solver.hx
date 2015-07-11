@@ -4,6 +4,8 @@ import lycan.constraint.Constraint.RelationalOperator;
 import lycan.constraint.Solver.SolverError;
 import lycan.constraint.Symbol.SymbolType;
 
+// TODO pull this in as the haxe-kiwi submodule (potentially try to rename the packages (import-as??) and possibly expose functionality via wrappers?)
+
 class Solver {
 	// TODO Haxe maps don't have key,value pair iteration, which makes this implementation less 1:1 and probably way more inefficient - what do?
 	private static inline var fMax:Float = 1e20;

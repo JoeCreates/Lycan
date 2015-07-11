@@ -1,8 +1,9 @@
-package lycan;
+package lycan.states;
 
+import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxState;
+import flixel.FlxSubState;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -11,12 +12,8 @@ import flixel.util.FlxColor;
 import lycan.world.World;
 import openfl.filters.BlurFilter;
 
-/**
- * Extends basic FlxState with additional functionality
- * 
- * @author Joe Williamson
- */
-class WorldState extends LycanState {
+class LycanState extends FlxSubState implements LateUpdatable {
+	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
 	
 	public var world:World;
 	public var uiGroup:FlxSpriteGroup;
@@ -56,6 +53,26 @@ class WorldState extends LycanState {
 		var blur:BlurFilter = new BlurFilter();
 		worldCamera.flashSprite.filters.push(blur);
 		worldCamera.flashSprite.filters = worldCamera.flashSprite.filters;
+	}
+	
+	override public function update(dt:Float):Void {
+		super.update(dt);
+		
+		updatesWithoutLateUpdates++;
+		if (updatesWithoutLateUpdates > 1) {
+			throw("lateUpdate has not been called since last update");
+		}
+	}
+	
+	public function lateUpdate(dt:Float) {
+		updatesWithoutLateUpdates = 0;
+		
+		forEach(function(o:FlxBasic) {
+			if (Std.is(o, LateUpdatable)) {
+				var u:LateUpdatable = cast o;
+				u.lateUpdate(dt);
+			}
+		}, true);
 	}
 	
 	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {

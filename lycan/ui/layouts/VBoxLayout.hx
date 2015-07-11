@@ -8,9 +8,9 @@ enum VBoxLayoutDirection {
 }
 
 class VBoxLayout extends BoxLayout {
-	private var layoutDirection:HBoxLayoutDirection;
+	private var layoutDirection:VBoxLayoutDirection;
 	
-	public function new(spacing:Int, layoutDirection:VBoxLayoutDirection = TopToBottom) {
+	public function new(spacing:Int, ?layoutDirection:VBoxLayoutDirection) {
 		super(spacing);
 		
 		if (layoutDirection == null) {

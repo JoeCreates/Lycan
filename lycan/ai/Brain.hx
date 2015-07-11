@@ -3,6 +3,8 @@ package lycan.ai;
 import haxe.ds.StringMap;
 import msignal.Signal.Signal1;
 
+// TODO consider how to do behaviour orchestration/smart scenes with these NPCs and their brains
+
 enum UnprioritizedBehaviourHandlingMode {
 	IGNORE_UNWEIGHTED; // Ignore suggested behaviours that the brain doesn't have a priority for
 }
@@ -15,7 +17,11 @@ class Brain {
 	private var behaviourPriorityWeights:StringMap<Float>; // Maps named behaviours to this brain's priorities
 	private var unprioritizedBehaviourHandlingMode = UnprioritizedBehaviourHandlingMode.IGNORE_UNWEIGHTED;
 	
-	public function new(values:StringMap<Float>) {
+	public function new(?values:StringMap<Float>) {
+		if (values == null) {
+			values = new StringMap<Float>();
+		}
+		
 		this.behaviourPriorityWeights = values;
 	}
 	

@@ -91,7 +91,7 @@ class Widget extends UIObject {
 		}
 		#end
 	}
-	
+
 	// The area that contains the child widgets without inner padding
 	// This is the area inside which widget contents may be positioned
 	public function innerRect():FlxRect {
@@ -116,6 +116,7 @@ class Widget extends UIObject {
 	}
 	
 	public function updateGeometry() {
+		// TODO
 		/*
 		// Invalidates the current layout
 		if(layout != null) {
@@ -137,6 +138,10 @@ class Widget extends UIObject {
 		// Ask the top-level object to recalculate the geometries of the dirty objects
 		p.event(new UIEvent(EventType.LayoutRequest));
 		*/
+		
+		if(layout != null) {
+			layout.update();
+		}
 	}
 	
 	override public function event(e:UIEvent):Bool {
@@ -525,6 +530,7 @@ class Widget extends UIObject {
 			throw "Don't support changing layouts yet"; // TODO remove the old layout
 		}		
 		
+		layout.owner = this;
 		return this.layout = layout;
 	}
 	

@@ -7,7 +7,6 @@ class LayoutContainer extends Widget {
 	public function new(layout:Layout, ?parent:UIObject = null, ?name:String) {
 		super(parent, name);
 		this.layout = layout;
-		this.layout.owner = this;
 	}
 	
 	override public function addChild(child:UIObject) {
