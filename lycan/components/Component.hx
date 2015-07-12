@@ -1,6 +1,6 @@
 package lycan.components;
 
-class Component<T> {
+class Component<T> implements IUpdateable {
 	public var entity:T;
 	
 	public function new(entity:T) {

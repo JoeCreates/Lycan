@@ -11,7 +11,9 @@ enum UnprioritizedBehaviourHandlingMode {
 
 // AI for an NPC
 class Brain {
-	public var signal_behaviourChanged = new Signal1<Node>(); // Attach to this to listen for changes in behaviour
+	public var signal_behaviourChanged = new Signal1<Node>();
+	public var signal_behaviourAccepted = new Signal1<Node>();
+	public var signal_behaviourRejected = new Signal1<Node>();
 	
 	private var activeBehaviours = new List<Node>(); // TODO prefer a set, not a list - there's no inherent ordering to active behaviours
 	private var behaviourPriorityWeights:StringMap<Float>; // Maps named behaviours to this brain's priorities
@@ -25,7 +27,7 @@ class Brain {
 		this.behaviourPriorityWeights = values;
 	}
 	
-	public function offerSuggestion(root:Node, suggestedPriority:NodePriority):Bool {
+	public function offerBehaviour(root:Node, suggestedPriority:NodePriority):Bool {
 		var weighting:Null<Float> = behaviourPriorityWeights.get(suggestedPriority.name);
 		
 		switch(unprioritizedBehaviourHandlingMode) {
@@ -35,16 +37,28 @@ class Brain {
 				weighting = 0;
 		}
 		
-		// TODO
-		signal_behaviourChanged.dispatch();
+		// TODO iterate over the active behaviours and see if they can accept the new behaviour at the suggested priority
+		// TODO if one/all (??) accept the behaviour, then install it (how?)
+		var accepted:Bool = true;
 		
-		return false;
+		if (accepted) {
+			signal_behaviourAccepted.dispatch(root);
+			signal_behaviourChanged.dispatch(root);
+			
+			// TODO should probably be to replace a behaviour first, rather than add
+			activeBehaviours.add(root);
+			
+			return true;
+		} else {
+			signal_behaviourRejected.dispatch(root);
+			return false;
+		}
 	}
 	
 	// TODO need to compare the trees - they're only really the same if the children, histories, queued futures are equal too
  	public function hasBehaviour(behaviour:Node):Bool {
 		for (activeBehaviour in activeBehaviours) {
-			if (state == activeBehaviour) {
+			if (behaviour.id == activeBehaviour.id) {
 				return true;
 			}
 		}
