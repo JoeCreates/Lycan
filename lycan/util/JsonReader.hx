@@ -1,4 +1,4 @@
-package lycan.json;
+package lycan.util;
 
 import haxe.Json;
 import haxe.macro.Context;

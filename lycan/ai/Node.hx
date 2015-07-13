@@ -39,8 +39,4 @@ class Node {
 	private function updateInvariant():Bool {
 		throw "Implement me";
 	}
-	
-	private function clone():Void {
-		
-	}
 }

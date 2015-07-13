@@ -13,8 +13,8 @@ class ImageLoader {
 	/* Whether to use packed textures or not */
 	private static var useTexturePacker:Bool = false;
 	
-	private static var atlasImagePath:String = "assets/images/sheets/";
-	private static var atlasDataPath:String = "assets/data/sheets/";
+	private static var atlasImagePath:String = "assets/images/texturepacker/";
+	private static var atlasDataPath:String = "assets/data/texturepacker/";
 	
 	/* Handles for all the loaded atlas textures */
 	private static var atlases:Array<FlxAtlasFrames> = new Array<FlxAtlasFrames>();
