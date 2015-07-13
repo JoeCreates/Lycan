@@ -16,7 +16,7 @@ class DummyTask extends PriorityTask {
 		
 		var startTime = Lib.getTimer();
 		while (startTime + duration > Lib.getTimer()) {
-			#if !flash
+			#if (!flash && !html5)
 			Sys.sleep(0.05);
 			#end
 			
