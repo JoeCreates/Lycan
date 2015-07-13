@@ -1,4 +1,4 @@
-package lycan.leaderboards ;
+package lycan.leaderboards;
 
 #if googleplayleaderboards
 
@@ -13,7 +13,7 @@ class GooglePlayLeaderboards {
 	}
 	
 	public function init():Void {
-		GooglePlayGames.init(Lib.current.stage, false);
+		GooglePlayGames.init(false);
 	}
 	
 	public function openLeaderboard(id:String):Void {

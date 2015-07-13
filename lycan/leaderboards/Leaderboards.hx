@@ -1,23 +1,23 @@
 package lycan.leaderboards;
 
 #if googleplayleaderboards
-import leaderboards.GooglePlayLeaderboards;
+import lycan.leaderboards.Leaderboards;
 #end
 
 #if gamecircleleaderboards
-import leaderboards.GameCircleLeaderboards;
+import lycan.leaderboards.GameCircleLeaderboards;
 #end
 
 #if gamecenterleaderboards
-import leaderboards.GameCenterLeaderboards;
+import lycan.leaderboards.GameCenterLeaderboards;
 #end
 
 #if kongregateleaderboards
-import leaderboards.KongregateFacade;
+import lycan.leaderboards.KongregateFacade;
 #end
 
 #if gamejoltleaderboards
-import leaderboards.GameJoltFacade;
+import lycan.leaderboards.GameJoltFacade;
 #end
 
 class Leaderboards {
@@ -113,15 +113,15 @@ class Leaderboards {
 	
 	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {		
 		#if gamecenterleaderboards
-		GameCenterLeaderboards.get.submitScore(id, score);
+		GameCenterLeaderboards.get.submitScore(leaderboardId, score);
 		#end
 		
 		#if googleplayleaderboards
-		GooglePlayLeaderboards.get.submitScore(id, score);
+		GooglePlayLeaderboards.get.submitScore(leaderboardId, score);
 		#end
 		
 		#if gamecircleleaderboards
-		GameCircleLeaderboards.get.submitScore(id, score);
+		GameCircleLeaderboards.get.submitScore(leaderboardId, score);
 		#end
 		
 		#if kongregateleaderboards

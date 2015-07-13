@@ -41,7 +41,7 @@ class Layout {
 	}
 	
 	public function event(e:UIEvent):Bool {
-		switch(e) {
+		switch(e.type) {
 			case EventType.ChildAdded:
 				childAddedEvent(cast e);
 			case EventType.ChildRemoved:
