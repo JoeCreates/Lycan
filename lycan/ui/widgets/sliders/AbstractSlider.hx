@@ -1,12 +1,15 @@
-package lycan.ui.widgets ;
+package lycan.ui.widgets.sliders ;
 
-import msignal.Signal.Signal0;
-import msignal.Signal.Signal1;
-import lycan.ui.events.UIEvent.WheelEvent;
+import lycan.ui.events.UIEvent.HoverEvent;
 import lycan.ui.events.UIEvent.KeyEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
+import lycan.ui.events.UIEvent.WheelEvent;
+import lycan.ui.widgets.Widget.PointerTrackingPolicy;
+import msignal.Signal.Signal0;
+import msignal.Signal.Signal1;
 
-class Slider extends Widget {
+// Base class for sliders. Has no graphical representation though, use a subclass
+class AbstractSlider extends Widget {
 	public var signal_valueChanged(default,null) = new Signal1<Float>();
 	public var signal_sliderPressed(default,null) = new Signal0();
 	public var signal_sliderMoved(default,null) = new Signal0();
@@ -18,6 +21,8 @@ class Slider extends Widget {
 	
 	public function new(min:Float, max:Float, value:Float, ?parent:UIObject, ?name:String) {
 		super(parent, name);
+		
+		pointerTrackingPolicy = PointerTrackingPolicy.StrongTracking;
 		
 		this.minimum = min;
 		this.maximum = max;
@@ -36,11 +41,21 @@ class Slider extends Widget {
 	
 	override private function pointerPressEvent(e:PointerEvent) {
 		super.pointerPressEvent(e);
+		
+		pressed = true;
+		
+		value = maximum * e.localX / width;
+		
 		signal_sliderPressed.dispatch();
 	}
 	
 	override private function pointerReleaseEvent(e:PointerEvent) {
 		super.pointerReleaseEvent(e);
+		
+		pressed = false;
+		
+		value = maximum * e.localX / width;
+		
 		signal_sliderReleased.dispatch();
 	}
 	
@@ -48,8 +63,20 @@ class Slider extends Widget {
 		super.pointerMoveEvent(e);
 		
 		if (pressed) {
-			// use local mouse to calculate value
+			value = maximum * e.localX / width;
 		}
+		
+		signal_sliderMoved.dispatch();
+	}
+	
+	override private function hoverEnterEvent(e:HoverEvent) {
+		super.hoverEnterEvent(e);
+		
+		// TODO if left mouse or touch is already pressed down on entering, then set pressed to true
+	}
+	
+	override private function hoverLeaveEvent(e:HoverEvent) {
+		super.hoverLeaveEvent(e);
 	}
 	
 	private function calculateValue(e:PointerEvent):Float {

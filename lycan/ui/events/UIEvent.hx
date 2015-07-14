@@ -3,6 +3,7 @@ package lycan.ui.events;
 import haxe.Utf8;
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.widgets.Widget;
+import lycan.ui.pointer.MouseButton;
 
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
@@ -73,15 +74,15 @@ class UIEvent {
 		this.type = type;
 	}
 	
-	public function get_type():EventType {
+	private function get_type():EventType {
 		return type;
 	}
 	
-	public function get_accept():Bool {
+	private function get_accept():Bool {
 		return accept;
 	}
 	
-	public function set_accept(accept:Bool):Bool {
+	private function set_accept(accept:Bool):Bool {
 		return this.accept = accept;
 	}
 	
@@ -109,7 +110,7 @@ class ChildEvent extends UIEvent {
 		return type == EventType.ChildRemoved;
 	}
 	
-	public function get_child():UIObject {
+	private function get_child():UIObject {
 		return child;
 	}
 }
@@ -172,7 +173,11 @@ class LocaleChangeEvent extends UIEvent {
 }
 
 class PointerEvent extends UIEvent {
-	
+	public var button:MouseButton;
+	public var localX:Float;
+	public var localY:Float;
+	public var globalX:Float;
+	public var globalY:Float;
 }
 
 class PropertyChangeEvent extends UIEvent {

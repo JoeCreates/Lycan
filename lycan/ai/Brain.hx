@@ -9,6 +9,34 @@ enum UnprioritizedBehaviourHandlingMode {
 	IGNORE_UNWEIGHTED; // Ignore suggested behaviours that the brain doesn't have a priority for
 }
 
+// A list of stacks of active behaviours
+// var subjectivePriority = suggestedPriority * ethicWeighting
+// override ethic could be like nodepriority with the "name"
+// a suggestion can have multiple ethics
+// importance of ethics has to be done so that all actions can be compared
+// each state the set of ethics and weightings that came with it
+// a state suggestion also includes an invariant function, this is checked every frame to determine if we should stay in the state or exit it
+
+/*
+ joe's notes
+[05:04:58] Joe Williamson: running
+[05:27:12] Joe Williamson: suggest run away (it affects survival ethic with importance 0.8)
+[05:27:45] Joe Williamson: NPC has survival ethic weighting of 1
+[05:45:10] Joe Williamson: agent (ethic map, list of stacks of states)
+[05:48:02] Joe Williamson: ^ and with each state, the set of ethics and weightings that came with it
+[05:57:43] Joe Williamson: make distinction between overriding and removing a state
+[05:57:57] Joe Williamson: an overiiding state keeps a list of states it overrode
+[05:58:04] Joe Williamson: each in turn might have states they overrode
+[05:58:20] Joe Williamson: when a state ends, we attempt to return to the states it overrode
+[06:09:01] Joe Williamson: a suggestion also includes an invariant function
+[06:09:16] Joe Williamson: this is checked every frame to determine if we should stay in the state
+[06:09:18] Joe Williamson: or exit it
+[06:26:26] Joe Williamson: it finally cut out
+[06:30:13] Joe Williamson: tweens.get.tween()
+[06:32:20] Joe Williamson: FlxTween.tween()
+[06:32:32] Joe Williamson: FlxTween.on(this).tween
+*/
+
 // AI for a game entity
 class Brain {
 	public var signal_behaviourChanged = new Signal1<Node>();
@@ -60,6 +88,11 @@ class Brain {
 			signal_behaviourRejected.dispatch(root);
 			return false;
 		}
+	}
+	
+	// TODO is there anything a brain would do in an update method? can't think of anything atm
+	public inline function update(dt:Float):Void {
+		
 	}
 	
 	// TODO need to do a deep comparison - the behaviour may only really the same if the children, histories, queued futures are equal too

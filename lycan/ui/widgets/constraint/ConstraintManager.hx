@@ -1,5 +1,6 @@
 package lycan.ui.widgets.constraint;
 
+/*
 import lycan.constraint.DebugHelper;
 import lycan.constraint.Expression;
 import lycan.constraint.frontend.ConstraintParser;
@@ -262,3 +263,4 @@ private class WidgetContextResolver implements IResolver {
 		return new Expression(constant);
 	}
 }
+*/

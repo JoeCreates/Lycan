@@ -183,7 +183,7 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerPress));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerPress, hoveredWidget));
 			}
 		}
 		
@@ -213,7 +213,7 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerMove));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down,EventType.PointerMove, hoveredWidget));
 				
 				if (down) {
 					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
@@ -230,9 +230,20 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, new PointerEvent(EventType.PointerRelease));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerRelease, hoveredWidget));
 			}
 		}
+	}
+	
+	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget):PointerEvent {
+		var event:PointerEvent = new PointerEvent(type);
+		event.globalX = x; // TODO should we use the outer margin or the x coordinate of the widget?
+		event.globalY = y;
+		event.localX = x - pointerWidget.x;
+		event.localY = y - pointerWidget.y;
+		// TODO set mouse button
+		
+		return event;
 	}
 	
 	private function onGamepadButtonDown(gamepad, button) {
