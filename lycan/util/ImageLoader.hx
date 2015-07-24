@@ -11,7 +11,11 @@ import openfl.Assets;
 // TODO assumes png and json assets
 class ImageLoader {
 	/* Whether to use packed textures or not */
+	#if texturepacker
+	private static var useTexturePacker:Bool = true;
+	#else
 	private static var useTexturePacker:Bool = false;
+	#end
 	
 	private static var atlasImagePath:String = "assets/images/texturepacker/";
 	private static var atlasDataPath:String = "assets/data/texturepacker/";
@@ -40,6 +44,7 @@ class ImageLoader {
 		var frame = getFrame(assetPath);
 		var sprite = new FlxSprite(x, y);
 		sprite.frame = frame;
+		sprite.updateHitbox();
 		return sprite;
 	}
 	
