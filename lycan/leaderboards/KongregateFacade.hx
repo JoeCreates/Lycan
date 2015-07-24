@@ -4,8 +4,7 @@ package lycan.leaderboards;
 
 import flixel.addons.api.FlxKongregate;
 
-class KongregateFacade
-{
+class KongregateFacade {
 	public static function init(onLoadedCb:Void->Void):Void {
 		FlxKongregate.init(onLoadedCb);
 	}

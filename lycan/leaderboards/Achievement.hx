@@ -1,6 +1,4 @@
-package lycan.leaderboards ;
-
-#if (gamecenterleaderboards || googleplayleaderboards || amazonkindleleaderboards || kongregateleaderboards || gamejoltleaderboards)
+package lycan.leaderboards;
 
 #if googleplayleaderboards
 import leaderboards.GooglePlayLeaderboards;
@@ -23,9 +21,9 @@ import leaderboards.GameJoltFacade;
 #end
 
 class Achievement {
-	public var id:AchievementId;
-	public var unlocked:Bool = false;
-	private var targetValue:Float = 0;
+	public var id(default, null):AchievementId;
+	public var unlocked(default, null):Bool = false;
+	public var targetValue(default, null):Float = 0;
 	
 	public function new(id:AchievementId, ?targetValue:Float):Void {
 		this.id = id;
@@ -46,23 +44,23 @@ class Achievement {
 		trace("Achievement unlocked: " + id.gameCenterId);
 		#end
 		
-		#if googleplay
+		#if googleplayleaderboards
 		GooglePlayLeaderboards.get.unlockAchievement(id.googlePlayId);
 		#end
 		
-		#if amazonkindle
+		#if amazonkindleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, 100);
 		#end
 		
-		#if ios
+		#if gamecenterleaderboards
 		GameCenterLeaderboards.get.updateAchievementProgress(id.gameCenterId, 100);
 		#end
 		
-		#if gamejolt
+		#if gamejoltleaderboards
 		GameJoltFacade.addTrophy(id.gameJoltId);
 		#end
 		
-		#if kongregate
+		#if kongregateleaderboards
 		if (targetValue == null) {
 			KongregateFacade.submitStat(id.kongregateId, 1);
 		}
@@ -76,25 +74,25 @@ class Achievement {
 		
 		var progressPercent:Float = Math.min(100, ((currentValue / targetValue) * 100));
 		
-		#if googleplay
+		#if googleplayleaderboards
 		GooglePlayLeaderboards.get.updateAchievementProgress(id.googlePlayId, progressPercent);
 		#end
 		
-		#if amazonkindle
+		#if amazonkindleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, progressPercent);
 		#end
 		
-		#if ios
+		#if gamecenterleaderboards
 		GameCenterLeaderboards.get.updateAchievementProgress(id.gameCenterId, progressPercent);
 		#end
 		
-		#if gamejolt
+		#if gamejoltleaderboards
 		if (progressPercent >= 100) {
 			GameJoltFacade.addTrophy(id.gameJoltId);
 		}
 		#end
 		
-		#if kongregate
+		#if kongregateleaderboards
 		KongregateFacade.submitStat(id.kongregateId, currentValue);
 		#end
 	}
@@ -107,5 +105,3 @@ typedef AchievementId = {
 	gameJoltId:Int,
 	amazonId:String
 };
-
-#end

@@ -1,4 +1,4 @@
-package lycan.leaderboards ;
+package lycan.leaderboards;
 
 #if gamecenterleaderboards
 

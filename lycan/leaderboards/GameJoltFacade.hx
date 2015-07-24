@@ -4,8 +4,7 @@ package lycan.leaderboards;
 
 import flixel.addons.api.FlxGameJolt;
 
-class GameJoltFacade
-{
+class GameJoltFacade {
 	public static function init(gameId:Int, privateKey:String, ?autoAuth:Bool = false, userName:String = null, ?userToken:String = null, ?cb:Dynamic = null):Void {
 		FlxGameJolt.init(gameId, privateKey, autoAuth, userName, userToken, cb);
 	}

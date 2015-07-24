@@ -1,4 +1,4 @@
-package lycan.leaderboards ;
+package lycan.leaderboards;
 
 #if gamecircleleaderboards
 
@@ -7,7 +7,6 @@ import extension.gamecircle.gc.GamesClient;
 import extension.gamecircle.GameCircle;
 
 class GameCircleLeaderboards {
-	
 	public static var get(default, never):GameCircleLeaderboards = new GameCircleLeaderboards();
 	
 	private var leaderboards:GameCircle;
@@ -46,27 +45,21 @@ class GameCircleLeaderboards {
 	}
 }
 
-class GameCircleConnectionHandler extends ConnectionHandler
-{
-  override public function onWarning(msg:String, where:String)
-  {
-  }
+class GameCircleConnectionHandler extends ConnectionHandler {
+	override public function onWarning(msg:String, where:String) {
+	}
 
-  override public function onError(what:String, code:Int, where:String)
-  {
-  }
+	override public function onError(what:String, code:Int, where:String) {
+	}
 
-  override public function onException(msg:String, where:String)
-  {
-  }
+	override public function onException(msg:String, where:String) {
+	}
 
-  override public function onConnectionEstablished(what:String)
-  {
-  }
+	override public function onConnectionEstablished(what:String) {
+	}
 
-  override public function onSignedOut(what:String)
-  {
-  }
+	override public function onSignedOut(what:String) {
+	}
 }
 
 #end
