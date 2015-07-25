@@ -140,7 +140,6 @@ class Leaderboards {
 	#end
 	
 	#if gamejoltleaderboards
-	
 	public var gameId:Int = 0;
 	public var privateKey:String = null;
 	public var autoAuth:Bool = false;

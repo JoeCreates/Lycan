@@ -1,23 +1,23 @@
 package lycan.leaderboards;
 
 #if googleplayleaderboards
-import leaderboards.GooglePlayLeaderboards;
+import lycan.leaderboards.GooglePlayLeaderboards;
 #end
 
 #if amazonkindleleaderboards
-import leaderboards.GameCircleLeaderboards;
+import lycan.leaderboards.GameCircleLeaderboards;
 #end
 
 #if gamecenterleaderboards
-import leaderboards.GameCenterLeaderboards;
+import lycan.leaderboards.GameCenterLeaderboards;
 #end
 
 #if kongregateleaderboards
-import leaderboards.KongregateFacade;
+import lycan.leaderboards.KongregateFacade;
 #end
 
 #if gamejoltleaderboards
-import leaderboards.GameJoltFacade;
+import lycan.leaderboards.GameJoltFacade;
 #end
 
 class Achievement {
@@ -75,7 +75,7 @@ class Achievement {
 		var progressPercent:Float = Math.min(100, ((currentValue / targetValue) * 100));
 		
 		#if googleplayleaderboards
-		GooglePlayLeaderboards.get.updateAchievementProgress(id.googlePlayId, progressPercent);
+		GooglePlayLeaderboards.get.updateAchievementProgress(id.googlePlayId, Std.int(currentValue));
 		#end
 		
 		#if amazonkindleleaderboards
