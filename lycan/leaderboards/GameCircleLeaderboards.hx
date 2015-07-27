@@ -2,22 +2,22 @@ package lycan.leaderboards;
 
 #if gamecircleleaderboards
 
-import extension.gamecircle.gc.ConnectionHandler;
+import extension.gamecircle.gc.GameCircleListener;
 import extension.gamecircle.gc.GamesClient;
 import extension.gamecircle.GameCircle;
+import extension.gamecircle.gc.PopUpLocation;
 
 class GameCircleLeaderboards {
 	public static var get(default, never):GameCircleLeaderboards = new GameCircleLeaderboards();
 	
 	private var leaderboards:GameCircle;
-	private var connectionHandler:GameCircleConnectionHandler;
 	
 	private function new() {
+		leaderboards = new GameCircle();
 	}
 	
-	public function init():Void {		
-		connectionHandler = new GameCircleConnectionHandler();
-		leaderboards = new GameCircle(connectionHandler);
+	public function setListener(listener:GameCircleListener):Void {
+		leaderboards.setListener(listener);
 	}
 	
 	public function openLeaderboard(id:String):Void {
@@ -43,22 +43,9 @@ class GameCircleLeaderboards {
 	public function updateAchievementProgress(id:String, percent:Float):Void {
 		leaderboards.games.updateAchievement(id, percent, "");
 	}
-}
-
-class GameCircleConnectionHandler extends ConnectionHandler {
-	override public function onWarning(msg:String, where:String) {
-	}
-
-	override public function onError(what:String, code:Int, where:String) {
-	}
-
-	override public function onException(msg:String, where:String) {
-	}
-
-	override public function onConnectionEstablished(what:String) {
-	}
-
-	override public function onSignedOut(what:String) {
+	
+	public function setPopUpLocation(location:PopUpLocation):Void {
+		leaderboards.games.setPopUpLocation(location);
 	}
 }
 
