@@ -28,15 +28,15 @@ class Leaderboards {
 	
 	public static function init():Void {
 		#if gamecenterleaderboards
-		GameCenterLeaderboards.get.init();
+		GameCenterLeaderboards.get;
 		#end
 		
 		#if googleplayleaderboards
-		GooglePlayLeaderboards.get.init();
+		GooglePlayLeaderboards.get;
 		#end
 		
 		#if gamecircleleaderboards
-		GameCircleLeaderboards.get.init();
+		GameCircleLeaderboards.get;
 		#end
 		
 		#if kongregateleaderboards

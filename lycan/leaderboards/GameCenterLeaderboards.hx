@@ -10,9 +10,6 @@ class GameCenterLeaderboards {
 	private function new() {
 	}
 	
-	public function init():Void {
-	}
-	
 	public function openLeaderboard(id:String):Void {
 		GameCenter.showLeaderboard(id);
 	}

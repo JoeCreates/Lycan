@@ -10,9 +10,6 @@ class GooglePlayLeaderboards {
 	public static var get(default, never):GooglePlayLeaderboards = new GooglePlayLeaderboards();
 	
 	private function new() {
-	}
-	
-	public function init():Void {
 		GooglePlayGames.init(false);
 	}
 	
