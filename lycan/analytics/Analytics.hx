@@ -13,7 +13,6 @@ class Analytics {
 		Flurry.setVersionName(appVersion);
 		Flurry.setReportLocation(false);
 		Flurry.setCaptureUncaughtExceptions(true);
-		Flurry.setLogEvents(true);
 		
 		#if debug
 		Flurry.setLogEnabled(true);
