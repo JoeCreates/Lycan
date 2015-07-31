@@ -5,6 +5,8 @@ import ru.zzzzzzerg.linden.Flurry;
 #end
 
 // TODO implement steamworks stats for this too
+// TODO haxe-ga by fbricker might be the best general solution for this
+// TODO there is also the newgrounds API
 class Analytics {
 	public static function init(appId:String, appVersion:String) {
 		#if flurryanalytics
