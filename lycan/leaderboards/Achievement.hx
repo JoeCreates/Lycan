@@ -75,7 +75,7 @@ class Achievement {
 		var progressPercent:Float = Math.min(100, ((currentValue / targetValue) * 100));
 		
 		#if googleplayleaderboards
-		GooglePlayLeaderboards.get.updateAchievementProgress(id.googlePlayId, Std.int(currentValue));
+		GooglePlayLeaderboards.get.setAchievementSteps(id.googlePlayId, Std.int(currentValue));
 		#end
 		
 		#if amazonkindleleaderboards
