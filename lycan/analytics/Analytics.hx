@@ -10,9 +10,10 @@ import ru.zzzzzzerg.linden.Flurry;
 class Analytics {
 	public static function init(appId:String, appVersion:String) {
 		#if flurryanalytics
+		Flurry.setVersionName(appVersion);
+		
 		Flurry.onStartSession(appId);
 		
-		Flurry.setVersionName(appVersion);
 		Flurry.setReportLocation(false);
 		Flurry.setCaptureUncaughtExceptions(true);
 		
