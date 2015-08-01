@@ -8,6 +8,7 @@ class GameCenterLeaderboards {
 	public static var get(default, never):GameCenterLeaderboards = new GameCenterLeaderboards();
 	
 	private function new() {
+		GameCenter.initialize();
 	}
 	
 	public function openLeaderboard(id:String):Void {
@@ -30,8 +31,8 @@ class GameCenterLeaderboards {
 		GameCenter.reportScore(id, score);
 	}
 
-    public function updateAchievementProgress(id:String, percent:Float):Void {
-		GameCenter.reportAchievement(id, percent);
+    public function updateAchievementProgress(id:String, percent:Float, showBanner:Bool=true):Void {
+		GameCenter.reportAchievement(id, percent, showBanner);
     }
 }
 
