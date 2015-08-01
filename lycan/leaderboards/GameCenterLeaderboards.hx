@@ -8,7 +8,6 @@ class GameCenterLeaderboards {
 	public static var get(default, never):GameCenterLeaderboards = new GameCenterLeaderboards();
 	
 	private function new() {
-		GameCenter.initialize();
 	}
 	
 	public function openLeaderboard(id:String):Void {
