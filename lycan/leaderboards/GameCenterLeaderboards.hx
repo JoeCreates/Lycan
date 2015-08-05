@@ -20,8 +20,8 @@ class GameCenterLeaderboards {
 		GameCenterManager.presentAchievements();
 	}
 	
-	public function isAvailable():Bool {
-		return GameCenterManager.isGameCenterAvailable();
+	public function isSignedIn():Bool {
+		return GameCenterManager.isGameCenterAvailable(); // Really means whether the service is available at all, not simply whether you are signed in or not
 	}
 	
 	public function signIn():Void {
