@@ -3,7 +3,7 @@ package lycan.leaderboards;
 #if gamecenterleaderboards
 
 import extension.gamecentermanager.GameCenterManager;
-import extension.gamecentermanager.GameCenterSortOrder;
+import extension.gamecentermanager.GameCenterManager.GameCenterSortOrder;
 
 class GameCenterLeaderboards {
 	public static var get(default, never):GameCenterLeaderboards = new GameCenterLeaderboards();
@@ -28,7 +28,7 @@ class GameCenterLeaderboards {
 		GameCenterManager.authenticateUser();
 	}
 	
-	public function submitScore(id:String, score:Int, sortOrder:GameCenterSortOrder = GameCenterSortOrder.HIGH_TO_LOW):Void {
+	public function submitScore(id:String, score:Int, sortOrder:GameCenterSortOrder = GameCenterSortOrder.HighToLow):Void {
 		GameCenterManager.saveAndReportScore(id, score, sortOrder);
 	}
 
