@@ -1,6 +1,5 @@
 package lycan.ui.widgets;
 
-import lycan.ui.renderer.IRenderItem;
 import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.UIObject;
 

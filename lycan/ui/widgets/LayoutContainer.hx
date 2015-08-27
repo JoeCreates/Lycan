@@ -1,7 +1,7 @@
 package lycan.ui.widgets;
 
-import lycan.ui.UIObject;
 import lycan.ui.layouts.Layout;
+import lycan.ui.UIObject;
 
 class LayoutContainer extends Widget {
 	public function new(layout:Layout, ?parent:UIObject = null, ?name:String) {

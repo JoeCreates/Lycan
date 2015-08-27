@@ -1,14 +1,10 @@
 package lycan.ui.widgets;
 
-import lycan.ui.events.UIEvent.DragEnterEvent;
-import lycan.ui.events.UIEvent.DragLeaveEvent;
-import lycan.ui.events.UIEvent.DragMoveEvent;
+import lycan.ui.events.UIEvent.EventType;
 import lycan.ui.events.UIEvent.KeyEvent;
+import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.widgets.Widget.KeyboardFocusPolicy;
 import msignal.Signal.Signal1;
-import msignal.Signal.Signal2;
-import lycan.ui.renderer.ITextRenderItem;
-import lycan.ui.events.UIEvent.EventType;
 import openfl.ui.Keyboard;
 
 class LineEdit extends Widget {
