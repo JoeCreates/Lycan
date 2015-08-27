@@ -9,13 +9,11 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
 import flixel.util.FlxColor;
-import lycan.world.World;
 import openfl.filters.BlurFilter;
 
 class LycanState extends FlxSubState implements LateUpdatable {
 	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
 	
-	public var world:World;
 	public var uiGroup:FlxSpriteGroup;
 	
 	public var uiCamera:FlxCamera;

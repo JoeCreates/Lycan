@@ -1,14 +1,10 @@
 package lycan.util;
 
-/**
- * @author Joe Williamson
- */
+// TODO
 class Cinematic {
-
 	public function new() {
 		
 	}
-	
 }
 
 private class CinematicEvent {

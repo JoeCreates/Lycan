@@ -1,4 +1,4 @@
-package lycan.util.queue ;
+package lycan.util.queue;
 
 interface Queue<T> {
 	function empty():Bool;

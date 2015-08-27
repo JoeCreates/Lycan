@@ -1,11 +1,11 @@
 package lycan.loading.loaders;
 
-import openfl.events.Event;
-import openfl.Lib;
 import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;
 import lycan.loading.tasks.IRunnable;
 import lycan.util.queue.IPrioritizable;
+import openfl.events.Event;
+import openfl.Lib;
 
 #if neko
 import neko.vm.Thread;

@@ -1,4 +1,4 @@
-package lycan.loading.tasks ;
+package lycan.loading.tasks;
 
 import flixel.graphics.frames.FlxAtlasFrames;
 
@@ -6,7 +6,7 @@ class FlxAtlasFramesLoadingTask extends PriorityTask implements IDataProducer<Fl
 	private var filename:String = null;
 	private var frames:FlxAtlasFrames;
 	public var data(get, null):FlxAtlasFrames;
-	public function get_data():FlxAtlasFrames {
+	private function get_data():FlxAtlasFrames {
 		return frames;
 	}
 

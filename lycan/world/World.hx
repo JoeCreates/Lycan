@@ -1,8 +1,8 @@
 package lycan.world;
 
+import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
-import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -14,17 +14,11 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import haxe.io.Path;
 import openfl.display.BitmapData;
 
-/**
- * A 2D world using Tiled maps, Nape Physics, and hxDynaLight lighting
- * 
- * Consists of TileLayers and FlxGroups of game objects.
- */
+// A 2D world using Tiled maps, Nape Physics, and hxDynaLight lighting
+// Consists of TileLayers and FlxGroups of game objects.
 class World extends FlxGroup {
-	
 	private static inline var TILESET_PATH = "assets/images/";
 	
-	
-	/** TiledMap data */
 	public var tiledMap:TiledMap;
 	
 	public var namedObjects:Map<String, FlxBasic>;
@@ -69,7 +63,6 @@ class World extends FlxGroup {
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
 				case TiledLayerType.OBJECT:					
-					// Object Layer
 					var group:ObjectLayer = new ObjectLayer(this);
 					worldLoader.load(group, cast tiledLayer);
 					namedLayers.set(tiledLayer.name, group);
@@ -121,9 +114,7 @@ class World extends FlxGroup {
 		return namedLayers.get(name);
 	}
 	
-	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void,
-		?processCallback:FlxObject->FlxObject->Bool):Bool
-	{
+	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
 		if (collidableLayers != null) {
 			for (map in collidableLayers) {
 				// IMPORTANT: Always collide the map with objects, not the other way around. 
@@ -139,4 +130,3 @@ class World extends FlxGroup {
 		super.update(dt * updateSpeed);
 	}
 }
-

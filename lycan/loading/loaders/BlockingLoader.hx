@@ -1,4 +1,4 @@
-package lycan.loading.loaders ;
+package lycan.loading.loaders;
 
 import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;

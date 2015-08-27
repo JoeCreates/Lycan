@@ -7,8 +7,6 @@ enum WorldLayerType {
 }
 
 interface WorldLayer {
-	
 	public var layerType:WorldLayerType;
 	public var world:World;
-	
 }

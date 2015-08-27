@@ -38,7 +38,6 @@ class Stars extends FlxTypedSpriteGroup<Star> {
 			add(star);
 		}
 	}
-	
 }
 
 class Star extends FlxSprite {

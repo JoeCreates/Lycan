@@ -1,4 +1,4 @@
-package lycan.loading.tasks ;
+package lycan.loading.tasks;
 
 interface IRunnable {
 	public function run():Void;

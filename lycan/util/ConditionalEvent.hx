@@ -5,7 +5,6 @@ import flixel.FlxG;
 import flixel.FlxState;
 
 class ConditionalEvent extends FlxBasic {
-	
 	public var condition:Void->Bool;
 	public var callback:ConditionalEvent->Void;
 	public var state:FlxState;

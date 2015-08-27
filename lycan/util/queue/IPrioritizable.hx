@@ -1,4 +1,4 @@
-package lycan.util.queue ;
+package lycan.util.queue;
 
 interface IPrioritizable {
 	var priority:Float;

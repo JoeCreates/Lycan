@@ -1,12 +1,9 @@
 package lycan.ui.widgets.buttons ;
 
-import flixel.FlxSprite;
-import lycan.ui.renderer.IRenderItem;
-import lycan.ui.UIObject;
-import msignal.Signal.Signal0;
-import msignal.Signal.Signal1;
 import lycan.ui.events.UIEvent.HoverEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
+import lycan.ui.UIObject;
+import msignal.Signal.Signal0;
 
 // Base class
 class Button extends Widget {	

@@ -1,4 +1,5 @@
-package lycan.loading.tasks ;
+package lycan.loading.tasks;
+
 import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;
 

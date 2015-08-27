@@ -3,7 +3,6 @@ package lycan.ai;
 import haxe.ds.GenericStack;
 import world.entities.BaseEntity;
 
-
 // A node in our behaviour-tree-with-stacks/CES hybrid AI solution
 
 class Node {

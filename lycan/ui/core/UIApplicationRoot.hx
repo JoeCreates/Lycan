@@ -6,7 +6,6 @@ import lycan.ui.events.UIEvent.PointerEvent;
 import lycan.ui.events.UIEventLoop;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
-import msignal.Signal.Signal1;
 import openfl.events.AccelerometerEvent;
 import openfl.events.Event;
 import openfl.events.FocusEvent;

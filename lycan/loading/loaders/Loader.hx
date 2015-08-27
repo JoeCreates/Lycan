@@ -1,13 +1,13 @@
-package lycan.loading.loaders ;
+package lycan.loading.loaders;
 
-import msignal.Signal.Signal0;
-import msignal.Signal.Signal1;
-import msignal.Signal.Signal2;
+import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;
 import lycan.loading.tasks.IRunnable;
 import lycan.util.queue.IPrioritizable;
 import lycan.util.queue.PriorityQueue;
-import lycan.loading.tasks.IDescribable;
+import msignal.Signal.Signal0;
+import msignal.Signal.Signal1;
+import msignal.Signal.Signal2;
 
 class Loader<T:(IPrioritizable, IRunnable, ILoadingSignalDispatcher, IDescribable)> {
 	private var queue:PriorityQueue<T> = new PriorityQueue<T>();

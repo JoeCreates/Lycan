@@ -1,6 +1,5 @@
 package lycan.ui.layouts;
 
-import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.layouts.Layout.Alignment;
