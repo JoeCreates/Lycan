@@ -10,6 +10,7 @@ extern class GUI {
 	public function add(object:Dynamic, property:Dynamic, ?args:Array<Dynamic>):GUI;
 	public function addColor(object:Dynamic, property:Dynamic):GUI;
 	public function remove(controller:Dynamic):GUI;
+	public function removeFolder(name:String):GUI;
 	public function destroy():GUI;
 	public function addFolder(name:String):GUI;
 	public function open():GUI;
