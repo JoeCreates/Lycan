@@ -1,10 +1,10 @@
 package lycan.ui.renderer.flixel;
 
 import flixel.FlxSprite;
-import flixel.math.FlxPoint;
-import lycan.ui.renderer.IRenderItem;
-import flixel.util.FlxColor;
 import flixel.group.FlxGroup;
+import flixel.math.FlxPoint;
+import flixel.util.FlxColor;
+import lycan.ui.renderer.IRenderItem;
 
 class FlxDebugRenderItem implements IRenderItem {
 	public var graphic:FlxSprite = new FlxSprite();

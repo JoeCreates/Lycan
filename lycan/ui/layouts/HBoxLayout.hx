@@ -40,7 +40,7 @@ class HBoxLayout extends BoxLayout {
 		// TODO each child widget should get at least its minimum size and at most its maximum size
 		// TODO the layout maintains an ordering of the widgets elements and implements the getNext() and getPrevious() functionality for its owner
 		
-		var area:FlxRect = owner.innerRect();
+		var area:FlxRect = owner.borderRect();
 
 		if (align.has(Alignment.HorizontalCenter)) {
 			layoutHorizonalCentered(area);
@@ -58,23 +58,32 @@ class HBoxLayout extends BoxLayout {
 	}
 	
 	private inline function layoutHorizonalCentered(area:FlxRect):Void {
-		var childrenWidth:Int = 0;
+		var childrenWidth:Float = 0;
 		for (child in owner.children) {
 			var c:Widget = cast child;
-			childrenWidth += c.width;
+			childrenWidth += c.outerRect().width;
 		}
 		
 		var numChildren:Int = owner.children.length;
-		var totalWidth:Int = childrenWidth + (spacing * (numChildren + 2));
 		
-		var baseX = Std.int(area.left + area.width/2 - totalWidth/2);
+		var totalSpacing:Float = 0;
+		if (numChildren == 0) {
+			spacing = 0;
+		} else if(numChildren % 2 == 0) {
+			totalSpacing = spacing * (numChildren + 2);
+		} else {
+			totalSpacing = spacing * (numChildren + 1);
+		}
+		
+		var totalWidth:Float = childrenWidth + totalSpacing;
+		var baseX = area.left + area.width / 2 - totalWidth / 2;
 		var baseY = getBaseY(area);
 		
 		for (child in owner.children) {
 			var c:Widget = cast child;
 			baseX += spacing;
-			c.x = baseX;
-			baseX += c.width;
+			c.x = Math.round(baseX) + Std.int((c.marginLeft + c.marginRight) / 2); // TODO where does the extra margin addition come from...? Probably a bug...
+			baseX += c.outerRect().width;
 			
 			if(align.has(Alignment.Bottom)) {
 				c.y = Std.int(baseY - c.height);

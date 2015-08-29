@@ -115,6 +115,16 @@ class Widget extends UIObject {
 		return FlxPoint.get(innerRect.x + innerRect.width / 2, innerRect.y + innerRect.height / 2); // TODO avoid FlxPoint and minimize calculation
 	}
 	
+	public function borderCenter():FlxPoint {
+		var borderRect = borderRect();
+		return FlxPoint.get(borderRect.x + borderRect.width / 2, borderRect.y + borderRect.height / 2); // TODO avoid FlxPoint and minimize calculation
+	}
+	
+	public function outerCenter():FlxPoint {
+		var outerRect = outerRect();
+		return FlxPoint.get(outerRect.x + outerRect.width / 2, outerRect.y + outerRect.height / 2); // TODO avoid FlxPoint and minimize calculation
+	}
+	
 	public function updateGeometry() {
 		// TODO
 		/*

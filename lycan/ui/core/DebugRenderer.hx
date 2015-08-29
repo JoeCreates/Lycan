@@ -34,7 +34,7 @@ class DebugRenderer extends FlxSprite {
 				var outer = w.outerRect();
 				var border = w.borderRect();
 				var inner = w.innerRect();
-				var center = w.innerCenter();
+				var center = w.outerCenter();
 				
 				var rectLineColor = FlxColor.RED;
 				
@@ -63,7 +63,8 @@ class DebugRenderer extends FlxSprite {
 				FlxSpriteUtil.drawLine(this, center.x, center.y + Math.min(20, inner.width / 6), center.x, center.y - Math.min(20, inner.width / 6), centerLineStyle);
 				FlxSpriteUtil.drawLine(this, center.x - Math.min(20, inner.width / 6), center.y, center.x + Math.min(20, inner.width / 6), center.y, centerLineStyle);
 				
-				text.text = w.name + ": (" + w.x + "," + w.y + "), (" + w.width + "," + w.height + ")";
+				//text.text = w.name + ": (" + w.x + "," + w.y + "), (" + w.width + "," + w.height + ")";
+				text.text = "(" + w.x + "," + w.y + "),(" + w.width + "," + w.height + ");\n(" + center.x + "," + center.y + ")";
 				text.x = w.x;
 				text.y = w.y;
 				text.draw();
