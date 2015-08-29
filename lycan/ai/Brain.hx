@@ -90,11 +90,6 @@ class Brain {
 		}
 	}
 	
-	// TODO is there anything a brain would do in an update method? can't think of anything atm
-	public inline function update(dt:Float):Void {
-		
-	}
-	
 	// TODO need to do a deep comparison - the behaviour may only really the same if the children, histories, queued futures are equal too
 	// TODO it would make more sense if we could easily compute a value/number for checking for a behaviour somehow - like with a mask on a bitfield but taking into account the stuff above too
  	public function hasBehaviour(behaviour:Node):Bool {

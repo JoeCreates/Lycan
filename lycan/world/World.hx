@@ -26,6 +26,10 @@ typedef WorldObjectLoader = TiledObject->ObjectLayer->FlxBasic;
 class World extends FlxGroup {
 	private static inline var TILESET_PATH = "assets/images/"; // TODO avoid explicit path if possible
 	
+	// Property keys
+	private static inline var WORLD_NAME = "name";
+	
+	public var name(default, null):String;
 	public var scale(default, null):FlxPoint;
 	public var updateSpeed:Float;
 	public var signal_loadingProgress(default, null):Signal1<Float>;
@@ -52,6 +56,13 @@ class World extends FlxGroup {
 	
 	public function load(tiledLevel:FlxTiledAsset, loaderDefinitions:Map<String, WorldObjectLoader>):Void {
 		var tiledMap = new TiledMap(tiledLevel);
+		
+		if (tiledMap.properties != null && tiledMap.properties.contains(WORLD_NAME)) {
+			name = tiledMap.properties.get(WORLD_NAME);
+		}
+		if (name == null) {
+			name = "Unnamed World";
+		}
 		
 		// Camera scroll bounds
 		FlxG.camera.setScrollBoundsRect(0, 0, tiledMap.fullWidth * scale.x, tiledMap.fullHeight * scale.x, true);
@@ -84,53 +95,71 @@ class World extends FlxGroup {
 					namedLayers.set(tiledLayer.name, group);
 					for (m in group) {
 						if (Std.is(m, FlxObject)) {
-							var o:FlxObject = cast m;
+							var o = cast (m, FlxObject);
 							o.x *= scale.x;
 							o.y *= scale.y;
 						}
 					}
 					add(group);
 				case TiledLayerType.TILE:
-					var tileLayer:TileLayer = loadTileLayer(tiledMap, cast tiledLayer, combinedTileset);
+					var layer:TileLayer = new TileLayer(this);
+					var tileLayer:TileLayer = loadTileLayer(layer, scale, collidableLayers, tiledMap, cast tiledLayer, combinedTileset);
 					namedLayers.set(tiledLayer.name, tileLayer);
 					add(tileLayer);
+				default:
+					trace("Encountered unknown TiledLayerType");
 			}
 			
 			var loadingProgressPercent:Float = (layersLoaded / tiledMap.layers.length) * 100;
 			signal_loadingProgress.dispatch(loadingProgressPercent);
 			layersLoaded++;
 		}
+		
+		loaded = true;
 	}
 	
-	public function loadTileLayer(tiledMap:TiledMap, tiledLayer:TiledTileLayer, combinedTileset:FlxTilemapGraphicAsset):TileLayer {
-		var tilemap:TileLayer = new TileLayer(this);
-		var mapWidth:Int = Std.int(tiledMap.fullWidth * scale.x);
-		var mapHeight:Int = Std.int(tiledMap.fullHeight * scale.y);
+	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
+		if (collidableLayers == null) {
+			return false;
+		}
 		
-		tilemap.loadMapFromArray(tiledLayer.tileArray, tiledMap.width,  tiledMap.height, combinedTileset, Std.int(tiledMap.tileWidth),  Std.int(tiledMap.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
-		tilemap.scale.copyFrom(scale);
-		
-		// Collidable layers
-		if (tiledLayer.properties.contains("collision")) {
-			tilemap.solid = true;
-			collidableLayers.push(tilemap);
-			if (tiledLayer.properties.get("collision") == "oneway") {
-				tilemap.allowCollisions = FlxObject.UP;
+		for (map in collidableLayers) {
+			// NOTE Always collide the map with objects, not the other way around
+			if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
+				return true;
 			}
 		}
 		
-		if (tiledLayer.properties.contains("hide")) {
-			tilemap.visible = false;
+		return false;
+	}
+	
+	// Implements loading of tiles into a world from a TiledMap
+	private static function loadTileLayer(layer:TileLayer, scale:FlxPoint, collidableLayers:Array<TileLayer>, tiledMap:TiledMap, tiledLayer:TiledTileLayer, combinedTileset:FlxTilemapGraphicAsset):TileLayer {
+		layer.loadMapFromArray(tiledLayer.tileArray, tiledMap.width, tiledMap.height, combinedTileset, Std.int(tiledMap.tileWidth), Std.int(tiledMap.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
+		layer.scale.copyFrom(scale);
+		
+		// Collidable layers
+		if (tiledLayer.properties.contains("collision")) {
+			layer.solid = true;
+			collidableLayers.push(layer);
+			if (tiledLayer.properties.get("collision") == "oneway") {
+				layer.allowCollisions = FlxObject.UP;
+			}
 		}
 		
-		return tilemap;
+		// TODO implement this using passed-in handler functions like objects
+		if (tiledLayer.properties.contains("hide")) {
+			layer.visible = false;
+		}
+		
+		return layer;
 	}
 	
 	// Implements loading of objects into a world from a TiledMap using supplied handler functions (world object loaders)
 	// Load the objects from a tiled map into a world 
 	// @param	layer The layer into which objects will be loaded
 	// @param	tiledLayer The Tiled layer data from which the world will be loaded
-	public static function loadObjectLayer(layer:ObjectLayer, tiledLayer:TiledObjectLayer, loaderDefinitions:Map<String, WorldObjectLoader>):Void {
+	private static function loadObjectLayer(layer:ObjectLayer, tiledLayer:TiledObjectLayer, loaderDefinitions:Map<String, WorldObjectLoader>):Void {
 		for (o in tiledLayer.objects) {
 			if (!loaderDefinitions.exists(o.type)) {
 				throw ("Error loading world. Unknown object type: " + o.type);
@@ -149,21 +178,6 @@ class World extends FlxGroup {
 				layer.add(basic);
 			}
 		}
-	}
-	
-	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
-		if (collidableLayers == null) {
-			return false;
-		}
-		
-		for (map in collidableLayers) {
-			// NOTE Always collide the map with objects, not the other way around
-			if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	override public function update(dt:Float):Void {

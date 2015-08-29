@@ -3,19 +3,19 @@ package lycan.world;
 import flixel.group.FlxGroup;
 import flixel.tile.FlxTilemap;
 
-enum WorldLayerType {
+enum LayerType {
 	TILE;
 	OBJECT;
 	OTHER;
 }
 
 interface Layer {
-	public var layerType(default, null):WorldLayerType;
+	public var layerType(default, null):LayerType;
 	public var world(default, null):World;
 }
 
 class ObjectLayer extends FlxGroup implements Layer {
-	public var layerType(default, null):WorldLayerType = WorldLayerType.OBJECT;
+	public var layerType(default, null):LayerType = LayerType.OBJECT;
 	public var world(default, null):World;
 	
 	public function new(world:World) {
@@ -25,7 +25,7 @@ class ObjectLayer extends FlxGroup implements Layer {
 }
 
 class TileLayer extends FlxTilemap implements Layer {
-	public var layerType(default, null):WorldLayerType = WorldLayerType.TILE;
+	public var layerType(default, null):LayerType = LayerType.TILE;
 	public var world(default, null):World;
 	
 	public function new(world:World) {

@@ -1,7 +1,7 @@
 package lycan.ai;
 
 import haxe.ds.GenericStack;
-import world.entities.BaseEntity;
+import world.entities.Actor;
 
 // A node in our behaviour-tree-with-stacks/CES hybrid AI solution
 
@@ -9,7 +9,7 @@ class Node {
 	public var id(default, null):Int;
 	private static var idCounter:Int = 0;
 	
-	private var entity:BaseEntity;
+	private var entity:Actor;
 	
 	private var history = new GenericStack<Node>();
 	private var future = new GenericStack<Node>();
