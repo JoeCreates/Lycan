@@ -114,8 +114,6 @@ class World extends FlxGroup {
 			signal_loadingProgress.dispatch(loadingProgressPercent);
 			layersLoaded++;
 		}
-		
-		loaded = true;
 	}
 	
 	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
