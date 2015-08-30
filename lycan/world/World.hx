@@ -21,7 +21,7 @@ import openfl.display.BitmapData;
 import flixel.addons.editors.tiled.TiledLayer;
 
 typedef WorldObjectLoader = TiledObject->ObjectLayer->FlxBasic;
-typedef TileLayerLoader = TileLayer->TiledTileLayer->Array<TileLayer>->Void;
+typedef TileLayerLoader = TileLayer->TiledTileLayer->Array<TileLayer>->String->Void;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
@@ -118,7 +118,7 @@ class World extends FlxGroup {
 		}
 	}
 	
-	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
+	public static function collideWithLevel<T, U>(obj:FlxBasic, collidableLayers:Array<TileLayer>, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
 		if (collidableLayers == null) {
 			return false;
 		}
@@ -138,12 +138,12 @@ class World extends FlxGroup {
 		layer.loadMapFromArray(tiledLayer.tileArray, tiledMap.width, tiledMap.height, combinedTileset, Std.int(tiledMap.tileWidth), Std.int(tiledMap.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
 		layer.scale.copyFrom(scale);
 		
-		for (prop in tiledLayer.properties.keysIterator()) {
-			var loader = loaderDefinitions.get(prop);
+		for (key in tiledLayer.properties.keysIterator()) {
+			var loader = loaderDefinitions.get(key);
 			if (loader != null) {
-				loader(layer, tiledLayer, collidableLayers);
+				loader(layer, tiledLayer, collidableLayers, tiledLayer.properties.get(key));
 			} else {
-				trace("Tile layer loader encountered unhandled property: " + prop);
+				trace("Tile layer loader encountered unhandled key: " + key);
 			}
 		}
 		
