@@ -52,16 +52,24 @@ class LineEdit extends Widget {
 	private function set_textGraphic(graphic:ITextRenderItem) {
 		width = graphic.get_width();
 		height = graphic.get_height();
+		graphic.set_x(x);
+		graphic.set_y(y);
 		return this.textGraphic = graphic;
 	}
 	
 	override private function set_x(x:Int):Int {
-		textGraphic.set_x(x);		
+		if(textGraphic != null) {
+			textGraphic.set_x(x);	
+		}
+		
 		return super.set_x(x);
 	}
 	
 	override private function set_y(y:Int):Int {
-		textGraphic.set_y(y);
+		if (textGraphic != null) {
+			textGraphic.set_y(y);
+		}
+		
 		return super.set_y(y);
 	}
 }

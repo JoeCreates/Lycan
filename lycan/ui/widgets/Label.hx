@@ -18,12 +18,18 @@ class Label extends Widget {
 	}
 	
 	override private function set_x(x:Int):Int {
-		graphic.set_x(x);		
+		if(graphic != null) {
+			graphic.set_x(x);	
+		}
+		
 		return super.set_x(x);
 	}
 	
 	override private function set_y(y:Int):Int {
-		graphic.set_y(y);
+		if (graphic != null) {
+			graphic.set_y(y);
+		}
+		
 		return super.set_y(y);
 	}
 }

@@ -53,18 +53,22 @@ class SimpleHorizontalSlider extends AbstractSlider {
 	}
 	
 	private function updateHandlePosition():Void {
-		var nextX = barGraphic.get_x() + (barGraphic.get_width() * (value / maximum) - (handleGraphic.get_width() / 2));
-		var nextY = barGraphic.get_y() + (barGraphic.get_height() / 2) - (handleGraphic.get_height() / 2);
-		
-		handleGraphic.set_x(cast nextX);
-		handleGraphic.set_y(cast nextY);
+		if(handleGraphic != null) {
+			var nextX = barGraphic.get_x() + (barGraphic.get_width() * (value / maximum) - (handleGraphic.get_width() / 2));
+			var nextY = barGraphic.get_y() + (barGraphic.get_height() / 2) - (handleGraphic.get_height() / 2);
+			
+			handleGraphic.set_x(Std.int(nextX));
+			handleGraphic.set_y(Std.int(nextY));
+		}
 	}
 	
 	private function updateBarPosition():Void {
-		var nextX = x + width / 2 - barGraphic.get_width() / 2;
-		var nextY = y + height / 2 - barGraphic.get_height() / 2;
-		
-		barGraphic.set_x(cast nextX);
-		barGraphic.set_y(cast nextY);
+		if(barGraphic != null) {
+			var nextX = x + width / 2 - barGraphic.get_width() / 2;
+			var nextY = y + height / 2 - barGraphic.get_height() / 2;
+			
+			barGraphic.set_x(Std.int(nextX));
+			barGraphic.set_y(Std.int(nextY));
+		}
 	}
 }

@@ -22,7 +22,6 @@ class UIObject {
 	private var eventFilters:List<UIObject>;
 	
 	public function new(?parent:UIObject = null, ?name:String = null) {
-		this.parent = parent;
 		this.name = name;
 		id = idTick++;
 		sendChildEvents = true;
@@ -30,6 +29,8 @@ class UIObject {
 		
 		children = new List<UIObject>();
 		eventFilters = new List<UIObject>();
+		
+		this.parent = parent;
 	}
 	
 	public function installEventFilter(filter:UIObject):Void {
