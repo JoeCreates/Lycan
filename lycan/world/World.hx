@@ -18,8 +18,10 @@ import lycan.world.Layer;
 import lycan.world.Layer.TileLayer;
 import msignal.Signal.Signal1;
 import openfl.display.BitmapData;
+import flixel.addons.editors.tiled.TiledLayer;
 
 typedef WorldObjectLoader = TiledObject->ObjectLayer->FlxBasic;
+typedef TileLayerLoader = TileLayer->TiledTileLayer->Array<TileLayer>->Void;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
@@ -54,7 +56,7 @@ class World extends FlxGroup {
 		signal_loadingProgress = new Signal1<Float>();
 	}
 	
-	public function load(tiledLevel:FlxTiledAsset, loaderDefinitions:Map<String, WorldObjectLoader>):Void {
+	public function load(tiledLevel:FlxTiledAsset, loaderDefinitions:Map<String, WorldObjectLoader>, tileLayerLoadingDefinitions:Map<String, TileLayerLoader>):Void {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		if (tiledMap.properties != null && tiledMap.properties.contains(WORLD_NAME)) {
@@ -103,7 +105,7 @@ class World extends FlxGroup {
 					add(group);
 				case TiledLayerType.TILE:
 					var layer:TileLayer = new TileLayer(this);
-					var tileLayer:TileLayer = loadTileLayer(layer, scale, collidableLayers, tiledMap, cast tiledLayer, combinedTileset);
+					var tileLayer:TileLayer = loadTileLayer(layer, scale, collidableLayers, tiledMap, cast tiledLayer, combinedTileset, tileLayerLoadingDefinitions);
 					namedLayers.set(tiledLayer.name, tileLayer);
 					add(tileLayer);
 				default:
@@ -132,22 +134,17 @@ class World extends FlxGroup {
 	}
 	
 	// Implements loading of tiles into a world from a TiledMap
-	private static function loadTileLayer(layer:TileLayer, scale:FlxPoint, collidableLayers:Array<TileLayer>, tiledMap:TiledMap, tiledLayer:TiledTileLayer, combinedTileset:FlxTilemapGraphicAsset):TileLayer {
+	private static function loadTileLayer(layer:TileLayer, scale:FlxPoint, collidableLayers:Array<TileLayer>, tiledMap:TiledMap, tiledLayer:TiledTileLayer, combinedTileset:FlxTilemapGraphicAsset, loaderDefinitions:Map<String, TileLayerLoader>):TileLayer {
 		layer.loadMapFromArray(tiledLayer.tileArray, tiledMap.width, tiledMap.height, combinedTileset, Std.int(tiledMap.tileWidth), Std.int(tiledMap.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
 		layer.scale.copyFrom(scale);
 		
-		// Collidable layers
-		if (tiledLayer.properties.contains("collision")) {
-			layer.solid = true;
-			collidableLayers.push(layer);
-			if (tiledLayer.properties.get("collision") == "oneway") {
-				layer.allowCollisions = FlxObject.UP;
+		for (prop in tiledLayer.properties.keysIterator()) {
+			var loader = loaderDefinitions.get(prop);
+			if (loader != null) {
+				loader(layer, tiledLayer, collidableLayers);
+			} else {
+				trace("Tile layer loader encountered unhandled property: " + prop);
 			}
-		}
-		
-		// TODO implement this using passed-in handler functions like objects
-		if (tiledLayer.properties.contains("hide")) {
-			layer.visible = false;
 		}
 		
 		return layer;
