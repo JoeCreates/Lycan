@@ -75,11 +75,11 @@ class VBoxLayout extends BoxLayout {
 			baseY += c.outerRect().height;
 			
 			if(align.containsAll(Alignment.LEFT)) {
-				c.y = Std.int(baseX - c.width);
+				c.x = Std.int(baseX - c.width);
 			} else if (align.containsAll(Alignment.HORIZONTAL_CENTER)) {
-				c.y = Std.int(baseX - c.width / 2);
+				c.x = Std.int(baseX - c.width / 2);
 			} else if (align.containsAll(Alignment.RIGHT)) {
-				c.y = Std.int(baseX);
+				c.x = Std.int(baseX);
 			}
 		}
 	}
@@ -114,6 +114,9 @@ class VBoxLayout extends BoxLayout {
 		
 		if (align.containsAll(Alignment.LEFT)) {
 			baseX = Std.int(area.left + spacing);
+		}
+		else if (align.containsAll(Alignment.HORIZONTAL_CENTER)) {
+			baseX = Std.int(area.left + area.width / 2);
 		}
 		else if (align.containsAll(Alignment.RIGHT)) {
 			baseX = Std.int(area.right - spacing);
