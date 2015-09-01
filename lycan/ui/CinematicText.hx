@@ -1,10 +1,9 @@
-package lycan.ui ;
+package lycan.ui;
 
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 
 class CinematicText extends FlxSpriteGroup {
-	
 	public var letters:Array<CinematicLetter>;
 	public var fullText:FlxText;
 	public var minYMotion:Float = 10;
@@ -42,23 +41,23 @@ class CinematicText extends FlxSpriteGroup {
 	public function show():Void {
 		var i = 0;
 		for (letter in letters) {
-			showLetter(letter, i);
-			i++;
+			showLetter(letter, i++);
 		}
 	}
 	
 	public function hide():Void {
 		var i = 0;
 		for (letter in letters) {
-			hideLetter(letter, i);
-			i++;
+			hideLetter(letter, i++);
 		}
 	}
 	
 	public function showLetter(letter:CinematicLetter, index:Int):Void {
+		throw "Implement me";
 	}
 	
 	public function hideLetter(letter:CinematicLetter, index:Int):Void {
+		throw "Implement me";
 	}
 	
 	private function set_finishedShowing(finished:Bool):Bool {
@@ -87,9 +86,7 @@ class CinematicText extends FlxSpriteGroup {
 		for (item in group) {
 			item.destroy();
 		}
-		
 		group.clear();
-		
 		super.destroy();
 	}
 }

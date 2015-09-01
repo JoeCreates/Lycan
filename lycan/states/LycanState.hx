@@ -29,8 +29,8 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	/** Map of IDs to tweens that should be cancelled before another tween of the same ID plays */
 	public var exclusiveTweens:Map<String, FlxTween>;
 	
-	override public function create():Void {
-		super.create();
+	public function new() {
+		super();
 		
 		exclusiveTweens = new Map<String, FlxTween>();
 		
@@ -50,6 +50,10 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		uiGroup.cameras = [uiCamera];
 		
 		add(uiGroup);
+	}
+	
+	override public function create():Void {
+		super.create();
 	}
 	
 	override public function update(dt:Float):Void {
