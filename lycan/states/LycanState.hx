@@ -4,17 +4,20 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSubState;
+import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
 import flixel.util.FlxColor;
-import openfl.filters.BlurFilter;
 
+// Base state for all substates in a game
 class LycanState extends FlxSubState implements LateUpdatable {
+	#if debug
 	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
+	#end
 	
-	public var uiGroup:FlxSpriteGroup;
+	public var uiGroup:FlxGroup;
 	
 	public var uiCamera:FlxCamera;
 	public var worldCamera:FlxCamera;
@@ -43,27 +46,27 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		worldZoom = 1;
 		
 		// Groups
-		uiGroup = new FlxSpriteGroup();
+		uiGroup = new FlxGroup();
 		uiGroup.cameras = [uiCamera];
 		
 		add(uiGroup);
-		
-		var blur:BlurFilter = new BlurFilter();
-		worldCamera.flashSprite.filters.push(blur);
-		worldCamera.flashSprite.filters = worldCamera.flashSprite.filters;
 	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
 		
+		#if debug
 		updatesWithoutLateUpdates++;
 		if (updatesWithoutLateUpdates > 1) {
 			throw("lateUpdate has not been called since last update");
 		}
+		#end
 	}
 	
 	public function lateUpdate(dt:Float) {
+		#if debug
 		updatesWithoutLateUpdates = 0;
+		#end
 		
 		forEach(function(o:FlxBasic) {
 			if (Std.is(o, LateUpdatable)) {
@@ -83,8 +86,9 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	}
 	
 	public function zoomTo(zoom:Float, duration:Float = 0.5, ?ease:Float->Float):FlxTween {
-		if (ease == null) ease = FlxEase.quadInOut;
-		
+		if (ease == null) {
+			ease = FlxEase.quadInOut;
+		}
 		if (zoomTween != null) {
 			zoomTween.cancel();
 		}
@@ -99,6 +103,6 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	}
 	
 	//TODO autotweening
-	//TODO camera targetting
+	//TODO camera targeting
 	//TODO sound fading
 }
