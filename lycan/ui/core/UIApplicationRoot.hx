@@ -29,13 +29,12 @@ class UIApplicationRoot {
 	private var gestureRecognizers:Array<GestureRecognizer> = new Array<GestureRecognizer>();
 	private var listenersAttached:Bool = false;
 	
-	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
-	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
-	
 	// Assumes there can only be one top level widget active at any one time
 	// TODO a solution to this is probably to use a stack/priority queue of TLWs - only one gets updated at a time, but multiple ones can still be active and rendering
 	@:isVar public var topLevelWidget(get, set):Widget = null;
 	
+	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
+	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
 	// TODO this gets screwed if you resize the window on Flash and move the mouse about - probably a mouse coordinate problem
 	private var hoveredWidget(default, set):Widget = null;
 	
@@ -48,7 +47,7 @@ class UIApplicationRoot {
 	}
 	
 	/*
-	// Returns the next selectable selectable widget in the direction given
+	// Returns the next selectable widget in the direction given
 	private function getNextSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
 		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
 		// Should be useful for gamepads
@@ -100,8 +99,8 @@ class UIApplicationRoot {
 	private function onResize(e:Event) {
 		Sure.sure(topLevelWidget != null);
 		trace("TLW resized");
-		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
 		
+		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
 		// TODO only if the TLW should resize rather than ignoring and letting flixel do the scaling or whatever?
 		// sendEvent(topLevelWidget, new ResizeEvent());
 		
@@ -150,6 +149,7 @@ class UIApplicationRoot {
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
+		// TODO hack for flash touch coordinates is to multiply by (GAME_WIDTH / Lib.current.stage.width)
 		handlePointerDown(e.localX, e.localY, e.buttonDown);
 	}
 	

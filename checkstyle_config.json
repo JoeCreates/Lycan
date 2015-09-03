@@ -233,19 +233,6 @@
             }
         },
         {
-            "type": "PublicPrivate",
-            "props": {
-                "severity": "INFO"
-            }
-        },
-        {
-            "type": "Return",
-            "props": {
-                "severity": "INFO",
-                "allowEmptyReturn": true
-            }
-        },
-        {
             "type": "Spacing",
             "props": {
                 "severity": "INFO",

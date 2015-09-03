@@ -8,7 +8,7 @@ import haxe.io.Path;
 import openfl.events.Event;
 import openfl.Lib;
 
-// Utility for taking a single screenshot across several screen resolutions on native platforms
+// Utility for taking screenshots across several screen resolutions on native platforms
 class BatchScreenGrab {
 	private var path:Path;
 	private var baseFilename:String;
