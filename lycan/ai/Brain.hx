@@ -31,10 +31,6 @@ enum UnprioritizedBehaviourHandlingMode {
 [06:09:01] Joe Williamson: a suggestion also includes an invariant function
 [06:09:16] Joe Williamson: this is checked every frame to determine if we should stay in the state
 [06:09:18] Joe Williamson: or exit it
-[06:26:26] Joe Williamson: it finally cut out
-[06:30:13] Joe Williamson: tweens.get.tween()
-[06:32:20] Joe Williamson: FlxTween.tween()
-[06:32:32] Joe Williamson: FlxTween.on(this).tween
 */
 
 // AI for a game entity
