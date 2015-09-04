@@ -37,7 +37,7 @@ class ConstantRatePath extends BasePath {
 	public var offset:FlxPoint; // TODO
 	public var path:Array<FlxPoint>; // Path data
 	public var pathIndex(default, set):Int;
-	public var traversalMode(default, set):TraversalMode;
+	public var traversalMode(default, null):TraversalMode;
 	
 	#if debug
 	public var debugColor:FlxColor;
