@@ -172,15 +172,14 @@ private class FileReference {
 		fieldDocumentation = "\"" + value + "\" (auto generated).";
 	}
 	
-	private static function validateValue(value:String):Void
-	{
+	private static function validateValue(value:String):Void {
 		// Check if file name should work on all platforms
 		// Note that some platforms have a lot of restrictions
 		// For example, Windows won't accept names like COM, AUX, NUL, COM1 to COM9, LPT1 to LPT9
 		var nameValidation:EReg = ~/[a-z0-9_]+\.[a-z][a-z][a-z]?/;
 		
 		if (!nameValidation.match(value)) {
-			Context.warning("Warning : [ " + value + " ] may be an invalid filename on some systems ", Context.currentPos() );
+			Context.warning("Warning : [ " + value + " ] may be an invalid filename on some systems ", Context.currentPos());
 		}
 	}
 }

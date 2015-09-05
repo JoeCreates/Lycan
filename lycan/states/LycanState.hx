@@ -4,7 +4,6 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSubState;
-import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -14,19 +13,19 @@ import flixel.util.FlxColor;
 // Base state for all substates in a game
 class LycanState extends FlxSubState implements LateUpdatable {
 	#if debug
-	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
+	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called // TODO remove
 	#end
 	
-	public var uiGroup:FlxSpriteGroup;
-	
-	public var uiCamera:FlxCamera;
-	public var worldCamera:FlxCamera;
+	public var uiGroup(default, null):FlxSpriteGroup;
+	public var uiCamera(default, null):FlxCamera;
+	public var worldCamera(default, null):FlxCamera;
 	
 	public var worldZoom(default, set):Float;
 	public var baseZoom:Float;
 	
-	public var zoomTween:FlxTween;
-	/** Map of IDs to tweens that should be cancelled before another tween of the same ID plays */
+	public var zoomTween(default, null):FlxTween;
+	
+	// Tweens that should be cancelled before another tween of the same ID plays
 	public var exclusiveTweens:Map<String, FlxTween>;
 	
 	public function new() {
@@ -34,11 +33,9 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		
 		exclusiveTweens = new Map<String, FlxTween>();
 		
-		// Cameras
 		worldCamera = FlxG.camera;
-		
 		// TODO avoid creating a new UI camera every time? Or make sure it's disposed of when destroying...
-		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
+		uiCamera = LycanRootState.getInstance().uiCamera;
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
 		
 		FlxG.cameras.add(uiCamera);
@@ -47,11 +44,9 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		baseZoom = worldCamera.zoom;
 		worldZoom = 1;
 		
-		// Groups
 		uiGroup = new FlxSpriteGroup();
 		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
-		
 		add(uiGroup);
 	}
 	
@@ -103,13 +98,13 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		return zoomTween;
 	}
 	
+	// Sets world and camera zoom
 	private function set_worldZoom(worldZoom:Float):Float {
-		// Set world and camera zoom
 		worldCamera.zoom = baseZoom * worldZoom;
 		return this.worldZoom = worldZoom;
 	}
 	
-	//TODO autotweening
-	//TODO camera targeting
-	//TODO sound fading
+	// TODO autotweening
+	// TODO camera targeting
+	// TODO sound fading
 }

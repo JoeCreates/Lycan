@@ -8,8 +8,8 @@ import flixel.util.FlxSpriteUtil;
 import openfl.display.Graphics;
 
 using lycan.util.BitSet;
+using lycan.util.IntExtensions;
 
-// TODO make easier ways to yoyo, loop etc
 enum TraversalMode {
 	FORWARD;
 	BACKWARD;
@@ -205,8 +205,7 @@ class ConstantRatePath extends BasePath {
 			default:
 		}
 		
-		// TODO
-		this.pathIndex = cast Math.max(0.0, cast Math.min(cast index, cast path.length - 1));
+		this.pathIndex = index.clamp(0, path.length - 1);
 		
 		if (setComplete) {
 			complete = true;
@@ -280,7 +279,7 @@ class ConstantRatePath extends BasePath {
 			g.drawRect(x - nodeSize * 0.5, y - nodeSize * 0.5, nodeSize, nodeSize);
 			g.endFill();
 
-			// Then find the next node in the path
+			// Get the next node
 			var nextNode:FlxPoint;
 			var lineAlpha:Float = 1.0;
 			if (idx < len - 1) {
@@ -289,9 +288,9 @@ class ConstantRatePath extends BasePath {
 				nextNode = path[idx];
 			}
 			
-			// Then draw a line to the next node
+			// Draw a line to the next node
 			g.moveTo(x, y);
-			g.lineStyle(1, debugColor, lineAlpha);
+			g.lineStyle(2, debugColor, lineAlpha);
 			x = nextNode.x - camera.scroll.x;
 			y = nextNode.y - camera.scroll.y;
 			g.lineTo(x, y);

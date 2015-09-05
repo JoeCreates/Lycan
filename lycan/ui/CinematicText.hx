@@ -3,7 +3,7 @@ package lycan.ui;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 
-class CinematicText extends FlxSpriteGroup {
+class CinematicText extends FlxSpriteGroup {	
 	public var letters:Array<CinematicLetter>;
 	public var fullText:FlxText;
 	public var minYMotion:Float = 10;
