@@ -17,7 +17,7 @@ class World extends FlxGroup {
 	public var scale(default, null):FlxPoint;
 	public var name:String;
 	public var updateSpeed:Float;
-	public var signal_loadingProgress(default, null):Signal1<Float>;
+	public var signal_loadingProgressed(default, null):Signal1<Float>;
 	
 	private var namedObjects(default, null):Map<String, FlxBasic>;
 	private var namedLayers(default, null):Map<String, Layer>;
@@ -37,7 +37,7 @@ class World extends FlxGroup {
 		namedLayers = new Map<String, Layer>();
 		collidableLayers = new Array<TileLayer>();
 		
-		signal_loadingProgress = new Signal1<Float>();
+		signal_loadingProgressed = new Signal1<Float>();
 	}
 	
 	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {

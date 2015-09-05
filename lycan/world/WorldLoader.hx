@@ -117,6 +117,7 @@ class WorldLoader {
 					world.add(group);
 				case TiledLayerType.TILE:
 					var layer:TileLayer = new TileLayer(world);
+					layer.useScaleHack = true;
 					var tileLayer:TileLayer = loadTileLayer(layer, world.scale, world.collidableLayers, tiledMap, cast tiledLayer, combinedTileset, loadingRules.tileLayerRules);
 					world.namedLayers.set(tiledLayer.name, tileLayer);
 					world.add(tileLayer);
@@ -125,7 +126,7 @@ class WorldLoader {
 			}
 			
 			var loadingProgressPercent:Float = (layersLoaded / tiledMap.layers.length) * 100;
-			world.signal_loadingProgress.dispatch(loadingProgressPercent);
+			world.signal_loadingProgressed.dispatch(loadingProgressPercent);
 			layersLoaded++;
 		}
 		

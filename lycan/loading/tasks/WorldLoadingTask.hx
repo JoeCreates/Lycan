@@ -20,7 +20,7 @@ class WorldLoadingTask extends PriorityTask {
 		this.loadingRules = loadingRules;
 		world = new World(scale);
 		
-		world.signal_loadingProgress.add(onLoadingProgressed);
+		world.signal_loadingProgressed.add(onLoadingProgressed);
 	}
 	
 	override public function run():Void {

@@ -9,7 +9,7 @@ import lycan.ui.core.UIApplicationRoot;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
 
-// HaxeFlixel debug/development rendererer for UI elements
+// HaxeFlixel debug/development renderer for UI elements
 @:access(lycan.ui.core.UIApplicationRoot)
 @:access(lycan.ui.UIObject)
 class DebugRenderer extends FlxSprite {

@@ -1,6 +1,6 @@
 package lycan.util;
 
-// TODO
+// TODO what is this even? Events on a timeline? cinder::Timeline worth looking at
 class Cinematic {
 	public function new() {
 		

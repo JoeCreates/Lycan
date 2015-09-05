@@ -24,56 +24,35 @@ enum AdvanceMode {
 
 // Moves a point along an array of 2D points in a linear fashion at a given rate, traversing at most one point per update
 class ConstantRatePath extends BasePath {
-	public var signal_pauseToggled = new Signal2<BasePath, Bool>();
-	public var signal_cancelled = new Signal1<BasePath>();
-	public var signal_complete = new Signal1<BasePath>();
-	
 	public var rate:Float;
 	public var active(default, set):Bool;
 	//public var bearing(default, null):Float; // Angle in degrees between current and next point in the path // TODO
 	public var complete(default, set):Bool;
 	
 	public var point:FlxPoint; // The point that will follow the path
-	public var offset:FlxPoint; // TODO
 	public var path:Array<FlxPoint>; // Path data
 	public var pathIndex(default, set):Int;
 	public var traversalMode(default, null):TraversalMode;
 	
-	#if debug
-	public var debugColor:FlxColor;
-	public var debugScrollX:Float;
-	public var debugScrollY:Float;
-	public var drawDebug:Bool;
-	#end
-	
 	public function new() {
+		super();
+		
 		rate = 0;
 		active = false;
 		complete = false;
 		
 		point = null;
-		offset = null;
+		point = null;
 		path = null;
 		pathIndex = 0;
 		traversalMode = FORWARD;
-		
-		#if debug
-		debugColor = 0xFF00FF;
-		debugScrollX = 1.0;
-		debugScrollY = 1.0;
-		drawDebug = true;
-		#end
 	}
 	
-	public function init(point:FlxPoint, path:Array<FlxPoint>, rate:Float = 100, ?mode:TraversalMode, ?offset:FlxPoint):ConstantRatePath {
+	public function init(point:FlxPoint, path:Array<FlxPoint>, rate:Float = 100, ?mode:TraversalMode):ConstantRatePath {
 		if (mode == null) {
 			mode = FORWARD;
 		}
-		if (offset == null) {
-			offset = FlxPoint.get();
-		}
 		this.point = point;
-		this.offset = offset;
 		this.path = path;
 		this.rate = rate;
 		this.traversalMode = mode;
@@ -81,6 +60,12 @@ class ConstantRatePath extends BasePath {
 		reset();
 		
 		return this;
+	}
+	
+	public function start():Void {
+		Sure.sure(!complete);
+		Sure.sure(!active);
+		active = true;
 	}
 	
 	public function reset():ConstantRatePath {
@@ -108,7 +93,7 @@ class ConstantRatePath extends BasePath {
 		Sure.sure(point != null);
 		Sure.sure(path != null);
 		
-		if (complete) {
+		if (!active) {
 			return;
 		}
 		
@@ -128,11 +113,11 @@ class ConstantRatePath extends BasePath {
 		// Move the point
 		// TODO add different techniques for doing this
 		if (!current.equals(point)) {
-			moveTowardsTarget(point, current, offset, rate, dt);
+			moveTowardsTarget(point, current, rate, dt);
 		}
 	}
 	
-	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, offset:FlxPoint, speed:Float, dt:Float):Void {
+	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {
 		// TODO avoid jittering on x/y. Use velocity?
 		
 		var dx:Float;
@@ -160,7 +145,7 @@ class ConstantRatePath extends BasePath {
 	private function advancePath(mode:AdvanceMode):FlxPoint {
 		if (mode == SNAP_TO_NEAREST) {
 			var node:FlxPoint = path[pathIndex];
-			point.copyFrom(node).addPoint(offset);
+			point.copyFrom(node);
 		}
 		
 		switch(traversalMode) {
@@ -189,15 +174,17 @@ class ConstantRatePath extends BasePath {
 		}
 		
 		if (this.complete && !complete) {
-			return complete;
+			return this.complete = complete;
 		}
 		
 		if (!this.complete && complete) {
 			this.complete = true;
-			signal_complete.dispatch(this);
+			signal_completed.dispatch(this);
+		} else {
+			this.complete = complete;
 		}
 		
-		return this.complete = complete;
+		return this.complete;
 	}
 	
 	private function set_pathIndex(index:Int):Int {
@@ -232,7 +219,7 @@ class ConstantRatePath extends BasePath {
 	private function set_active(active:Bool):Bool {
 		if (active != this.active) {
 			this.active = active;
-			signal_pauseToggled.dispatch(this, active);
+			signal_activeToggled.dispatch(this, active);
 		}
 		
 		return this.active = active;
@@ -242,17 +229,18 @@ class ConstantRatePath extends BasePath {
 		FlxDestroyUtil.putArray(path);
 		path = null;
 		point = null;
-		offset = null;
 		traversalMode = null;
-		signal_pauseToggled = null;
+		signal_activeToggled = null;
 		signal_cancelled = null;
-		signal_complete = null;
+		signal_completed = null;
 	}
 	
 	#if debug
 	override public function draw(camera:FlxCamera):Void {
 		Sure.sure(camera != null);
 		Sure.sure(path != null);
+		
+		super.draw(camera);
 		
 		if (path.length == 0) {
 			return;
@@ -265,12 +253,10 @@ class ConstantRatePath extends BasePath {
 		var g:Graphics = camera.debugLayer.graphics;
 		#end
 
-		var node:FlxPoint;
-		var nextNode:FlxPoint;
 		var idx:Int = 0;
 		var len:Int = path.length;
 		while (idx < len) {
-			node = path[idx];
+			var node:FlxPoint = path[idx];
 			var x = node.x - camera.scroll.x * debugScrollX;
 			var y = node.y - camera.scroll.y * debugScrollY;
 			
@@ -296,6 +282,7 @@ class ConstantRatePath extends BasePath {
 			g.endFill();
 
 			// Then find the next node in the path
+			var nextNode:FlxPoint;
 			var lineAlpha:Float = 0.8;
 			if (idx < len - 1) {
 				nextNode = path[idx + 1];
@@ -318,7 +305,9 @@ class ConstantRatePath extends BasePath {
 		g.moveTo(point.x, point.y);
 		g.beginFill(debugColor.getComplementHarmony(), 0.5);
 		g.lineStyle();
-		g.drawRect(point.x - pointSize * 0.5, point.y - pointSize * 0.5, pointSize, pointSize);
+		var x:Float = point.x - pointSize * 0.5 - camera.scroll.x * debugScrollX;
+		var y:Float = point.y - pointSize * 0.5 - camera.scroll.y * debugScrollY;
+		g.drawRect(x, y, pointSize, pointSize);
 		g.endFill();
 		
 		#if FLX_RENDER_BLIT
