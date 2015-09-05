@@ -14,6 +14,8 @@ import msignal.Signal.Signal1;
 // Consists of TileLayers and FlxGroups of game objects
 @:allow(lycan.world.WorldLoader)
 class World extends FlxGroup {
+	public var width(default, null):Int;
+	public var height(default, null):Int;
 	public var scale(default, null):FlxPoint;
 	public var name:String;
 	public var updateSpeed:Float;

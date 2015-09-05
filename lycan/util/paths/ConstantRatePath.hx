@@ -5,8 +5,6 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
-import msignal.Signal.Signal1;
-import msignal.Signal.Signal2;
 import openfl.display.Graphics;
 
 using lycan.util.BitSet;
@@ -66,6 +64,7 @@ class ConstantRatePath extends BasePath {
 		Sure.sure(!complete);
 		Sure.sure(!active);
 		active = true;
+		signal_started.dispatch(this);
 	}
 	
 	public function reset():ConstantRatePath {

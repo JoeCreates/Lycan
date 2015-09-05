@@ -66,6 +66,9 @@ class WorldLoader {
 		
 		var tiledMap = new TiledMap(tiledLevel);
 		
+		world.width = tiledMap.fullWidth;
+		world.height = tiledMap.fullHeight;
+		
 		// Handle top-level map properties
 		if (tiledMap.properties != null) {
 			for (key in tiledMap.properties.keysIterator()) {
@@ -77,10 +80,6 @@ class WorldLoader {
 				}
 			}
 		}
-		
-		// Set camera scroll bounds
-		FlxG.camera.setScrollBoundsRect(0, 0, tiledMap.fullWidth * world.scale.x, tiledMap.fullHeight * world.scale.y, true); // TODO pull this out into game code
-		FlxG.camera.maxScrollY += FlxG.height / 2;
 		
 		// Load tileset graphics
 		var tilesetBitmaps:Array<BitmapData> = new Array<BitmapData>();
