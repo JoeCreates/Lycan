@@ -2,13 +2,14 @@ package lycan.ui.renderer.flixel;
 
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import lycan.ui.renderer.IRenderItem;
 
 class FlxDebugRenderItem implements IRenderItem {
 	public var graphic:FlxSprite = new FlxSprite();
-	public var group:FlxGroup = null;
+	public var group:FlxSpriteGroup = null;
 	
 	public function new(w:Int, h:Int, ?color:FlxColor) {
 		if (color == null) {
@@ -20,14 +21,14 @@ class FlxDebugRenderItem implements IRenderItem {
 		set_height(cast graphic.height);
 	}
 	
-	public function addTo(group:FlxGroup) {
+	public function addTo(group:FlxSpriteGroup) {
 		Sure.sure(this.group == null);
 		this.group = group;
 		group.add(graphic);
 		return this;
 	}
 	
-	public function removeFrom(group:FlxGroup) {
+	public function removeFrom(group:FlxSpriteGroup) {
 		Sure.sure(this.group != null);
 		group.remove(graphic);
 		this.group = null;

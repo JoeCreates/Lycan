@@ -15,17 +15,11 @@ class BasePath {
 	
 	#if debug
 	public var debugColor:FlxColor;
-	public var debugScrollX:Float;
-	public var debugScrollY:Float;
-	public var debugDraw:Bool;
 	#end
 	
 	public function new() {
 		#if debug
 		debugColor = 0x0000FF;
-		debugScrollX = 1.0;
-		debugScrollY = 1.0;
-		debugDraw = true;
 		#end
 	}
 	

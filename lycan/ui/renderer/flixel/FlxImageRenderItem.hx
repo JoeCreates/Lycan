@@ -3,7 +3,7 @@ package lycan.ui.renderer.flixel;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import lycan.ui.renderer.IRenderItem;
-import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 
 class FlxImageRenderItem implements IRenderItem {
 	public var graphic:FlxSprite;
@@ -12,12 +12,12 @@ class FlxImageRenderItem implements IRenderItem {
 		this.graphic = graphic;
 	}
 	
-	public function addTo(group:FlxGroup) {
+	public function addTo(group:FlxSpriteGroup) {
 		group.add(graphic);
 		return this;
 	}
 	
-	public function removeFrom(group:FlxGroup) {
+	public function removeFrom(group:FlxSpriteGroup) {
 		group.remove(graphic);
 		return this;
 	}

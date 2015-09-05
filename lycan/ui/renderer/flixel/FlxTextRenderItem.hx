@@ -1,6 +1,6 @@
 package lycan.ui.renderer.flixel;
 
-import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import lycan.ui.renderer.flixel.IFlxRenderItem;
@@ -13,12 +13,12 @@ class FlxTextRenderItem implements IFlxRenderItem implements ITextRenderItem {
 		this.graphic = graphic;
 	}
 	
-	public function addTo(group:FlxGroup):FlxTextRenderItem {
+	public function addTo(group:FlxSpriteGroup):FlxTextRenderItem {
 		group.add(graphic);
 		return this;
 	}
 	
-	public function removeFrom(group:FlxGroup) {
+	public function removeFrom(group:FlxSpriteGroup) {
 		group.remove(graphic);
 		return this;
 	}

@@ -256,8 +256,8 @@ class ConstantRatePath extends BasePath {
 		var len:Int = path.length;
 		while (idx < len) {
 			var node:FlxPoint = path[idx];
-			var x = node.x - camera.scroll.x * debugScrollX;
-			var y = node.y - camera.scroll.y * debugScrollY;
+			var x = node.x - camera.scroll.x;
+			var y = node.y - camera.scroll.y;
 			
 			// Decide what color this node should be
 			var nodeSize:Int = 8;
@@ -275,14 +275,14 @@ class ConstantRatePath extends BasePath {
 			}
 			
 			// Draw a box for the node
-			g.beginFill(nodeColor, 0.5);
+			g.beginFill(nodeColor);
 			g.lineStyle();
 			g.drawRect(x - nodeSize * 0.5, y - nodeSize * 0.5, nodeSize, nodeSize);
 			g.endFill();
 
 			// Then find the next node in the path
 			var nextNode:FlxPoint;
-			var lineAlpha:Float = 0.8;
+			var lineAlpha:Float = 1.0;
 			if (idx < len - 1) {
 				nextNode = path[idx + 1];
 			} else {
@@ -292,8 +292,8 @@ class ConstantRatePath extends BasePath {
 			// Then draw a line to the next node
 			g.moveTo(x, y);
 			g.lineStyle(1, debugColor, lineAlpha);
-			x = nextNode.x - camera.scroll.x * debugScrollX;
-			y = nextNode.y - camera.scroll.y * debugScrollY;
+			x = nextNode.x - camera.scroll.x;
+			y = nextNode.y - camera.scroll.y;
 			g.lineTo(x, y);
 			
 			idx++;
@@ -302,10 +302,10 @@ class ConstantRatePath extends BasePath {
 		// Draw the point itself
 		var pointSize:Int = 8;
 		g.moveTo(point.x, point.y);
-		g.beginFill(debugColor.getComplementHarmony(), 0.5);
+		g.beginFill(debugColor.getComplementHarmony());
 		g.lineStyle();
-		var x:Float = point.x - pointSize * 0.5 - camera.scroll.x * debugScrollX;
-		var y:Float = point.y - pointSize * 0.5 - camera.scroll.y * debugScrollY;
+		var x:Float = point.x - pointSize * 0.5 - camera.scroll.x;
+		var y:Float = point.y - pointSize * 0.5 - camera.scroll.y;
 		g.drawRect(x, y, pointSize, pointSize);
 		g.endFill();
 		

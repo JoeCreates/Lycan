@@ -17,7 +17,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
 	#end
 	
-	public var uiGroup:FlxGroup;
+	public var uiGroup:FlxSpriteGroup;
 	
 	public var uiCamera:FlxCamera;
 	public var worldCamera:FlxCamera;
@@ -36,9 +36,11 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		
 		// Cameras
 		worldCamera = FlxG.camera;
-		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), 
-		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
+		
+		// TODO avoid creating a new UI camera every time? Or make sure it's disposed of when destroying...
+		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
+		
 		FlxG.cameras.add(uiCamera);
 		FlxCamera.defaultCameras = [worldCamera];
 		
@@ -46,7 +48,8 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		worldZoom = 1;
 		
 		// Groups
-		uiGroup = new FlxGroup();
+		uiGroup = new FlxSpriteGroup();
+		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
 		
 		add(uiGroup);

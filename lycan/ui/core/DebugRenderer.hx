@@ -1,5 +1,6 @@
 package lycan.ui.core;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
@@ -19,11 +20,13 @@ class DebugRenderer extends FlxSprite {
 	public function new(root:UIApplicationRoot) {
 		super(0, 0);
 		this.root = root;
+		this.scrollFactor.set(0, 0);
 		this.text = new FlxText();
+		text.scrollFactor.set(0, 0);
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
 	}
 	
-	override public function draw() {
+	override public function draw() {		
 		FlxSpriteUtil.fill(this, FlxColor.TRANSPARENT);
 		
 		var renderWidget = function(o:UIObject) {
