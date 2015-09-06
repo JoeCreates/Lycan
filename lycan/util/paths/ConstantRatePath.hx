@@ -92,8 +92,9 @@ class ConstantRatePath extends BasePath {
 	}
 	
 	public function update(dt:Float):Void {
-		Sure.sure(point != null);
-		Sure.sure(path != null);
+		if (point == null || path == null) {
+			return;
+		}
 		
 		if (!active) {
 			return;
@@ -258,7 +259,10 @@ class ConstantRatePath extends BasePath {
 	#if debug
 	override public function draw(camera:FlxCamera):Void {
 		Sure.sure(camera != null);
-		Sure.sure(path != null);
+		
+		if (path == null) {
+			return;
+		}
 		
 		super.draw(camera);
 		
