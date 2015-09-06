@@ -5,6 +5,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSpriteUtil;
+import msignal.Signal.Signal2;
 import openfl.display.Graphics;
 
 using lycan.util.BitSet;
@@ -15,22 +16,24 @@ enum TraversalMode {
 	BACKWARD;
 }
 
+// TODO use this
 enum AdvanceMode {
 	CONTINUOUS;
 	SNAP_TO_NEAREST;
 }
 
-// Moves a point along an array of 2D points in a linear fashion at a given rate, traversing at most one point per update
+// Moves a point along an array of 2D points in a linear fashion, traversing at most one point in the path per update
 class ConstantRatePath extends BasePath {
-	public var rate:Float;
+	public var rate:Float; // Units per second
 	public var active(default, set):Bool;
 	//public var bearing(default, null):Float; // Angle in degrees between current and next point in the path // TODO
 	public var complete(default, set):Bool;
 	
 	public var point:FlxPoint; // The point that will follow the path
-	public var path:Array<FlxPoint>; // Path data
-	public var pathIndex(default, set):Int;
 	public var traversalMode(default, null):TraversalMode;
+	
+	private var path:Array<FlxPoint>; // Path data
+	private var pathIndex(default, set):Int;
 	
 	public function new() {
 		super();
@@ -40,9 +43,8 @@ class ConstantRatePath extends BasePath {
 		complete = false;
 		
 		point = null;
-		point = null;
 		path = null;
-		pathIndex = 0;
+		pathIndex = 0; // Note must come before setting of traversalMode due to setters
 		traversalMode = FORWARD;
 	}
 	
@@ -65,7 +67,7 @@ class ConstantRatePath extends BasePath {
 		Sure.sure(!active);
 		
 		active = true;
-		signal_started.dispatch(this);
+		signal_started.dispatch();
 	}
 	
 	public function reset():ConstantRatePath {
@@ -85,7 +87,7 @@ class ConstantRatePath extends BasePath {
 	public function cancel():Void {
 		if (!complete) {
 			reset();
-			signal_cancelled.dispatch(this);
+			signal_cancelled.dispatch();
 		}
 	}
 	
@@ -112,11 +114,11 @@ class ConstantRatePath extends BasePath {
 		
 		// Move the point
 		if (!current.equals(point)) {
-			moveTowardsTarget(point, current, rate, dt);
+			moveTowardsTarget(point, current, rate, dt, signal_updated);
 		}
 	}
 	
-	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {		
+	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float, ?signal:Signal2<Float, Float>):Void {		
 		var dx:Float;
 		var dy:Float;
 		
@@ -128,6 +130,7 @@ class ConstantRatePath extends BasePath {
 		} else {
 			dx = 0;
 		}
+		
 		if (point.y < target.y) {
 			dy = dt * speed;
 		} else if (point.y > target.y) {
@@ -137,26 +140,26 @@ class ConstantRatePath extends BasePath {
 		}
 		
 		// Calculate actual distance from target
-		var distanceX = Math.abs(point.x - target.x);
-		var distanceY = Math.abs(point.y - target.y);
+		var xDistance = Math.abs(point.x - target.x);
+		var yDistance = Math.abs(point.y - target.y);
 		
 		// If greater than one step distance then move towards target, else stop at target
-		if (distanceX > dt * speed) {
+		if (xDistance > dt * speed) {
 			point.x += dx;
 		} else {
 			point.x = target.x;
 		}
-		if (distanceY > dt * speed) {
+		
+		if (yDistance > dt * speed) {
 			point.y += dy;
 		} else {
 			point.y = target.y;
 		}
+		
+		if(signal != null) {
+			signal.dispatch(dx, dy);
+		}
 	}
-	
-	// TODO implement other techniques for moving a point, like using velocity instead of setting position
-	//private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {
-	//	
-	//}
 	
 	private function advancePath(mode:AdvanceMode):FlxPoint {
 		if (mode == SNAP_TO_NEAREST) {
@@ -195,7 +198,7 @@ class ConstantRatePath extends BasePath {
 		
 		if (!this.complete && complete) {
 			this.complete = true;
-			signal_completed.dispatch(this);
+			signal_completed.dispatch();
 		} else {
 			this.complete = complete;
 		}
@@ -234,7 +237,7 @@ class ConstantRatePath extends BasePath {
 	private function set_active(active:Bool):Bool {
 		if (active != this.active) {
 			this.active = active;
-			signal_activeToggled.dispatch(this, active);
+			signal_activeToggled.dispatch(active);
 		}
 		
 		return this.active = active;
@@ -246,7 +249,9 @@ class ConstantRatePath extends BasePath {
 		point = null;
 		traversalMode = null;
 		signal_activeToggled = null;
+		signal_started = null;
 		signal_cancelled = null;
+		signal_updated = null;
 		signal_completed = null;
 	}
 	
