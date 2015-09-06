@@ -3,6 +3,7 @@ package lycan.ui.events;
 import haxe.Utf8;
 import lycan.ui.events.UIEvent.ChildEvent;
 import lycan.ui.pointer.MouseButton;
+import lycan.ui.core.GestureRecognizer.Gesture;
 
 // TODO macro to just make the enum values increase rather than specifying values manually?
 // TODO macro to add additional user/game-specific events onto the 1000+ range or whatever?
@@ -146,7 +147,12 @@ class GamepadFocusEvent extends UIEvent {
 }
 
 class GestureEvent extends UIEvent {
+	private var gestures:List<Gesture>;
 	
+	public function new(gestures:List<Gesture>) {
+		super(EventType.Gesture);
+		this.gestures = gestures;
+	}
 }
 
 class ShowEvent extends UIEvent {
@@ -165,7 +171,7 @@ class LocaleChangeEvent extends UIEvent {
 	
 }
 
-class PointerEvent extends UIEvent {
+class PointerEvent extends UIEvent {	
 	public var button:MouseButton;
 	public var localX:Float;
 	public var localY:Float;
