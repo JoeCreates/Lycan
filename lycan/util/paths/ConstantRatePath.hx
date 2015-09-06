@@ -63,6 +63,7 @@ class ConstantRatePath extends BasePath {
 	public function start():Void {
 		Sure.sure(!complete);
 		Sure.sure(!active);
+		
 		active = true;
 		signal_started.dispatch(this);
 	}
@@ -110,18 +111,16 @@ class ConstantRatePath extends BasePath {
 		}
 		
 		// Move the point
-		// TODO add different techniques for doing this
 		if (!current.equals(point)) {
 			moveTowardsTarget(point, current, rate, dt);
 		}
 	}
 	
-	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {
-		// TODO avoid jittering on x/y. Use velocity?
-		
+	private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {		
 		var dx:Float;
 		var dy:Float;
 		
+		// Calculate position deltas
 		if (point.x < target.x) {
 			dx = dt * speed;
 		} else if (point.x > target.x) {
@@ -129,7 +128,6 @@ class ConstantRatePath extends BasePath {
 		} else {
 			dx = 0;
 		}
-		
 		if (point.y < target.y) {
 			dy = dt * speed;
 		} else if (point.y > target.y) {
@@ -138,8 +136,27 @@ class ConstantRatePath extends BasePath {
 			dy = 0;
 		}
 		
-		point.add(dx, dy);
+		// Calculate actual distance from target
+		var distanceX = Math.abs(point.x - target.x);
+		var distanceY = Math.abs(point.y - target.y);
+		
+		// If greater than one step distance then move towards target, else stop at target
+		if (distanceX > dt * speed) {
+			point.x += dx;
+		} else {
+			point.x = target.x;
+		}
+		if (distanceY > dt * speed) {
+			point.y += dy;
+		} else {
+			point.y = target.y;
+		}
 	}
+	
+	// TODO implement other techniques for moving a point, like using velocity instead of setting position
+	//private static inline function moveTowardsTarget(point:FlxPoint, target:FlxPoint, speed:Float, dt:Float):Void {
+	//	
+	//}
 	
 	private function advancePath(mode:AdvanceMode):FlxPoint {
 		if (mode == SNAP_TO_NEAREST) {
