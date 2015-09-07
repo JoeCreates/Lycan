@@ -2,7 +2,7 @@ package lycan.components;
 
 import lycan.LateUpdatable;
 
-interface Attachable extends LateUpdatable {
+interface Attachable extends LateUpdatable extends Entity {
 	public var x(default, set):Float;
 	public var y(default, set):Float;
 	public var attachable:AttachableComponent;
@@ -30,7 +30,7 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		originY = 0;
 	}
 	
-	public function lateUpdate(dt:Float):Void {
+	override public function lateUpdate(dt:Float):Void {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
