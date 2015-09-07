@@ -9,6 +9,11 @@ import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
+typedef SnapPoint = {
+	x:Null<Float>,
+	y:Null<Float>
+};
+
 /**
  * @author Joe Williamson
  */
@@ -30,6 +35,11 @@ class ScrollPanel extends FlxSprite {
 	public var minReleaseScrollSpeed:Float = 1;
 	/** Minimum distance a touch must have moved before panel begins to scroll */
 	public var minMovement:Float = 8;
+	/**
+	 * Points to which the camera will snap. Leave empty for no snapping.
+	 * A null coordinate means "any", e.g. (100, null) will snap to 100 on x, but keep the same y.
+	 */
+	public var snapPoints:Array<SnapPoint>;
 	
 	public var scroll(get, never):FlxPoint;
 	public var minScrollX(get, set):Null<Float>;
@@ -61,6 +71,8 @@ class ScrollPanel extends FlxSprite {
 		lastTouchPosition = FlxPoint.get();
 		scrollVelocity = FlxPoint.get();
 		
+		snapPoints = new Array<SnapPoint>();
+		
 		updatePosition();
 		FlxG.cameras.add(panelCamera);
 	}
@@ -81,6 +93,9 @@ class ScrollPanel extends FlxSprite {
 		screenPosition.put();
 		touchedPosition.put();
 		scrollVelocity.put();
+		for (point in snapPoints) {
+			point.put();
+		}
 	}
 	
 	override public function update(elapsed:Float):Void {
@@ -130,20 +145,40 @@ class ScrollPanel extends FlxSprite {
 				scrollVelocity.set(0, 0);
 			}
 			
+			// Position to snap to
+			var snapX:Null<Float> = null;
+			var snapY:Null<Float> = null;
+			
+			// Snap to side if out of camera bounds
 			if (maxScrollX != null && scroll.x + width > maxScrollX) {
-				scroll.x -= (scroll.x + width - maxScrollX) * boundaryForce;
-				scrollVelocity.x = 0;
+				snapX = maxScrollX;
 			}
 			if (minScrollX != null && scroll.x < minScrollX) {
-				scroll.x += (minScrollX - scroll.x) * boundaryForce;
-				scrollVelocity.x = 0;
+				snapX = minScrollX;
 			}
 			if (maxScrollY != null && scroll.y + height > maxScrollY) {
-				scroll.y -= (scroll.y + height - maxScrollY) * boundaryForce;
-				scrollVelocity.y = 0;
+				snapY = maxScrollX
 			}
 			if (minScrollY != null && scroll.y < minScrollY) {
-				scroll.y += (minScrollY - scroll.y) * boundaryForce;
+				snapY = minScrollY;
+			}
+			
+			// Snap to nearest snap point if there is one
+			var closestDistanceSquared:Null<Float> = null;
+			for (p in snapPoints) {
+				var xDiff:Float = p.x != null ? p.x - scroll.x : 0;
+				var yDiff:Float = p.y != null ? p.y - scroll.y : 0;
+				// No need to sqrt because we can compare disnatance squared
+				var distanceSquared:Float = 
+			}
+			
+			// Move toward snap position
+			if (snapX != null) {
+				scroll.x += (snapX - scroll.x) * boundaryForce;
+				scrollVelocity.x = 0;
+			}
+			if (snapY != null) {
+				scroll.y += (snapY - scroll.y) * boundaryForce;
 				scrollVelocity.y = 0;
 			}
 		}
