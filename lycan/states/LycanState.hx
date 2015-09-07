@@ -34,7 +34,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		exclusiveTweens = new Map<String, FlxTween>();
 		
 		worldCamera = FlxG.camera;
-		// TODO avoid creating a new UI camera every time? Or make sure it's disposed of when destroying...
+		
 		uiCamera = LycanRootState.getInstance().uiCamera;
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
 		

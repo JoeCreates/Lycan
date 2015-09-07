@@ -1,78 +1,53 @@
 package lycan.ui.core;
 
-import flixel.math.FlxPoint;
+import lycan.ui.core.Gesture;
+import lycan.ui.events.UIEvent;
+import lycan.ui.UIObject;
+import lycan.util.ArraySet;
 
-@:enum
-abstract GestureType(Int) {
-	var Tap = 1;
-	var TapAndHold = 2;
-	var Pan = 3;
-	var Pinch = 4;
-	var Swipe = 5;
-	// TODO custom types
-}
-
-@:enum
-abstract GestureState(Int) {
-	var Started = 1;
-	var Updated = 2;
-	var Finished = 3;
-	var Cancelled = 4;
+// The current result of the event filtering step in the gesture recognizer
+@:enum abstract GestureRecognizerResult(Int) {
+	var Ignore = 1;
+	var Indeterminate = 2;
+	var TriggerGesture = 4;
+	var CancelGesture = 8;
 }
 
 // Infrastructure for gesture recognition
+// A gesture recognizer is a frontend to a gesture manager that converts input events into higher-level actions
+// Widgets subscribe to a gesture recognizer which then listens to their events
 class GestureRecognizer {
 	public function new() {
 		
 	}
-}
-
-class Gesture {
-	public function new(type:GestureType) {
-		this.type = type;
+	
+	//public function create(target:UIObject):Gesture {
+	//	
+	//}
+	
+	public function recognize(gesture:Gesture, watched:UIObject, event:UIEvent):GestureRecognizerResult {
+		return Ignore;
 	}
 	
-	public var type(default, null):GestureType;
+	public function reset(gesture:Gesture):Void {
+		
+	}
+}
+
+private class GestureManager {
+	public static var instance(get, null):GestureManager;
 	
-	public var hasHotspot(default, null):Bool;
-	public var hotspot(get, null):FlxPoint; // UI coordinate used for finding the receiver for the gesture event
-	
-	private function get_hotspot():FlxPoint {
-		Sure.sure(hasHotspot);
-		return hotspot;
-	}
-}
-
-class TapGesture extends Gesture {
 	public function new() {
-		super(Tap);
-	}
-}
-
-class TapAndHoldGesture extends Gesture {
-	public function new() {
-		super(TapAndHold);
-	}
-}
-
-class PanGesture extends Gesture {
-	public function new() {
-		super(Pan);
+		
 	}
 	
-	private var delta:FlxPoint;
-	private var lastOffset:FlxPoint;
-	private var offset:FlxPoint;
-}
-
-class PinchGesture extends Gesture {
-	public function new() {
-		super(Pinch);
-	}
-}
-
-class SwipeGesture extends Gesture {
-	public function new() {
-		super(Swipe);
+	private var activeGestures:ArraySet<Gesture>;
+	private var possibleGestures:ArraySet<Gesture>;
+	
+	private static function get_instance():GestureManager {
+		if (instance == null) {
+			instance = new GestureManager();
+		}
+		return instance;
 	}
 }

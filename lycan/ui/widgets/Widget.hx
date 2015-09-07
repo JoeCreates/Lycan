@@ -172,6 +172,8 @@ class Widget extends UIObject {
 				keyboardFocusInEvent(cast e);
 			case EventType.KeyboardFocusOut:
 				keyboardFocusOutEvent(cast e);
+			case EventType.Gesture:
+				gestureEvent(cast e);
 			case EventType.HoverEnter:
 				hoverEnterEvent(cast e);
 			case EventType.HoverLeave:
@@ -455,6 +457,12 @@ class Widget extends UIObject {
 	private function gamepadDisconnectEvent(e:GamepadEvent) {
 		#if debug
 		trace(name + " got a gamepad disconnect event");
+		#end
+	}
+	
+	private function gestureEvent(e:GestureEvent) {
+		#if debug
+		trace(name + " got a gesture event of type: " + e.type);
 		#end
 	}
 	

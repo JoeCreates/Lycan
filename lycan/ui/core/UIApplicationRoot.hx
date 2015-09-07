@@ -212,7 +212,7 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down,EventType.PointerMove, hoveredWidget));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerMove, hoveredWidget));
 				
 				if (down) {
 					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
