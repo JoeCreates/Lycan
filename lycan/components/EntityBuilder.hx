@@ -118,7 +118,7 @@ class EntityBuilder {
 		}
 		
 		// Add getters and setters for entity_ properties
-		// for each field that isnt the component field
+		// for each field that isn't the component field
 		for (dummyField in getDummyPropertyFields()) {
 			// Check if the entity_ property already exists
 			var found:Bool = false;
@@ -130,26 +130,48 @@ class EntityBuilder {
 			}
 			// If not, create it
 			if (!found) {
-				var dummyFieldType:ClassType;
-				switch (dummyField.type) {
-					case TInst(t, _):
-						dummyFieldType = t.get();
-					case _:
-				}
-				var typePath:TypePath = { pack: dummyFieldType.pack, name: dummyFieldType.name };
 				fields.push({
-					name: "entity_" + dummyField.name,
+					name: dummyField.name,
 					doc: null,
 					meta: [],
 					access: [APublic],
 					kind: FProp(
 						"get", "set",
-						TPath(typePath),
+						Types.toComplex(dummyField.type),
 						null ),
 					pos: Context.currentPos()
 				});
-			}
-			// And create getter/setter
+				// And create getter/setter
+				fields.push({
+					name: "get_" + dummyField.name,
+					doc: null,
+					meta: [],
+					access: [APublic],
+					kind: FFun({
+						args: [],
+						ret: Types.toComplex(dummyField.type),
+						expr: macro return $i { dummyField.name.substring(7, dummyField.name.length)}
+					}),
+					pos: Context.currentPos()
+				});
+				fields.push({
+					name: "set_" + dummyField.name,
+					doc: null,
+					meta: [],
+					access: [APublic],
+					kind: FFun({
+						args: [ {
+							name: "value",
+							type: Types.toComplex(dummyField.type)
+						}],
+						ret: Types.toComplex(dummyField.type),
+						expr: macro {
+							return $i { dummyField.name.substring(7, dummyField.name.length)} = value;
+						}
+					}),
+					pos: Context.currentPos()
+				});
+			}			
 		}
 		
 		// Append component instantiation to constructor
@@ -199,7 +221,7 @@ class EntityBuilder {
 		for (componentInterface in getComponentInterfaces()) {
 			for (field in getDummyPropertyFieldsFromInterface(componentInterface)) {
 				// If field not yet in array, add it
-				if (fieldNameMap.exists(field.name)) {
+				if (!fieldNameMap.exists(field.name)) {
 					fields.push(field);
 					fieldNameMap.set(field.name, field);
 				}
@@ -213,10 +235,11 @@ class EntityBuilder {
 		for (field in componentInterface.fields.get()) {
 			switch(field.type) {
 				case TInst(t, _):
-					if (t.get().name != componentInterface + "Component") {
+					if (t.get().name != componentInterface.name + "Component") {
 						fields.push(field);
 					}
 				case _:
+					fields.push(field);
 			}
 		}
 		return fields;
@@ -226,15 +249,16 @@ class EntityBuilder {
 	public static function getComponentFields() {
 		var componentFields:Map<String, ClassField> = new Map<String, ClassField>();
 		for (i in getComponentInterfaces()) {
-			trace(i);
 			var componentField:ClassField = getComponentField(i);
-			//if (componentField != null) {
+			if (componentField != null) {
 				switch (componentField.type) {
 					case TInst(t, _):
 						componentFields.set(t.get().name, getComponentField(i));
 					case _:
 				}
-			//}
+			} else {
+				throw("Component interface is missing a field for the component");
+			}
 		}
 		return componentFields;
 	}

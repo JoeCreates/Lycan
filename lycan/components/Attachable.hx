@@ -3,9 +3,9 @@ package lycan.components;
 import lycan.LateUpdatable;
 
 interface Attachable extends LateUpdatable extends Entity {
-	public var x(default, set):Float;
-	public var y(default, set):Float;
 	public var attachable:AttachableComponent;
+	public var x(get, set):Float;
+	public var y(get, set):Float;
 }
 
 class AttachableComponent extends Component<Attachable> implements LateUpdatable {
@@ -87,8 +87,8 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		// Recursively update children
 		for (child in children) {
 			// Update child's position
-			child.x = entity.x + child.attachable.x - child.attachable.originX;
-			child.y = entity.y + child.attachable.y - child.attachable.originY;
+			child.entity_x = entity.entity_x + child.attachable.x - child.attachable.originX;
+			child.entity_y = entity.entity_y + child.attachable.y - child.attachable.originY;
 			// Update child's children
 			child.attachable.recursiveUpdate(dt);
 		}

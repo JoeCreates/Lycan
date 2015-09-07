@@ -17,20 +17,20 @@ class CenterPositionableComponent extends Component<CenterPositionable> {
 	}
 	
 	private function set_x(x:Float):Float {
-		entity.x = x - entity.width / 2;
+		entity.entity_x = x - entity.entity_width / 2;
 		return x;
 	}
 	
 	private function set_y(y:Float):Float {
-		entity.y = y - entity.height / 2;
+		entity.entity_y = y - entity.entity_height / 2;
 		return y;
 	}
 	
 	private function get_x():Float {
-		return entity.x + entity.width / 2;
+		return entity.entity_x + entity.entity_width / 2;
 	}
 	
 	private function get_y():Float {
-		return entity.y + entity.height / 2;
+		return entity.entity_y + entity.entity_height / 2;
 	}
 }
