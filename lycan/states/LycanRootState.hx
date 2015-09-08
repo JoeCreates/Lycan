@@ -7,8 +7,14 @@ import flixel.FlxState;
 class LycanRootState extends FlxState {
 	private var uiCamera:FlxCamera;
 	
-	public function new() {
+	private function new() {
 		super();
+	}
+	
+	public static function getInstance<T>():T {
+		var self = FlxG.game._state;
+		Sure.sure(self != null);
+		return cast self;
 	}
 	
 	override public function create():Void {
@@ -20,12 +26,6 @@ class LycanRootState extends FlxState {
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
-	}
-	
-	public static function getInstance<T>():T {
-		var self = FlxG.game._state;
-		Sure.sure(self != null);
-		return cast self;
 	}
 	
 	// Returns the first state of type T in the state stack, throws if there isn't one of that type
