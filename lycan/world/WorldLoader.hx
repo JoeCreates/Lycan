@@ -98,11 +98,14 @@ class WorldLoader {
 		var combinedTileset:FlxTileFrames = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize);
 		tileSize.put();
 		
+		// Save a reference to the tileset map
+		world.namedTilesets = tiledMap.tilesets;
+		
 		// Load layers
 		var layersLoaded:Float = 0;
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
-				case TiledLayerType.OBJECT:					
+				case TiledLayerType.OBJECT:
 					var group:ObjectLayer = new ObjectLayer(world);
 					loadObjectLayer(group, cast tiledLayer, loadingRules.objectRules);
 					world.namedLayers.set(tiledLayer.name, group);
