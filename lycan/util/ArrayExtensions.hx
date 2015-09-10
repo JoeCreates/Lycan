@@ -32,4 +32,13 @@ class ArrayExtensions {
 		Sure.sure(array != null && array.length != 0);
 		return array[Std.random(array.length)];
 	}
+	
+	public static function noNulls<T>(array:Array<T>):Bool {
+		for (e in array) {
+			if (e == null) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
