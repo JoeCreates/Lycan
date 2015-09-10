@@ -216,7 +216,7 @@ class TimelineItem {
 	}
 	
 	private function get_endTime():Float {
-		return endTime + duration;
+		return startTime + duration;
 	}
 	
 	private function get_updateAtLoopStart():Bool {

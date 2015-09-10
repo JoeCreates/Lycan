@@ -40,8 +40,8 @@ class Timeline extends TimelineItem {
 		eraseMarked();
 	}
 	
-	public function addFunction(f:Void->Void, atTime:Float):Cue {
-		var cue = new Cue(f, atTime);
+	public function addFunction(target:Dynamic, f:Void->Void, atTime:Float):Cue {
+		var cue = new Cue(target, f, atTime);
 		cue.autoRemove = defaultAutoRemove;
 		add(cue);
 		return cue;
@@ -51,16 +51,14 @@ class Timeline extends TimelineItem {
 		if (item.target != null) {
 			removeTarget(item.target);
 		}
-		add(item, null, false);
+		add(item);
 	}
 	
-	public function add(item:TimelineItem, ?time:Float, setTime:Bool = true):Void {
+	public function add(item:TimelineItem):Void {
+		Sure.sure(item != null);
+		Sure.sure(item.target != null);
+		
 		item.parent = this;
-		if(time == null && setTime) {
-			item.startTime = currentTime;
-		} else if(time != null) {
-			item.startTime = time;
-		}
 		
 		var existingItems = items.get(item.target);
 		
@@ -71,6 +69,15 @@ class Timeline extends TimelineItem {
 		}
 		
 		dirtyDuration = true;
+	}
+	
+	public function addAtTime(item:TimelineItem, ?time:Float):Void {
+		if(time == null) {
+			item.startTime = currentTime;
+		} else {
+			item.startTime = time;
+		}
+		add(item);
 	}
 	
 	public function find(target:Dynamic):Array<TimelineItem> {
@@ -167,5 +174,12 @@ class Timeline extends TimelineItem {
 			}
 		}
 		return duration;
+	}
+	
+	override public function get_endTime():Float {
+		if (dirtyDuration) {
+			duration = calcDuration();
+		}
+		return startTime + duration;
 	}
 }

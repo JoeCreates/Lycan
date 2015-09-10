@@ -3,8 +3,8 @@ package lycan.util.timeline;
 class Cue extends TimelineItem {
 	public var fn(default, default):Void->Void;
 	
-	public function new(fn:Void->Void, atTime:Float = 0) {
-		super(null, null, atTime, 0);
+	public function new(target:Dynamic, fn:Void->Void, atTime:Float = 0) {
+		super(null, target, atTime, 0);
 		this.fn = fn;
 	}
 	
