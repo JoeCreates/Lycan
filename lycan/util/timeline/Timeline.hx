@@ -2,62 +2,101 @@ package lycan.util.timeline;
 
 import haxe.ds.ObjectMap;
 
-// Timeline based on Cinder timelines
+using lycan.util.FloatExtensions;
+
 class Timeline<T:{}> extends TimelineItem {
-	public var currentTime(default, null):Float;
-	public var defaultAutoRemoveCues:Bool;
+	public var currentTime(default, set):Float;
+	public var defaultRemoveCuesOnCompletion:Bool;
 	private var items:ObjectMap<T, Array<TimelineItem>>;
 	
 	public function new() {
 		super(null, null, 0, 0);
 		currentTime = 0;
-		defaultAutoRemoveCues = false;
+		defaultRemoveCuesOnCompletion = false;
 		useAbsoluteTime = true;
 		items = new ObjectMap<T, Array<TimelineItem>>();
 	}
 	
+	// Step forward or backward on the timeline
 	public function step(dt:Float):Void {
 		currentTime += dt;
 		super.stepTo(currentTime, dt < 0);
 	}
 	
+	// Steps to the provided absolute time on the timeline
+	// Items on each target will be triggered in order of their startTimes (earliest to latest) when stepping forward, and their endTimes (latest to earliest) when reversing
+	// Note that this is a per-target object ordering, not a global ordering on all the items
 	override public function stepTo(nextTime:Float, ?reverse:Bool):Void {
+		nextTime = nextTime.clamp(0, duration);
+		
 		reverse = currentTime > nextTime;
-		currentTime = nextTime;
 		
 		eraseMarked();
 		
 		var iter = items.iterator();
 		for (items in iter) {
-			for (item in items) {
-				item.stepTo(currentTime, reverse);
-				if (item.completed && item.autoRemove) {
+			// TODO this is insanely slow
+			// TODO cache the sorted versions of the arrays in the map, and don't use arrays for it
+			if (reverse) {
+				items.sort(function(a:TimelineItem, b:TimelineItem):Int {
+					if (a.startTime > b.startTime) {
+						return -1;
+					}
+					if (a.startTime < b.startTime) {
+						return 1;
+					}
+					return 0;
+				});
+			} else {
+				items.sort(function(a:TimelineItem, b:TimelineItem):Int {
+					if (a.endTime > b.endTime) {
+						return -1;
+					}
+					if (a.endTime < b.endTime) {
+						return 1;
+					}
+					return 0;
+				});
+			}
+			
+			for (item in items) {				
+				var needsStep:Bool;
+				if (reverse) {
+					needsStep = rangesIntersect(nextTime, currentTime, item.startTime, item.endTime);
+				} else {
+					needsStep = rangesIntersect(currentTime, nextTime, item.startTime, item.endTime);
+				}
+				
+				if(needsStep) {
+					item.stepTo(nextTime, reverse);
+				}
+				
+				if (item.completed && item.removeOnCompletion) {
 					item.markedForRemoval = true;
 				}
 			}
 		}
 		
 		eraseMarked();
+		
+		currentTime = nextTime;
+	}
+	
+	// Skip forward or backward to a place on the timeline without triggering any items
+	public function skipTo(nextTime:Float):Void {
+		currentTime = nextTime;
 	}
 	
 	override public function update(absoluteTime:Float):Void {
-		absoluteTime = loopTime(absoluteTime);
 		stepTo(absoluteTime);
 	}
 	
 	public function addFunction(target:T, f:Void->Void, atTime:Float):Cue {
 		var cue = new Cue(target, f, atTime);
-		cue.autoRemove = defaultAutoRemoveCues;
+		cue.removeOnCompletion = defaultRemoveCuesOnCompletion;
 		add(cue);
 		return cue;
 	}
-	
-	//public function apply(item:TimelineItem):Void {
-	//	if (item.target != null) {
-	//		removeTarget(item.target);
-	//	}
-	//	add(item);
-	//}
 	
 	public function add(item:TimelineItem):Void {
 		Sure.sure(item != null);
@@ -70,10 +109,10 @@ class Timeline<T:{}> extends TimelineItem {
 		if (existingItems != null) {
 			existingItems.push(item);
 		} else {
-			items.set(item.target, [ item ]);
+			items.set(item.target, [ item ] );
 		}
 		
-		dirtyDuration = true;
+		durationDirty = true;
 	}
 	
 	public function addAtTime(item:TimelineItem, ?time:Float):Void {
@@ -109,7 +148,7 @@ class Timeline<T:{}> extends TimelineItem {
 			item.markedForRemoval = true;
 		}
 		
-		dirtyDuration = true;
+		durationDirty = true;
 	}
 	
 	public function replaceTarget(target:T, replacement:T):Void {
@@ -140,15 +179,7 @@ class Timeline<T:{}> extends TimelineItem {
 	}
 	
 	public function itemTimeChanged(item:TimelineItem):Void {
-		dirtyDuration = true;
-	}
-	
-	override public function reverse():Void {
-		for (items in items.iterator()) {
-			for (item in items) {
-				item.reverse();
-			}
-		}
+		durationDirty = true;
 	}
 	
 	override public function onLoopStart():Void {
@@ -163,7 +194,7 @@ class Timeline<T:{}> extends TimelineItem {
 				}
 			}
 		}
-		dirtyDuration = true;
+		durationDirty = true;
 	}
 	
 	override public function calcDuration():Float {
@@ -177,9 +208,17 @@ class Timeline<T:{}> extends TimelineItem {
 	}
 	
 	override public function get_endTime():Float {
-		if (dirtyDuration) {
+		if (durationDirty) {
 			duration = calcDuration();
 		}
 		return startTime + duration;
+	}
+	
+	private function set_currentTime(time:Float):Float {
+		return this.currentTime = time.clamp(0, duration);
+	}
+	
+	private inline function rangesIntersect(x1:Float, x2:Float, y1:Float, y2:Float):Bool {		
+		return x1 <= y2 && y1 <= x2;
 	}
 }

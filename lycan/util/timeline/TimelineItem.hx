@@ -1,5 +1,7 @@
 package lycan.util.timeline;
 
+using lycan.util.BitSet;
+
 // Base class for anything that can go on a timeline
 class TimelineItem {
 	public var parent(default, null):Timeline<Dynamic>;
@@ -7,42 +9,39 @@ class TimelineItem {
 	
 	public var startTime(default, set):Float;
 	@:isVar public var duration(get, set):Float;
-	public var looping(default, default):Bool;
-	public var pingPong(default, default):Bool;
-	public var infinite(default, default):Bool;
 	public var endTime(get, null):Float;
+	
+	//public var enterZoneCount
+	
 	public var started(default, null):Bool;
 	public var reverseStarted(default, null):Bool;
 	public var completed(default, null):Bool;
 	public var reverseCompleted(default, null):Bool;
-	public var autoRemove(default, default):Bool;
+	
+	public var removeOnCompletion(default, default):Bool;
 	public var updateAtLoopStart(get, null):Bool;
 	
 	private var markedForRemoval(default, default):Bool;
 	private var useAbsoluteTime(default, default):Bool;
 	private var lastLoopIteration(default, default):Int;
 	private var inverseDuration(get, null):Float;
-	private var dirtyDuration(default, set):Bool;
+	private var durationDirty(default, set):Bool;
 	
 	public function new(?parent:Timeline<Dynamic>, ?target:Dynamic, startTime:Float, duration:Float) {
 		this.parent = parent;
 		this.target = target;
 		this.startTime = startTime;
 		this.duration = duration;
-		looping = false;
-		pingPong = false;
-		infinite = false;
 		started = false;
 		reverseStarted = false;
 		completed = false;
 		reverseCompleted = false;
-		autoRemove = true;
-		
+		removeOnCompletion = true;
 		markedForRemoval = false;
 		useAbsoluteTime = false;
 		lastLoopIteration = -1;
 		inverseDuration = 0;
-		dirtyDuration = false;
+		durationDirty = false;
 	}
 	
 	public function markForRemoval():Void {
@@ -72,10 +71,6 @@ class TimelineItem {
 		
 	}
 	
-	public function reverse():Void {
-		
-	}
-	
 	public function stepTo(newTime:Float, ?reverse:Bool):Void {
 		if (reverse == null) {
 			reverse = false;
@@ -101,17 +96,7 @@ class TimelineItem {
 			started = true;
 			onStart(true);
 		} else if (newTime >= startTime) {
-			var relTime:Float = 0;
-			if (pingPong) {
-				relTime = fmod(absTime * inverseDuration, 2);
-				if (relTime > 1) {
-					relTime = (2 - relTime);
-				}
-			} else if (looping) {
-				relTime = fmod(absTime * inverseDuration, 1);
-			} else {
-				relTime = Math.min(absTime * inverseDuration, 1);
-			}
+			var relTime = Math.min(absTime * inverseDuration, 1);
 			
 			if (!started && !reverse) {
 				started = true;
@@ -131,20 +116,8 @@ class TimelineItem {
 			if (!useAbsoluteTime && (inverseDuration <= 0)) {
 				time = 1.0;
 			}
-			
-			if (looping || pingPong) {
-				var loopIteration:Int = Std.int((newTime - startTime) * inverseDuration);
-				
-				if (loopIteration != lastLoopIteration) {
-					lastLoopIteration = loopIteration;
-					onLoopStart();
-					update(time);
-				} else {
-					update(time);
-				}
-			} else {
-				update(time);
-			}
+
+			update(time);
 		}
 		
 		if (newTime < endTime) {
@@ -152,12 +125,6 @@ class TimelineItem {
 				reverseCompleted = true;
 				completed = false;
 				onComplete(true);
-			}
-		} else if (!looping && !infinite) {
-			if (!completed && !reverse) {
-				completed = true;
-				reverseCompleted = false;
-				onComplete(false);
 			}
 		}
 	}
@@ -167,28 +134,11 @@ class TimelineItem {
 	}
 	
 	private function updateDuration():Void {
-		if (dirtyDuration) {
+		if (durationDirty) {
 			duration = Math.max(calcDuration(), 0.0);
 			inverseDuration = (duration == 0) ? 1.0 : (1.0 / duration);
-			dirtyDuration = false;
+			durationDirty = false;
 		}
-	}
-	
-	private function loopTime(absoluteTime:Float):Float {
-		var result = absoluteTime;
-		if (pingPong) {
-			result = fmod(result * inverseDuration, 2);
-			
-			if (result <= 1) {
-				result *= duration;
-			} else {
-				result = (2 - result) * duration;
-			}
-		} else if (looping) {
-			result = fmod(result * inverseDuration, 1);
-			result *= duration;
-		}
-		return result;
 	}
 	
 	private function set_target(target:Dynamic):Dynamic {
@@ -208,8 +158,8 @@ class TimelineItem {
 		return duration;
 	}
 	
-	private function set_dirtyDuration(dirty:Bool):Bool {
-		return this.dirtyDuration = dirty;
+	private function set_durationDirty(dirty:Bool):Bool {
+		return this.durationDirty = dirty;
 	}
 	
 	private function get_inverseDuration():Float {
