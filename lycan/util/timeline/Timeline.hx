@@ -3,17 +3,17 @@ package lycan.util.timeline;
 import haxe.ds.ObjectMap;
 
 // Timeline based on Cinder timelines
-class Timeline extends TimelineItem {
+class Timeline<T:{}> extends TimelineItem {
 	public var currentTime(default, null):Float;
-	public var defaultAutoRemove:Bool;
-	private var items:ObjectMap<Dynamic, Array<TimelineItem>>;
+	public var defaultAutoRemoveCues:Bool;
+	private var items:ObjectMap<T, Array<TimelineItem>>;
 	
 	public function new() {
 		super(null, null, 0, 0);
 		currentTime = 0;
-		defaultAutoRemove = true;
+		defaultAutoRemoveCues = false;
 		useAbsoluteTime = true;
-		items = new ObjectMap<Dynamic, Array<TimelineItem>>();
+		items = new ObjectMap<T, Array<TimelineItem>>();
 	}
 	
 	public function step(dt:Float):Void {
@@ -21,9 +21,9 @@ class Timeline extends TimelineItem {
 		super.stepTo(currentTime, dt < 0);
 	}
 	
-	override public function stepTo(absoluteTime:Float, ?reverse:Bool):Void {
-		reverse = currentTime > absoluteTime;
-		currentTime = absoluteTime;
+	override public function stepTo(nextTime:Float, ?reverse:Bool):Void {
+		reverse = currentTime > nextTime;
+		currentTime = nextTime;
 		
 		eraseMarked();
 		
@@ -40,19 +40,24 @@ class Timeline extends TimelineItem {
 		eraseMarked();
 	}
 	
-	public function addFunction(target:Dynamic, f:Void->Void, atTime:Float):Cue {
+	override public function update(absoluteTime:Float):Void {
+		absoluteTime = loopTime(absoluteTime);
+		stepTo(absoluteTime);
+	}
+	
+	public function addFunction(target:T, f:Void->Void, atTime:Float):Cue {
 		var cue = new Cue(target, f, atTime);
-		cue.autoRemove = defaultAutoRemove;
+		cue.autoRemove = defaultAutoRemoveCues;
 		add(cue);
 		return cue;
 	}
 	
-	public function apply(item:TimelineItem):Void {
-		if (item.target != null) {
-			removeTarget(item.target);
-		}
-		add(item);
-	}
+	//public function apply(item:TimelineItem):Void {
+	//	if (item.target != null) {
+	//		removeTarget(item.target);
+	//	}
+	//	add(item);
+	//}
 	
 	public function add(item:TimelineItem):Void {
 		Sure.sure(item != null);
@@ -80,7 +85,7 @@ class Timeline extends TimelineItem {
 		add(item);
 	}
 	
-	public function find(target:Dynamic):Array<TimelineItem> {
+	public function find(target:T):Array<TimelineItem> {
 		return items.get(target);
 	}
 	
@@ -94,7 +99,7 @@ class Timeline extends TimelineItem {
 		}
 	}
 	
-	public function removeTarget(target:Dynamic):Void {
+	public function removeTarget(target:T):Void {
 		if (target == null) {
 			return;
 		}
@@ -107,7 +112,7 @@ class Timeline extends TimelineItem {
 		dirtyDuration = true;
 	}
 	
-	public function replaceTarget(target:Dynamic, replacement:Dynamic):Void {
+	public function replaceTarget(target:T, replacement:T):Void {
 		if (target == null) {
 			return;
 		}
@@ -121,7 +126,7 @@ class Timeline extends TimelineItem {
 	}
 	
 	public function clear():Void {
-		items = new ObjectMap<Dynamic, Array<TimelineItem>>();
+		items = new ObjectMap<T, Array<TimelineItem>>();
 	}
 	
 	override public function reset(unsetStarted:Bool = false):Void {
@@ -146,13 +151,8 @@ class Timeline extends TimelineItem {
 		}
 	}
 	
-	override public function loopStart():Void {
+	override public function onLoopStart():Void {
 		reset(false);
-	}
-	
-	override public function update(absoluteTime:Float):Void {
-		absoluteTime = loopTime(absoluteTime);
-		stepTo(absoluteTime);
 	}
 	
 	private function eraseMarked():Void {

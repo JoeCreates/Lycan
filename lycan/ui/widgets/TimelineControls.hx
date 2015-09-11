@@ -13,7 +13,7 @@ import lycan.ui.widgets.sliders.SimpleHorizontalSlider;
 import lycan.util.timeline.Timeline;
 
 class TimelineControls extends Widget {
-	private var timeline:Timeline;
+	private var timeline:Timeline<Dynamic>;
 	private var slider:SimpleHorizontalSlider;
 	private var togglePlay:CheckBox;
 	private var fastForward:PushButton;
@@ -26,7 +26,7 @@ class TimelineControls extends Widget {
 	private var speedMultiplier:Float;
 	private var totalTime:Float;
 	
-	public function new(timeline:Timeline, group:FlxSpriteGroup, ?parent:UIObject = null, ?name:String) {
+	public function new(timeline:Timeline<Dynamic>, group:FlxSpriteGroup, ?parent:UIObject = null, ?name:String) {
 		super(parent, name);
 		
 		layout = new VBoxLayout(10);
@@ -72,7 +72,7 @@ class TimelineControls extends Widget {
 			}
 		});
 		
-		rewind.signal_clicked.add(function():Void {			
+		rewind.signal_clicked.add(function():Void {
 			if (speedMultiplier <= -2) {
 				speedMultiplier -= 0.2;
 			} else {
@@ -96,9 +96,9 @@ class TimelineControls extends Widget {
 	public function update(dt:Float):Void {
 		if (playing) {
 			totalTime += dt * speedMultiplier;
-			timeline.update(totalTime);
 			slider.value = timeline.currentTime;
 		}
+		timeline.update(totalTime);
 		
 		infoLabel.graphic.set_text("Playing: " + playing + ", Speed multiplier: " + speedMultiplier);
 	}

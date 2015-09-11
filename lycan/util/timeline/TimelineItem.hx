@@ -1,11 +1,12 @@
 package lycan.util.timeline;
 
 // Base class for anything that can go on a timeline
-class TimelineItem {	
-	public var parent(default, null):Timeline;
+class TimelineItem {
+	public var parent(default, null):Timeline<Dynamic>;
 	public var target(default, set):Dynamic;
+	
 	public var startTime(default, set):Float;
-	public var duration(default, set):Float;
+	@:isVar public var duration(get, set):Float;
 	public var looping(default, default):Bool;
 	public var pingPong(default, default):Bool;
 	public var infinite(default, default):Bool;
@@ -20,10 +21,10 @@ class TimelineItem {
 	private var markedForRemoval(default, default):Bool;
 	private var useAbsoluteTime(default, default):Bool;
 	private var lastLoopIteration(default, default):Int;
-	private var inverseDuration(default, default):Float;
+	private var inverseDuration(get, null):Float;
 	private var dirtyDuration(default, set):Bool;
 	
-	public function new(?parent:Timeline, ?target:Dynamic, startTime:Float, duration:Float) {
+	public function new(?parent:Timeline<Dynamic>, ?target:Dynamic, startTime:Float, duration:Float) {
 		this.parent = parent;
 		this.target = target;
 		this.startTime = startTime;
@@ -44,7 +45,7 @@ class TimelineItem {
 		dirtyDuration = false;
 	}
 	
-	public function removeSelf():Void {
+	public function markForRemoval():Void {
 		markedForRemoval = true;
 	}
 	
@@ -55,24 +56,20 @@ class TimelineItem {
 		}
 	}
 	
-	public function start(reverse:Bool):Void {
+	public function onStart(reverse:Bool):Void {
 		
 	}
 	
-	public function loopStart():Void {
+	public function onLoopStart():Void {
+		
+	}
+	
+	public function onComplete(reverse:Bool):Void {
 		
 	}
 	
 	public function update(relativeTime:Float):Void {
 		
-	}
-	
-	public function complete(reverse:Bool):Void {
-		
-	}
-	
-	public function calcDuration():Float {
-		return duration;
 	}
 	
 	public function reverse():Void {
@@ -102,7 +99,7 @@ class TimelineItem {
 			
 			reverseStarted = true;
 			started = true;
-			start(true);
+			onStart(true);
 		} else if (newTime >= startTime) {
 			var relTime:Float = 0;
 			if (pingPong) {
@@ -120,8 +117,8 @@ class TimelineItem {
 				started = true;
 				reverseStarted = false;
 				lastLoopIteration = 0;
-				loopStart();
-				start(false);
+				onLoopStart();
+				onStart(false);
 			}
 			
 			var time:Float;
@@ -140,7 +137,7 @@ class TimelineItem {
 				
 				if (loopIteration != lastLoopIteration) {
 					lastLoopIteration = loopIteration;
-					loopStart();
+					onLoopStart();
 					update(time);
 				} else {
 					update(time);
@@ -154,15 +151,19 @@ class TimelineItem {
 			if (!reverseCompleted && reverse) {
 				reverseCompleted = true;
 				completed = false;
-				complete(true);
+				onComplete(true);
 			}
 		} else if (!looping && !infinite) {
 			if (!completed && !reverse) {
 				completed = true;
 				reverseCompleted = false;
-				complete(false);
+				onComplete(false);
 			}
 		}
+	}
+	
+	public function calcDuration():Float {
+		return duration;
 	}
 	
 	private function updateDuration():Void {
@@ -194,6 +195,10 @@ class TimelineItem {
 		return this.target = target;
 	}
 	
+	private function get_duration():Float {
+		return this.duration;
+	}
+	
 	private function set_duration(duration:Float):Float {
 		this.duration = duration;
 		inverseDuration = duration == 0 ? 1.0 : (1.0 / duration);
@@ -205,6 +210,10 @@ class TimelineItem {
 	
 	private function set_dirtyDuration(dirty:Bool):Bool {
 		return this.dirtyDuration = dirty;
+	}
+	
+	private function get_inverseDuration():Float {
+		return this.inverseDuration;
 	}
 	
 	private function set_startTime(startTime:Float):Float {

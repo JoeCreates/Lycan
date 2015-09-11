@@ -8,13 +8,35 @@ class Cue extends TimelineItem {
 		this.fn = fn;
 	}
 	
-	override public function loopStart():Void {
+	override private function get_updateAtLoopStart():Bool {
+		return true;
+	}
+	
+	override public function onStart(reverse:Bool):Void {
+		trace("START");
 		if (fn != null) {
 			fn();
 		}
 	}
 	
-	override private function get_updateAtLoopStart():Bool {
-		return true;
+	override public function onLoopStart():Void {
+		trace("LOOPSTART");
+		if (fn != null) {
+			fn();
+		}
+	}
+	
+	override public function update(relativeTime:Float):Void {
+		//trace("UPDATE");
+		//if (fn != null) {
+		//	fn();
+		//}
+	}
+	
+	override public function onComplete(reverse:Bool):Void {
+		trace("COMPLETE");
+		if (fn != null) {
+			fn();
+		}
 	}
 }
