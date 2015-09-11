@@ -4,17 +4,22 @@ import haxe.ds.ObjectMap;
 
 using lycan.util.FloatExtensions;
 
+typedef SortedTimelineItems = {
+	var forwardSort:Array<TimelineItem>; // Items sorted from earliest start time to latest start time
+	var reverseSort:Array<TimelineItem>; // Items sorted from latest end time to earliest end time
+}
+
 class Timeline<T:{}> extends TimelineItem {
 	public var currentTime(default, set):Float;
 	public var defaultRemoveCuesOnCompletion:Bool;
-	private var items:ObjectMap<T, Array<TimelineItem>>;
+	private var items:ObjectMap<T, SortedTimelineItems>;
 	
 	public function new() {
 		super(null, null, 0, 0);
 		currentTime = 0;
 		defaultRemoveCuesOnCompletion = false;
 		useAbsoluteTime = true;
-		items = new ObjectMap<T, Array<TimelineItem>>();
+		items = new ObjectMap<T, SortedTimelineItems>();
 	}
 	
 	// Step forward or backward on the timeline
@@ -35,31 +40,14 @@ class Timeline<T:{}> extends TimelineItem {
 		
 		var iter = items.iterator();
 		for (items in iter) {
-			// TODO this is insanely slow
-			// TODO cache the sorted versions of the arrays in the map, and don't use arrays for it
+			var arr;
 			if (reverse) {
-				items.sort(function(a:TimelineItem, b:TimelineItem):Int {
-					if (a.startTime > b.startTime) {
-						return -1;
-					}
-					if (a.startTime < b.startTime) {
-						return 1;
-					}
-					return 0;
-				});
+				arr = items.reverseSort;
 			} else {
-				items.sort(function(a:TimelineItem, b:TimelineItem):Int {
-					if (a.endTime > b.endTime) {
-						return -1;
-					}
-					if (a.endTime < b.endTime) {
-						return 1;
-					}
-					return 0;
-				});
+				arr = items.forwardSort;
 			}
 			
-			for (item in items) {				
+			for (item in arr) {
 				var needsStep:Bool;
 				if (reverse) {
 					needsStep = rangesIntersect(nextTime, currentTime, item.startTime, item.endTime);
@@ -107,10 +95,31 @@ class Timeline<T:{}> extends TimelineItem {
 		var existingItems = items.get(item.target);
 		
 		if (existingItems != null) {
-			existingItems.push(item);
+			existingItems.forwardSort.push(item);
+			existingItems.reverseSort.push(item);
 		} else {
-			items.set(item.target, [ item ] );
+			existingItems = { forwardSort:[ item ], reverseSort:[ item ] };
+			items.set(item.target, existingItems );
 		}
+		
+		existingItems.forwardSort.sort(function(a:TimelineItem, b:TimelineItem):Int {
+			if (a.startTime < b.startTime) {
+				return -1;
+			}
+			if (a.startTime > b.startTime) {
+				return 1;
+			}
+			return 0;
+		});
+		existingItems.reverseSort.sort(function(a:TimelineItem, b:TimelineItem):Int {
+			if (a.endTime > b.endTime) {
+				return -1;
+			}
+			if (a.endTime < b.endTime) {
+				return 1;
+			}
+			return 0;
+		});
 		
 		durationDirty = true;
 	}
@@ -124,13 +133,22 @@ class Timeline<T:{}> extends TimelineItem {
 		add(item);
 	}
 	
-	public function find(target:T):Array<TimelineItem> {
-		return items.get(target);
+	public function find(target:T, byStartTime:Bool = true):Array<TimelineItem> {
+		if (byStartTime) {
+			return items.get(target).forwardSort;
+		} else {
+			return items.get(target).reverseSort;
+		}
 	}
 	
 	public function remove(itemToRemove:TimelineItem):Void {
 		for (items in items.iterator()) {
-			for (item in items) {
+			for (item in items.forwardSort) {
+				if (item == itemToRemove) {
+					item.markedForRemoval = true;
+				}
+			}
+			for (item in items.reverseSort) {
 				if (item == itemToRemove) {
 					item.markedForRemoval = true;
 				}
@@ -144,7 +162,10 @@ class Timeline<T:{}> extends TimelineItem {
 		}
 		
 		var arr = items.get(target);
-		for (item in arr) {
+		for (item in arr.forwardSort) {
+			item.markedForRemoval = true;
+		}
+		for (item in arr.reverseSort) {
 			item.markedForRemoval = true;
 		}
 		
@@ -165,14 +186,14 @@ class Timeline<T:{}> extends TimelineItem {
 	}
 	
 	public function clear():Void {
-		items = new ObjectMap<T, Array<TimelineItem>>();
+		items = new ObjectMap<T, SortedTimelineItems>();
 	}
 	
 	override public function reset(unsetStarted:Bool = false):Void {
 		super.reset(unsetStarted);
 		
 		for (items in items.iterator()) {
-			for (item in items) {
+			for (item in items.forwardSort) {
 				item.reset(unsetStarted);
 			}
 		}
@@ -188,9 +209,14 @@ class Timeline<T:{}> extends TimelineItem {
 	
 	private function eraseMarked():Void {
 		for (items in items.iterator()) {
-			for (item in items) {
+			for (item in items.forwardSort) {
 				if (item.markedForRemoval) {
-					items.remove(item);
+					items.forwardSort.remove(item);
+				}
+			}
+			for (item in items.reverseSort) {
+				if (item.markedForRemoval) {
+					items.reverseSort.remove(item);
 				}
 			}
 		}
@@ -200,7 +226,7 @@ class Timeline<T:{}> extends TimelineItem {
 	override public function calcDuration():Float {
 		var duration:Float = 0;
 		for (items in items.iterator()) {
-			for (item in items) {
+			for (item in items.forwardSort) {
 				duration = Math.max(item.endTime, duration);
 			}
 		}
