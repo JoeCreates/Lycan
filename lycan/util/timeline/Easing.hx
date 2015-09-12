@@ -1,8 +1,10 @@
 package lycan.util.timeline;
+import flixel.input.FlxAccelerometer;
 
-// Easing equations in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license:
+// Easing equations in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license
 // Documentation and easeOutIn algorithms were originally adapted from Qt: http://qt.nokia.com/products/
 // Atan easing function are copyright Chris MacKenzie
+// Cubic hermite implementation based on StackOverflow answer by Roman Zenka: http://stackoverflow.com/a/3367593/1333253
 
 /*
 Copyright (c) 2010, The Cinder Project
@@ -177,7 +179,21 @@ class EaseSine {
 }
 
 class EaseBounce {
-	// TODO use partially applied arguments using function bindings to make these Float->Floats
+	inline public static function makeInBounce(a:Float):Float->Float {
+		return inBounce.bind(_, a);
+	}
+	
+	inline public static function makeOutBounce(a:Float):Float->Float {
+		return outBounce.bind(_, a);
+	}
+	
+	inline public static function makeInOutBounce(a:Float):Float->Float {
+		return inOutBounce.bind(_, a);
+	}
+	
+	inline public static function makeOutInBounce(a:Float):Float->Float {
+		return outInBounce.bind(_, a);
+	}
 	
 	inline public static function inBounce(t:Float, a:Float):Float {
 		return 1 - outBounceHelper(1 - t, 1, a);
@@ -214,6 +230,22 @@ class EaseBounce {
 }
 
 class EaseBack {
+	inline public static function makeInBack(s:Float):Float->Float {
+		return inBack.bind(_, s);
+	}
+	
+	inline public static function makeOutBack(s:Float):Float->Float {
+		return outBack.bind(_, s);
+	}
+	
+	inline public static function makeInOutBack(s:Float):Float->Float {
+		return inOutBack.bind(_, s);
+	}
+	
+	inline public static function makeOutInBack(s:Float):Float->Float {
+		return outInBack.bind(_, s);
+	}
+	
 	inline public static function inBack(t:Float, s:Float):Float {
 		return t * t * ((s + 1) * t - s);
 	}
@@ -235,6 +267,22 @@ class EaseBack {
 }
 
 class EaseElastic {
+	inline public static function makeInElastic(amp:Float, period:Float):Float->Float {
+		return inElastic.bind(_, amp, period);
+	}
+	
+	inline public static function makeOutElastic(amp:Float, period:Float):Float->Float {
+		return outElastic.bind(_, amp, period);
+	}
+	
+	inline public static function makeInOutElastic(amp:Float, period:Float):Float->Float {
+		return inOutElastic.bind(_, amp, period);
+	}
+	
+	inline public static function makeOutInElastic(amp:Float, period:Float):Float->Float {
+		return outInElastic.bind(_, amp, period);
+	}
+	
 	inline public static function inElastic(t:Float, amp:Float, period:Float):Float {
 		return inElasticHelper(t, 0, 1, 1, amp, period);
 	}
@@ -317,6 +365,18 @@ class EaseElastic {
 }
 
 class EaseAtan {
+	inline public static function makeInAtan(a:Float):Float->Float {
+		return inAtan.bind(_, a);
+	}
+	
+	inline public static function makeOutAtan(a:Float):Float->Float {
+		return outAtan.bind(_, a);
+	}
+	
+	inline public static function makeInOutAtan(a:Float):Float->Float {
+		return inOutAtan.bind(_, a);
+	}
+	
 	inline public static function inAtan(t:Float, a:Float):Float {
 		var m:Float = Math.atan(a);
 		return Math.atan((t - 1) * a) / m + 1;
@@ -333,8 +393,12 @@ class EaseAtan {
 	}
 }
 
-// Cubic hermite implementation based on StackOverflow answer by Roman Zenka: http://stackoverflow.com/a/3367593/1333253
 class EaseCubicHermite {
+	inline public static function makeHermite(accelTime:Float, cruiseTime:Float, decelTime:Float):Float->Float {
+		Sure.sure(accelTime + cruiseTime + decelTime == 1);
+		return hermite.bind(_, accelTime, cruiseTime, decelTime);
+	}
+	
 	inline public static function hermite(t:Float, accelTime:Float, cruiseTime:Float, decelTime:Float):Float {
 		Sure.sure(accelTime + cruiseTime + decelTime == 1);
 		
