@@ -31,15 +31,24 @@ class EntityBuilder {
 		}
 		
 		// Add components field
-		fields.push({
-			name: "components",
-			doc: null,
-			meta: [],
-			access: [APublic],
-			kind: FVar(macro :Array<lycan.components.Component<Dynamic>>,
-				macro new Array<lycan.components.Component<Dynamic>>() ),
-			pos: Context.currentPos()
-		});
+		var classType:ClassType;
+		switch (Context.getLocalType()) {
+			case TInst(r, _):
+				classType = r.get();
+			case _:
+		}
+		
+		if (!hasFieldIncludingBuildFields("components")) {
+			fields.push({
+				name: "components",
+				doc: null,
+				meta: [],
+				access: [APublic],
+				kind: FVar(macro :Array<lycan.components.Component<Dynamic>>,
+					macro new Array<lycan.components.Component<Dynamic>>() ),
+				pos: Context.currentPos()
+			});
+		}
 		
 		var addedDraw:Bool = false;
 		var addedUpdate:Bool = false;
@@ -101,7 +110,7 @@ class EntityBuilder {
 			var f:Bool = hasInheritedFunction(TypeTools.getClass(Context.getLocalType()), "lateUpdate");
 			// If we find the function in a superclass, override it
 			if (f) {
-				appendLateUpdate(addFunction("lateUpdate", {
+				appendLateUpdate(overrideFunction("lateUpdate", {
 					args: [{ name: "dt", type: TPath( { pack: [], name: "Float" } )}],
 					ret: null,
 					expr: macro super.lateUpdate(dt)
@@ -122,11 +131,9 @@ class EntityBuilder {
 		for (dummyField in getDummyPropertyFields()) {
 			// Check if the entity_ property already exists
 			var found:Bool = false;
-			for (field in fields) {
-				if (field.name == "entity_" + dummyField.name) {
-					found = true;
-					break;
-				}
+			if (hasFieldIncludingBuildFields(dummyField.name)) {
+				found = true;
+				break;
 			}
 			// If not, create it
 			if (!found) {
@@ -141,6 +148,12 @@ class EntityBuilder {
 						null ),
 					pos: Context.currentPos()
 				});
+				
+				var dummySourceFieldName:String = dummyField.name.substring(7, dummyField.name.length);
+				if (!hasFieldIncludingBuildFields(dummySourceFieldName)) {
+					throw("Field " + dummySourceFieldName + " required by component interface is missing in " + classType.name);
+				}
+				
 				// And create getter/setter
 				fields.push({
 					name: "get_" + dummyField.name,
@@ -150,7 +163,7 @@ class EntityBuilder {
 					kind: FFun({
 						args: [],
 						ret: Types.toComplex(dummyField.type),
-						expr: macro return $i { dummyField.name.substring(7, dummyField.name.length)}
+						expr: macro return $i { dummySourceFieldName }
 					}),
 					pos: Context.currentPos()
 				});
@@ -166,7 +179,7 @@ class EntityBuilder {
 						}],
 						ret: Types.toComplex(dummyField.type),
 						expr: macro {
-							return $i { dummyField.name.substring(7, dummyField.name.length)} = value;
+							return $i { dummySourceFieldName } = value;
 						}
 					}),
 					pos: Context.currentPos()
@@ -178,11 +191,10 @@ class EntityBuilder {
 		var componentFields:Map<String, ClassField> = getComponentFields();
 		var appendComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
 			var found:Bool = false;
-			for (field in fields) {
-				if (field.name == c.name) {
-					found = true;
-					break;
-				}
+			if (hasFieldIncludingBuildFields(componentFields.get(c.name).name)) {
+				throw("Class " + classType.name + " has field " +
+					componentFields.get(c.name).name + ", which must not be declared as it is required by " + c.name);
+				found = true;
 			}
 			// If we do not have a field for the component, create one
 			if (!found) {
@@ -205,6 +217,12 @@ class EntityBuilder {
 			switch (field.kind) {
 				case FFun(func) if (field.name == "new"):
 					for (componentInterface in getComponentInterfaces()) {
+						if (classType.superClass != null) {
+							// Do not re-add components that have already been added by a superclass
+							if (hasAddedComponent(classType.superClass.t.get(), componentInterface.name)) {
+								continue;
+							}
+						}
 						func.expr = appendComponentInstantiation(func.expr,
 							{pack: componentInterface.pack, name: componentInterface.name + "Component"});
 					}
@@ -213,6 +231,30 @@ class EntityBuilder {
 		}
 		
 		return fields;
+	}
+	
+	/**
+	 * Checks if a ClassType should have added a component already
+	 */
+	public static function hasAddedComponent(type:ClassType, componentInterfaceName:String):Bool {
+		// Only classes can have components added, so return false if type is an interface
+		if (type.isInterface) {
+			return false;
+		}
+		
+		// Check if each interface has the given name
+		for (i in type.interfaces) {
+			if (i.t.get().name == componentInterfaceName) {
+				return true;
+			}
+		}
+		
+		// If not, check the superclass of this type if there is one
+		if (type.superClass != null) {
+			return hasAddedComponent(type.superClass.t.get(), componentInterfaceName);
+		}
+		
+		return false;
 	}
 	
 	public static function getDummyPropertyFields():Array<ClassField> {
@@ -239,7 +281,7 @@ class EntityBuilder {
 						fields.push(field);
 					}
 				case _:
-					fields.push(field);
+					fields.push(field);//TODO !!!!!!!!!!!!!!!!!!!!! AAAAAARGH!!!!!!!!!!!!!!!!
 			}
 		}
 		return fields;
@@ -276,6 +318,42 @@ class EntityBuilder {
 		return null;
 	}
 	
+	/** Recursively check if build field or inherited field */
+	public static function hasFieldIncludingBuildFields(fieldName:String):Bool {
+		var classType:ClassType;
+		switch (Context.getLocalType()) {
+			case TInst(r, _):
+				classType = r.get();
+			case _:
+		}
+		for (field in Context.getBuildFields()) {
+			// Check if this Field is the required field
+			if (field.name == fieldName) {
+				return true;
+			}
+		}
+		// If not, check the super class if there is one
+		if (classType.superClass != null) {
+			return hasField(classType.superClass.t.get(), fieldName);
+		}
+		return false;
+	}
+	
+	/** Recursively check if given ClassType has a field */
+	public static function hasField(type:ClassType, fieldName:String):Bool {
+		for (field in type.fields.get()) {
+			// Check if this Field is the required field
+			if (field.name == fieldName) {
+				return true;
+			}
+		}
+		// If not, check the super class if there is one
+		if (type.superClass != null) {
+			return hasField(type.superClass.t.get(), fieldName);
+		}
+		return false;
+	}
+	
 	/** Recursively check if given ClassType implements interface of given name */
 	public static function hasInterface(type:ClassType, interfaceName:String):Bool {
 		for (i in type.interfaces) {
@@ -297,7 +375,10 @@ class EntityBuilder {
 			case TInst(r, _):
 				for (i in r.get().interfaces) {
 					if (hasInterface(i.t.get(), "Entity")) {
-						out.push(i.t.get());
+						// If we haven;t already, add the inyterface to output array
+						if (out.indexOf(i.t.get()) < 0) {
+							out.push(i.t.get());
+						}
 					}
 				}
 			case _:

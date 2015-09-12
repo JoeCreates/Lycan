@@ -8,7 +8,7 @@ interface Attachable extends LateUpdatable extends Entity {
 	public var y(get, set):Float;
 }
 
-class AttachableComponent extends Component<Attachable> implements LateUpdatable {
+class AttachableComponent extends Component<Attachable> {
 	public var parent:Attachable;
 	public var children:Array<Attachable>;
 	public var isRoot(get, never):Bool;
@@ -28,9 +28,12 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		y = 0;
 		originX = 0;
 		originY = 0;
+		
+		requiresLateUpdate = true;
 	}
 	
 	override public function lateUpdate(dt:Float):Void {
+		trace("lk");
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
