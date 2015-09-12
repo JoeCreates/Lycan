@@ -68,10 +68,10 @@ class Timeline<T:{}> extends TimelineItem {
 		stepTo(absoluteTime);
 	}
 	
-	public function addFunction(target:T, f:Void->Void, atTime:Float):Cue {
+	public function addFunction(target:T, f:Void->Void, startTime:Float):Cue {
 		Sure.sure(target != null);
 		
-		var cue = new Cue(target, f, atTime);
+		var cue = new Cue(target, startTime, f);
 		insert(cue);
 		return cue;
 	}

@@ -1,12 +1,13 @@
 package lycan.util.timeline;
 
+import lycan.util.timeline.Easing;
+
 class Tween extends TimelineItem {
-	static public var 
+	public var ease:Float->Float;
 	
-	public function new(target:Dynamic, startAt:Float, duration:Float, ease:Float->Float) {		
-		super(null, target, startAt, duration);
-		this.fn = fn;
-		this.removeOnCompletion = removeOnCompletion;
+	public function new(target:Dynamic, startTime:Float, duration:Float, ease:Float->Float) {		
+		super(null, target, startTime, duration);
+		this.ease = ease;
 	}
 	
 	override public function onEnterLeft(count:Int):Void {
