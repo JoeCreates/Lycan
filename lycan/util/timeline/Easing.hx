@@ -1,6 +1,8 @@
 package lycan.util.timeline;
 
-// Easing equations in this file were derived from The Cinder Project (http://libcinder.org/) held under the Modified BSD license:
+// Easing equations in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license:
+// Documentation and easeOutIn algorithms were originally adapted from Qt: http://qt.nokia.com/products/
+// Atan easing function are copyright Chris MacKenzie
 
 /*
 Copyright (c) 2010, The Cinder Project
@@ -211,74 +213,148 @@ class EaseBounce {
 	}
 }
 
-// TODO
-/*
 class EaseBack {
-	inline public static function easeInBack(t:Float, s:Float):Float {
-		
+	inline public static function inBack(t:Float, s:Float):Float {
+		return t * t * ((s + 1) * t - s);
 	}
 	
-	inline public static function easeOutBack(t:Float, s:Float):Float {
-		
+	inline public static function outBack(t:Float, s:Float):Float {
+		t -= 1;
+		return t * t * ((s + 1) * t + s) + 1;
 	}
 	
-	inline public static function easeInOutBack(t:Float, s:Float):Float {
-		
+	inline public static function inOutBack(t:Float, s:Float):Float {
+		t *= 2;
+		s *= 1.525;
+		return (t < 1) ? 0.5 * (t * t * ((s + 1) * t - s)) : t -= 2; 0.5 * (t * t * ((s + 1) * t + s) + 2);
 	}
 	
-	inline public static function easeOutInBack(t:Float, s:Float):Float {
-		
+	inline public static function outInBack(t:Float, s:Float):Float {
+		return (t < 0.5) ? outBack(2 * t, s) / 2 : inBack(2 * t - 1, s) / 2 + 0.5; 
 	}
 }
 
 class EaseElastic {
-	inline public static function easeInElastic(t:Float, amp:Float, period:Float):Float {
-		
+	inline public static function inElastic(t:Float, amp:Float, period:Float):Float {
+		return inElasticHelper(t, 0, 1, 1, amp, period);
 	}
 	
-	inline public static function easeOutElastic(t:Float, amp:Float, period:Float):Float {
-		
+	inline public static function outElastic(t:Float, amp:Float, period:Float):Float {
+		return outElasticHelper(t, 0, 1, 1, amp, period);
 	}
 	
-	inline public static function easeInOutElastic(t:Float, amp:Float, period:Float):Float {
+	inline public static function inOutElastic(t:Float, amp:Float, period:Float):Float {
+		if (t == 0) {
+			return 0;
+		}
+		t *= 2;
+		if (t == 2) {
+			return 1;
+		}
 		
+		var s:Float;
+		if (amp < 1) {
+			amp = 1;
+			s = period / 4;
+		} else {
+			s = period / (2 * Math.PI) * Math.asin(1 / amp);
+		}
+		
+		if (t < 1) {
+			return -0.5 * (amp * Math.pow(2, 10 * (t - 1)) * Math.sin(t - 1 - s) * ((2 * Math.PI) / period));
+		}
+		
+		return amp * Math.pow(2, -10 * (t - 1)) * Math.sin((t - 1 - s) * (2 * Math.PI) / period) * 0.5 + 1;
 	}
 	
-	inline public static function easeOutInElastic(t:Float, amp:Float, period:Float):Float {
-		
+	inline public static function outInElastic(t:Float, amp:Float, period:Float):Float {
+		if (t < 0.5) {
+			return outElasticHelper(t * 2, 0, 0.5, 1.0, amp, period);
+		}
+		return inElasticHelper(2 * t - 1.0, 0.5, 0.5, 1.0, amp, period);
 	}
 	
-	inline private static function easeInElasticHelper(t:Float, b:Float, c:Float, d:Float, a:Float, p:Float):Float {
+	inline private static function inElasticHelper(t:Float, b:Float, c:Float, d:Float, a:Float, p:Float):Float {
+		if (t == 0) {
+			return b;
+		}
+		var adj:Float = t / d;
+		if (adj == 1) {
+			return b + c;
+		}
 		
+		var s:Float;
+		if (a < Math.abs(c)) {
+			a = c;
+			s = p / 4.0;
+		} else {
+			s = p / (2 * Math.PI) * Math.asin(c / a);
+		}
+		
+		
+		adj -= 1;
+		return -(a * Math.pow(2, 10 * adj) * Math.sin((adj * d - s) * (2 * Math.PI) / p)) + b;
 	}
 	
-	inline private static function easeOutElasticHelper(t:Float, c:Float, a:Float, p:Float):Float {
+	inline private static function outElasticHelper(t:Float, b:Float, c:Float, d:Float, a:Float, p:Float):Float {
+		if (t == 0) {
+			return 0;
+		}
+		if (t == 1) {
+			return c;
+		}
 		
+		var s:Float;
+		if (a < c) {
+			a = c;
+			s = p / 4.0;
+		} else {
+			s = p / (2 * Math.PI) * Math.asin(c / a);
+		}
+		
+		return a * Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p ) + c;
 	}
 }
 
 class EaseAtan {
-	inline public static function easeInAtan(t:Float, a:Float):Float {
-		
+	inline public static function inAtan(t:Float, a:Float):Float {
+		var m:Float = Math.atan(a);
+		return Math.atan((t - 1) * a) / m + 1;
 	}
 	
-	inline public static function easeOutAtan(t:Float, a:Float):Float {
-		
+	inline public static function outAtan(t:Float, a:Float):Float {
+		var m:Float = Math.atan(a);
+		return Math.atan(t * a)  / 2;
 	}
 	
-	inline public static function easeInOutAtan(t:Float, a:Float):Float {
-		
+	inline public static function inOutAtan(t:Float, a:Float):Float {
+		var m:Float = Math.atan(0.5 * a);
+		return Math.atan((t - 0.5) * a) / (2 * m) + 0.5;
 	}
 }
 
-// TODO cubic hermite spline interpolator
+// Cubic hermite implementation based on StackOverflow answer by Roman Zenka: http://stackoverflow.com/a/3367593/1333253
 class EaseCubicHermite {
-	inline public static function easeHermite(t:Float, accel:Float, cruise:Float, decel:Float):Float {
+	inline public static function hermite(t:Float, accelTime:Float, cruiseTime:Float, decelTime:Float):Float {
+		Sure.sure(accelTime + cruiseTime + decelTime == 1);
 		
+		var v:Float = 1 / (accelTime / 2 + cruiseTime + decelTime / 2);
+		var x1:Float = v * accelTime / 2;
+		var x2:Float = v * cruiseTime;
+		var x3:Float = v * decelTime / 2;
+		
+		if (t < accelTime) {
+			return cubicHermite(t / accelTime, 0, x1, 0, x2 / cruiseTime * accelTime);
+		} else if (t <= accelTime + cruiseTime) {
+			return x1 + x2 * (t - accelTime) / cruiseTime;
+		} else {
+			return cubicHermite((t - accelTime - cruiseTime) / decelTime, x1 + x2, 1, x2 / cruiseTime * decelTime, 0);
+		}
 	}
 	
-	inline private static function cubicHermite(t:Float, p0:Float, p1:Float, m0:Float, m1:Float):Float {
-		
+	inline private static function cubicHermite(t:Float, start:Float, end:Float, stan:Float, etan:Float):Float {
+		var t2 = t * t;
+		var t3 = t2 * t;
+		return (2 * t3 - 3 * t2 + 1) * start + (t3 - 2 * t2 + t) * stan + ( -2 * t3 + 3 * t2) * end + (t3 - t2) * etan;
 	}
 }
-*/
