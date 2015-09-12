@@ -2,6 +2,8 @@ package lycan.util.timeline;
 
 using lycan.util.BitSet;
 
+using lycan.util.FloatExtensions;
+
 // Base class for anything that can go on a timeline
 class TimelineItem {
 	public var parent(default, null):Timeline<Dynamic>;
@@ -11,133 +13,98 @@ class TimelineItem {
 	@:isVar public var duration(get, set):Float;
 	public var endTime(get, null):Float;
 	
-	//public var enterZoneCount
+	public var enterLeftCount:Int;
+	public var exitLeftCount:Int;
+	public var enterRightCount:Int;
+	public var exitRightCount:Int;
+	public var stepOverCount:Int;
 	
-	public var started(default, null):Bool;
-	public var reverseStarted(default, null):Bool;
-	public var completed(default, null):Bool;
-	public var reverseCompleted(default, null):Bool;
+	public var exitLeftLimit(default, null):Int;
+	public var exitRightLimit(default, null):Int;
+	public var completed(get, null):Bool;
 	
 	public var removeOnCompletion(default, default):Bool;
-	public var updateAtLoopStart(get, null):Bool;
+	public var markedForRemoval(default, default):Bool;
 	
-	private var markedForRemoval(default, default):Bool;
-	private var useAbsoluteTime(default, default):Bool;
-	private var lastLoopIteration(default, default):Int;
-	private var inverseDuration(get, null):Float;
-	private var durationDirty(default, set):Bool;
-	
-	public function new(?parent:Timeline<Dynamic>, ?target:Dynamic, startTime:Float, duration:Float) {
+	public function new(?parent:Timeline<Dynamic>, target:Dynamic, startTime:Float, duration:Float) {
 		this.parent = parent;
 		this.target = target;
 		this.startTime = startTime;
 		this.duration = duration;
-		started = false;
-		reverseStarted = false;
-		completed = false;
-		reverseCompleted = false;
+		
+		enterLeftCount = 0;
+		exitLeftCount = 0;
+		enterRightCount = 0;
+		exitRightCount = 0;
+		stepOverCount = 0;
+		
+		exitLeftLimit = 1;
+		exitRightLimit = 1;
+		
 		removeOnCompletion = true;
 		markedForRemoval = false;
-		useAbsoluteTime = false;
-		lastLoopIteration = -1;
-		inverseDuration = 0;
-		durationDirty = false;
 	}
 	
-	public function markForRemoval():Void {
-		markedForRemoval = true;
+	public function reset():Void {
+		enterLeftCount = 0;
+		exitLeftCount = 0;
+		enterRightCount = 0;
+		exitRightCount = 0;
+		stepOverCount = 0;
+		markedForRemoval = false;
 	}
 	
-	public function reset(unsetStarted:Bool = false):Void {
-		if (unsetStarted) {
-			started = false;
-			completed = false;
-		}
-	}
-	
-	public function onStart(reverse:Bool):Void {
+	public function onEnterLeft(count:Int):Void {
 		
 	}
 	
-	public function onLoopStart():Void {
+	public function onExitLeft(count:Int):Void {
 		
 	}
 	
-	public function onComplete(reverse:Bool):Void {
+	public function onEnterRight(count:Int):Void {
 		
 	}
 	
-	public function update(relativeTime:Float):Void {
+	public function onExitRight(count:Int):Void {
 		
 	}
 	
-	public function stepTo(newTime:Float, ?reverse:Bool):Void {
-		if (reverse == null) {
-			reverse = false;
-		}
+	public function onUpdate(time:Float):Void {
+		stepTo(time);
+	}
+	
+	public function stepTo(nextTime:Float, ?currentTime:Float):Void {
+		Sure.sure(currentTime != null);
 		
 		if (markedForRemoval) {
 			return;
 		}
 		
-		updateDuration();
-		
-		var absTime:Float = newTime - startTime;
-		var endTime:Float = startTime + duration;
-		
-		if (!reverseStarted && reverse && (newTime < startTime)) {
-			if (useAbsoluteTime) {
-				update(startTime);
-			} else {
-				update(0);
+		if (completed) {
+			if (removeOnCompletion) {
+				markedForRemoval = true;
 			}
-			
-			reverseStarted = true;
-			started = true;
-			onStart(true);
-		} else if (newTime >= startTime) {
-			var relTime = Math.min(absTime * inverseDuration, 1);
-			
-			if (!started && !reverse) {
-				started = true;
-				reverseStarted = false;
-				lastLoopIteration = 0;
-				onLoopStart();
-				onStart(false);
-			}
-			
-			var time:Float;
-			if (useAbsoluteTime) {
-				time = absTime;
-			} else {
-				time = relTime;
-			}
-			
-			if (!useAbsoluteTime && (inverseDuration <= 0)) {
-				time = 1.0;
-			}
-
-			update(time);
+			return;
 		}
 		
-		if (newTime < endTime) {
-			if (!reverseCompleted && reverse) {
-				reverseCompleted = true;
-				completed = false;
-				onComplete(true);
-			}
+		var enteredLeft:Bool = (currentTime <= startTime && nextTime > startTime);
+		var enteredRight:Bool = (currentTime >= endTime && nextTime < endTime);
+		var exitedLeft:Bool = (currentTime >= startTime && nextTime < startTime);
+		var exitedRight:Bool = (currentTime <= endTime && nextTime > endTime);
+		
+		if (enteredLeft) {
+			onEnterLeft(enterLeftCount++);
 		}
-	}
-	
-	public function calcDuration():Float {
-		return duration;
-	}
-	
-	private function updateDuration():Void {
-		if (durationDirty) {
-			duration = Math.max(calcDuration(), 0.0);
-			inverseDuration = (duration == 0) ? 1.0 : (1.0 / duration);
-			durationDirty = false;
+		if (enteredRight) {
+			onEnterRight(enterRightCount++);
+		}
+		
+		if (exitedLeft) {
+			onExitLeft(exitLeftCount++);
+		}
+		if (exitedRight) {
+			onExitRight(exitRightCount++);
 		}
 	}
 	
@@ -150,20 +117,11 @@ class TimelineItem {
 	}
 	
 	private function set_duration(duration:Float):Float {
-		this.duration = duration;
-		inverseDuration = duration == 0 ? 1.0 : (1.0 / duration);
+		this.duration = Math.max(0, duration);
 		if (parent != null) {
 			parent.itemTimeChanged(this);
 		}
 		return duration;
-	}
-	
-	private function set_durationDirty(dirty:Bool):Bool {
-		return this.durationDirty = dirty;
-	}
-	
-	private function get_inverseDuration():Float {
-		return this.inverseDuration;
 	}
 	
 	private function set_startTime(startTime:Float):Float {
@@ -178,11 +136,7 @@ class TimelineItem {
 		return startTime + duration;
 	}
 	
-	private function get_updateAtLoopStart():Bool {
-		return false;
-	}
-	
-	private static inline function fmod(a:Float, b:Float):Float {
-		return (a - b * Math.floor(a / b));
+	private function get_completed():Bool {
+		return (exitLeftCount >= exitLeftLimit && exitRightCount >= exitRightLimit);
 	}
 }

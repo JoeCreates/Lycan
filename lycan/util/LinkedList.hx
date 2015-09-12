@@ -121,6 +121,7 @@ class LinkedList<T> {
 				if (cell.next == null) {
 					tail = cell;
 				}
+				length++;
 				return true;
 			}
 			current = current.next;
@@ -144,8 +145,11 @@ class LinkedList<T> {
 				} else {
 					previous.next = cell;
 				}
+				length++;
 				return true;
 			}
+			previous = current;
+			current = current.next;
 		}
 		
 		return false;
@@ -154,7 +158,7 @@ class LinkedList<T> {
 	public function toString():String {
 		var buf = new StringBuf();
 		var first = true;
-		var it:Iterator<T> = iterator();
+		var it = iterator();
 		buf.add("{");
 		
 		for (cell in it) {
@@ -180,7 +184,7 @@ class LinkedList<T> {
 		return head == null;
 	}
 	
-	public inline function iterator():Iterator<T> {
+	public inline function iterator():LinkedListIterator<T> {
 		return new LinkedListIterator<T>(head);
 	}
 }
@@ -196,6 +200,7 @@ class Cell<T> {
 	}
 }
 
+@:generic
 private class LinkedListIterator<T> {
 	private var head:Cell<T>;
 	private var tmp:T;

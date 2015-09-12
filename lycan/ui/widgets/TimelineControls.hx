@@ -18,6 +18,7 @@ class TimelineControls extends Widget {
 	private var togglePlay:CheckBox;
 	private var fastForward:PushButton;
 	private var rewind:PushButton;
+	private var reset:PushButton;
 	private var infoLabel:Label;
 	private var sliderContainer:LayoutContainer;
 	private var buttonsContainer:LayoutContainer;
@@ -40,6 +41,7 @@ class TimelineControls extends Widget {
 		rewind = new PushButton(new FlxDebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "rewind");
 		togglePlay = new CheckBox(new FlxDebugRenderItem(40, 40, FlxColor.RED).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), false, null, "togglePlay");
 		fastForward = new PushButton(new FlxDebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "fastForward");
+		reset = new PushButton(new FlxDebugRenderItem(60, 40, FlxColor.PURPLE).addTo(group), new FlxDebugRenderItem(60, 40, FlxColor.LIME).addTo(group), new FlxDebugRenderItem(60, 40, FlxColor.GRAY).addTo(group), null, "reset");
 		infoLabel = new Label(null, "infoLabel");
 		infoLabel.graphic = new FlxTextRenderItem(new FlxText()).addTo(group);
 		
@@ -56,6 +58,7 @@ class TimelineControls extends Widget {
 		buttonsContainer.addChild(rewind);
 		buttonsContainer.addChild(togglePlay);
 		buttonsContainer.addChild(fastForward);
+		buttonsContainer.addChild(reset);
 		addChild(buttonsContainer);
 		
 		// TODO fit to parent/expand to fill space
@@ -91,6 +94,8 @@ class TimelineControls extends Widget {
 				speedMultiplier = 2.0;
 			}
 		});
+		
+		reset.signal_clicked.add(timeline.reset);
 	}
 	
 	public function update(dt:Float):Void {
@@ -98,7 +103,7 @@ class TimelineControls extends Widget {
 			totalTime += dt * speedMultiplier;
 			slider.value = timeline.currentTime;
 		}
-		timeline.update(totalTime);
+		timeline.onUpdate(totalTime);
 		
 		infoLabel.graphic.set_text("Playing: " + playing + ", Speed multiplier: " + speedMultiplier);
 	}

@@ -13,4 +13,8 @@ class FloatExtensions {
 	public static inline function min<T:Float>(a:T, b:T):T {
 		return (a < b ? a : b);
 	}
+	
+	public static inline function inRange<T:Float>(p:T, x1:T, x2:T):Bool {
+		return (p >= Math.min(x1, x2) && p <= Math.max(x1, x2));
+	}
 }
