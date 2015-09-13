@@ -24,15 +24,13 @@ class Timeline<T:{}> extends TimelineItem {
 	
 	// Step to a relative time on the timeline
 	public function step(dt:Float):Void {
-		super.stepTo(currentTime + dt, currentTime);
-		currentTime += dt;
+		stepTo(currentTime + dt, currentTime);
 	}
 	
 	// Steps to an absolute time on the timeline
 	// Items on each target are updated in order of their startTimes (earliest to latest) when stepping forward, and their endTimes (latest to earliest) when stepping backward
 	// Note that this is a per-target object ordering, not a global ordering on all the items
 	override public function stepTo(nextTime:Float, ?unusedCurrentTime:Float):Void {
-		Sure.sure(unusedCurrentTime == null);
 		nextTime = nextTime.clamp(0, duration);
 		
 		removeMarked();
@@ -99,12 +97,14 @@ class Timeline<T:{}> extends TimelineItem {
 		
 		var forwardList = items.getList(false);
 		
+		// TODO think about any implications regarding stability of insertions here (i.e. sitatuions where two items with identical start and end times might get called in mixed up orders?)
+		
 		if (forwardList.last().startTime < item.startTime) { // If the latest start time is earlier than the item's start time, add it to the end
 			forwardList.add(item);
 		} else { 
 			var forwardInserted = forwardList.insertBefore(item, function(other:TimelineItem):Bool {
 				Sure.sure(other != null);
-				return other.startTime > item.startTime; // Insert the item before the first item that starts later than it
+				return other.startTime >= item.startTime; // Insert the item before the first item that starts later than it
 			});
 			Sure.sure(forwardInserted);
 		}
@@ -115,7 +115,7 @@ class Timeline<T:{}> extends TimelineItem {
 		} else {
 			var reverseInserted = backwardList.insertBefore(item, function(other:TimelineItem):Bool {
 				Sure.sure(other != null);
-				return other.endTime < item.endTime; // Insert the item before the first item that is earlier than it
+				return other.endTime <= item.endTime; // Insert the item before the first item that is earlier than it
 			});
 			Sure.sure(reverseInserted);
 		}

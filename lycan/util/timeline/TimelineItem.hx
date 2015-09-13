@@ -22,6 +22,7 @@ class TimelineItem {
 	public var exitLeftLimit(default, null):Int;
 	public var exitRightLimit(default, null):Int;
 	public var completed(get, null):Bool;
+	public var hovered(get, null):Bool;
 	
 	public var removeOnCompletion(default, default):Bool;
 	public var markedForRemoval(default, default):Bool;
@@ -71,7 +72,7 @@ class TimelineItem {
 	}
 	
 	public function onUpdate(time:Float):Void {
-		stepTo(time);
+		
 	}
 	
 	public function stepTo(nextTime:Float, ?currentTime:Float):Void {
@@ -106,6 +107,8 @@ class TimelineItem {
 		if (exitedRight) {
 			onExitRight(exitRightCount++);
 		}
+		
+		onUpdate(nextTime);
 	}
 	
 	private function set_target(target:Dynamic):Dynamic {
@@ -138,5 +141,10 @@ class TimelineItem {
 	
 	private function get_completed():Bool {
 		return (exitLeftCount >= exitLeftLimit && exitRightCount >= exitRightLimit);
+	}
+	
+	private function get_hovered():Bool {
+		Sure.sure(parent != null);
+		return (parent.currentTime >= startTime && parent.currentTime <= endTime);
 	}
 }
