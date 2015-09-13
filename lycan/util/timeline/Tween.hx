@@ -52,6 +52,10 @@ class Tween extends TimelineItem {
 	}
 	
 	private inline function setField<T> (target:T, key:String, value:Dynamic):Void {
+		Sure.sure(target != null);
+		Sure.sure(key != null);
+		Sure.sure(value != null);
+		
 		if (Reflect.hasField(target, key)) {
 			#if flash
 			untyped target[key] = value;
@@ -59,8 +63,9 @@ class Tween extends TimelineItem {
 			Reflect.setField(target, key, value);
 			#end
 		} else {
-			throw "Could not find key " + key + " on target " + target;
-			// Reflect.setProperty(target, key, value);
+			// throw "Could not find field " + key + " on target " + target;
+			// NOTE this is necessary to catch cases where a field was optimized away
+			Reflect.setProperty(target, key, value);
 		}
 	}
 }
