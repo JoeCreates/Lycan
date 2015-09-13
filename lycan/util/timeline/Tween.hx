@@ -65,14 +65,8 @@ class Tween extends TimelineItem {
 	}
 }
 
-class FieldDetails {
-	public var name:String;
-	public var start:Float;
-	public var end:Float;
-	
-	public inline function new(name:String, start:Float, end:Float) {
-		this.name = name;
-		this.start = start;
-		this.end = end;
-	}
+typedef FieldDetails = {
+	var name:String;
+	var start:Float;
+	var end:Float;
 }
