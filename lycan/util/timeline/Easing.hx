@@ -178,35 +178,35 @@ class EaseSine {
 }
 
 class EaseBounce {
-	inline public static function makeInBounce(a:Float):Float->Float {
+	inline public static function makeInBounce(a:Float = 1.70158):Float->Float {
 		return inBounce.bind(_, a);
 	}
 	
-	inline public static function makeOutBounce(a:Float):Float->Float {
+	inline public static function makeOutBounce(a:Float = 1.70158):Float->Float {
 		return outBounce.bind(_, a);
 	}
 	
-	inline public static function makeInOutBounce(a:Float):Float->Float {
+	inline public static function makeInOutBounce(a:Float = 1.70158):Float->Float {
 		return inOutBounce.bind(_, a);
 	}
 	
-	inline public static function makeOutInBounce(a:Float):Float->Float {
+	inline public static function makeOutInBounce(a:Float = 1.70158):Float->Float {
 		return outInBounce.bind(_, a);
 	}
 	
-	inline public static function inBounce(t:Float, a:Float):Float {
+	inline public static function inBounce(t:Float, a:Float = 1.70158):Float {
 		return 1 - outBounceHelper(1 - t, 1, a);
 	}
 	
-	inline public static function outBounce(t:Float, a:Float):Float {
+	inline public static function outBounce(t:Float, a:Float = 1.70158):Float {
 		return outBounceHelper(t, 1, a);
 	}
 	
-	inline public static function inOutBounce(t:Float, a:Float):Float {
+	inline public static function inOutBounce(t:Float, a:Float = 1.70158):Float {
 		return (t < 0.5) ? inBounce(2 * t, a) / 2 : (t == 1) ? 1 : outBounce(2 * t - 1, a) / 2 + 0.5;
 	}
 	
-	inline public static function outInBounce(t:Float, a:Float):Float {
+	inline public static function outInBounce(t:Float, a:Float = 1.70158):Float {
 		return (t < 0.5) ? outBounceHelper(t * 2, 0.5, a) : 1 - outBounceHelper(2 - 2 * t, 0.5, a);
 	}
 	
@@ -229,38 +229,38 @@ class EaseBounce {
 }
 
 class EaseBack {
-	inline public static function makeInBack(s:Float):Float->Float {
+	inline public static function makeInBack(s:Float = 1.70158):Float->Float {
 		return inBack.bind(_, s);
 	}
 	
-	inline public static function makeOutBack(s:Float):Float->Float {
+	inline public static function makeOutBack(s:Float = 1.70158):Float->Float {
 		return outBack.bind(_, s);
 	}
 	
-	inline public static function makeInOutBack(s:Float):Float->Float {
+	inline public static function makeInOutBack(s:Float = 1.70158):Float->Float {
 		return inOutBack.bind(_, s);
 	}
 	
-	inline public static function makeOutInBack(s:Float):Float->Float {
+	inline public static function makeOutInBack(s:Float = 1.70158):Float->Float {
 		return outInBack.bind(_, s);
 	}
 	
-	inline public static function inBack(t:Float, s:Float):Float {
+	inline public static function inBack(t:Float, s:Float = 1.70158):Float {
 		return t * t * ((s + 1) * t - s);
 	}
 	
-	inline public static function outBack(t:Float, s:Float):Float {
+	inline public static function outBack(t:Float, s:Float = 1.70158):Float {
 		t -= 1;
 		return t * t * ((s + 1) * t + s) + 1;
 	}
 	
-	inline public static function inOutBack(t:Float, s:Float):Float {
+	inline public static function inOutBack(t:Float, s:Float = 1.70158):Float {
 		t *= 2;
 		s *= 1.525;
 		return (t < 1) ? 0.5 * (t * t * ((s + 1) * t - s)) : 0.5 * ((t -= 2) * t * ((s + 1) * t + s) + 2);
 	}
 	
-	inline public static function outInBack(t:Float, s:Float):Float {
+	inline public static function outInBack(t:Float, s:Float = 1.70158):Float {
 		return (t < 0.5) ? outBack(2 * t, s) / 2 : inBack(2 * t - 1, s) / 2 + 0.5; 
 	}
 }
@@ -363,29 +363,29 @@ class EaseElastic {
 }
 
 class EaseAtan {
-	inline public static function makeInAtan(a:Float):Float->Float {
+	inline public static function makeInAtan(a:Float = 15):Float->Float {
 		return inAtan.bind(_, a);
 	}
 	
-	inline public static function makeOutAtan(a:Float):Float->Float {
+	inline public static function makeOutAtan(a:Float = 15):Float->Float {
 		return outAtan.bind(_, a);
 	}
 	
-	inline public static function makeInOutAtan(a:Float):Float->Float {
+	inline public static function makeInOutAtan(a:Float = 15):Float->Float {
 		return inOutAtan.bind(_, a);
 	}
 	
-	inline public static function inAtan(t:Float, a:Float):Float {
+	inline public static function inAtan(t:Float, a:Float = 15):Float {
 		var m:Float = Math.atan(a);
 		return Math.atan((t - 1) * a) / m + 1;
 	}
 	
-	inline public static function outAtan(t:Float, a:Float):Float {
+	inline public static function outAtan(t:Float, a:Float = 15):Float {
 		var m:Float = Math.atan(a);
 		return Math.atan(t * a)  / 2;
 	}
 	
-	inline public static function inOutAtan(t:Float, a:Float):Float {
+	inline public static function inOutAtan(t:Float, a:Float = 15):Float {
 		var m:Float = Math.atan(0.5 * a);
 		return Math.atan((t - 0.5) * a) / (2 * m) + 0.5;
 	}
