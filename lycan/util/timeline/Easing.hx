@@ -2,7 +2,7 @@ package lycan.util.timeline;
 
 // Easing equations in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license
 // Documentation and easeOutIn algorithms were originally adapted from Qt: http://qt.nokia.com/products/
-// Atan easing function are copyright Chris MacKenzie
+// Atan easing functions are copyright Chris MacKenzie
 // Cubic hermite implementation based on StackOverflow answer by Roman Zenka: http://stackoverflow.com/a/3367593/1333253
 
 /*
@@ -393,7 +393,6 @@ class EaseAtan {
 
 class EaseCubicHermite {
 	inline public static function makeHermite(accelTime:Float, cruiseTime:Float, decelTime:Float):Float->Float {
-		Sure.sure(accelTime + cruiseTime + decelTime == 1);
 		return hermite.bind(_, accelTime, cruiseTime, decelTime);
 	}
 	
