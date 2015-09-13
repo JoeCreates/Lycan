@@ -43,7 +43,7 @@ class EaseQuad {
 	
 	inline public static function inOutQuad(t:Float):Float {
 		t *= 2;
-		return (t < 1) ? 0.5 * t * t : t -= 1; -0.5 * ((t) * (t - 2) - 1);
+		return (t < 1) ? 0.5 * t * t : -0.5 * ((t - 1) * (t - 3) - 1);
 	}
 	
 	inline public static function outInQuad(t:Float):Float {
@@ -63,7 +63,7 @@ class EaseCubic {
 	
 	inline public static function inOutCubic(t:Float):Float {
 		t *= 2;
-		return (t < 1) ? 0.5 * t * t * t : t -= 2; 0.5 * (t * t * t + 2);
+		return (t < 1) ? 0.5 * t * t * t : 0.5 * ((t -= 2)* t * t + 2);
 	}
 	
 	inline public static function outInCubic(t:Float):Float {
@@ -71,7 +71,7 @@ class EaseCubic {
 	}
 }
 
-class EaseQuartic {
+class EaseQuart {
 	inline public static function inQuart(t:Float):Float {
 		return t * t * t * t;
 	}
@@ -83,7 +83,7 @@ class EaseQuartic {
 	
 	inline public static function inOutQuart(t:Float):Float {
 		t *= 2;
-		return (t < 1) ? 0.5 * t * t * t * t : t -= 2; -0.5 * (t * t * t * t - 2);
+		return (t < 1) ? 0.5 * t * t * t * t : -0.5 * ((t -= 2) * t * t * t - 2);
 	}
 	
 	inline public static function outInQuart(t:Float):Float {
@@ -91,7 +91,7 @@ class EaseQuartic {
 	}
 }
 
-class EaseQuintic {
+class EaseQuint {
 	inline public static function inQuint(t:Float):Float {
 		return t * t * t * t * t;
 	}
@@ -103,7 +103,7 @@ class EaseQuintic {
 	
 	inline public static function inOutQuint(t:Float):Float {
 		t *= 2;
-		return (t < 1) ? 0.5 * t * t * t * t * t : t -= 2; 0.5 * (t * t * t * t * t + 2);
+		return (t < 1) ? 0.5 * t * t * t * t * t : 0.5 * ((t -= 2) * t * t * t * t + 2);
 	}
 	
 	inline public static function outInQuint(t:Float):Float {
@@ -139,23 +139,23 @@ class EaseExpo {
 	}
 }
 
-class EaseCircular {
-	inline public static function inCircular(t:Float):Float {
+class EaseCirc {
+	inline public static function inCirc(t:Float):Float {
 		return -(Math.sqrt(1 - t * t) - 1);
 	}
 	
-	inline public static function outCircular(t:Float):Float {
+	inline public static function outCirc(t:Float):Float {
 		t -= 1;
 		return Math.sqrt(1 - t * t);
 	}
 	
-	inline public static function inOutCircular(t:Float):Float {
+	inline public static function inOutCirc(t:Float):Float {
 		t *= 2;
-		return (t < 1) ? -0.5 * (Math.sqrt(1 - t * t) - 1) : t -= 2; 0.5 * (Math.sqrt(1 - t * t) + 1);
+		return (t < 1) ? -0.5 * (Math.sqrt(1 - t * t) - 1) : 0.5 * (Math.sqrt(1 - (t -= 2) * t) + 1);
 	}
 	
-	inline public static function outInCircular(t:Float):Float {
-		return (t < 0.5) ? outCircular(2 * t) / 2 : inCircular(2 * t - 1) / 2 + 0.5;
+	inline public static function outInCirc(t:Float):Float {
+		return (t < 0.5) ? outCirc(2 * t) / 2 : inCirc(2 * t - 1) / 2 + 0.5;
 	}
 }
 
@@ -213,16 +213,16 @@ class EaseBounce {
 	inline private static function outBounceHelper(t:Float, b:Float, c:Float):Float {
 		if (t == 1) {
 			return b;
-		} else if (t < (1 / 2.75)) {
-			return c * (7.5625 * t * t);
-		} else if (t < (2 / 2.75)) {
-			t -= 1.5 / 2.75;
+		} else if (t < (4 / 11)) {
+			return b * (7.5625 * t * t);
+		} else if (t < (8 / 11)) {
+			t -= 6 / 11;
 			return -c * (1 - (7.5625 * t * t + 0.75)) + b;
-		} else if (t < (2.5 / 2.75)) {
-			t -= 2.25 / 2.75;
+		} else if (t < (10 / 11)) {
+			t -= 9 / 11;
 			return -c * (1 - (7.5625 * t * t + 0.9375)) + b;
 		} else {
-			t -= 2.625 / 2.75;
+			t -= 21 / 22;
 			return -c * (1 - (7.5625 * t * t + 0.984375)) + b;
 		}
 	}
@@ -257,7 +257,7 @@ class EaseBack {
 	inline public static function inOutBack(t:Float, s:Float):Float {
 		t *= 2;
 		s *= 1.525;
-		return (t < 1) ? 0.5 * (t * t * ((s + 1) * t - s)) : t -= 2; 0.5 * (t * t * ((s + 1) * t + s) + 2);
+		return (t < 1) ? 0.5 * (t * t * ((s + 1) * t - s)) : 0.5 * ((t -= 2) * t * ((s + 1) * t + s) + 2);
 	}
 	
 	inline public static function outInBack(t:Float, s:Float):Float {
@@ -290,7 +290,7 @@ class EaseElastic {
 		return outElasticHelper(t, 0, 1, 1, amp, period);
 	}
 	
-	inline public static function inOutElastic(t:Float, amp:Float, period:Float):Float {
+	public static function inOutElastic(t:Float, amp:Float, period:Float):Float {
 		if (t == 0) {
 			return 0;
 		}
@@ -337,7 +337,6 @@ class EaseElastic {
 		} else {
 			s = p / (2 * Math.PI) * Math.asin(c / a);
 		}
-		
 		
 		adj -= 1;
 		return -(a * Math.pow(2, 10 * adj) * Math.sin((adj * d - s) * (2 * Math.PI) / p)) + b;
@@ -398,9 +397,7 @@ class EaseCubicHermite {
 		return hermite.bind(_, accelTime, cruiseTime, decelTime);
 	}
 	
-	inline public static function hermite(t:Float, accelTime:Float, cruiseTime:Float, decelTime:Float):Float {
-		Sure.sure(accelTime + cruiseTime + decelTime == 1);
-		
+	inline public static function hermite(t:Float, accelTime:Float, cruiseTime:Float, decelTime:Float):Float {		
 		var v:Float = 1 / (accelTime / 2 + cruiseTime + decelTime / 2);
 		var x1:Float = v * accelTime / 2;
 		var x2:Float = v * cruiseTime;
