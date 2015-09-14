@@ -17,7 +17,7 @@ class AbstractSlider extends Widget {
 	
 	private var minimum:Float;
 	private var maximum:Float;
-	private var value(default, set):Float;
+	public var value(default, set):Float;
 	
 	public function new(min:Float, max:Float, value:Float, ?parent:UIObject, ?name:String) {
 		super(parent, name);

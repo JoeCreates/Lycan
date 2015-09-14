@@ -1,7 +1,6 @@
 package lycan.ui.renderer.flixel;
 
 import flixel.FlxSprite;
-import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;

@@ -9,6 +9,7 @@ import flixel.math.FlxPoint;
 import lycan.world.Layer;
 import lycan.world.Layer.TileLayer;
 import msignal.Signal.Signal1;
+import flixel.addons.editors.tiled.TiledTileSet;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
@@ -23,6 +24,7 @@ class World extends FlxGroup {
 	
 	private var namedObjects(default, null):Map<String, FlxBasic>;
 	private var namedLayers(default, null):Map<String, Layer>;
+	private var namedTilesets(default, null):Map<String, TiledTileSet>;
 	private var collidableLayers(default, null):Array<TileLayer>;
 	
 	public function new(?scale:FlxPoint) {
@@ -71,5 +73,9 @@ class World extends FlxGroup {
 	
 	public inline function getNamedLayer(name:String):Layer {
 		return namedLayers.get(name);
+	}
+	
+	public inline function getNamedTileSet(name:String):TiledTileSet {
+		return namedTilesets.get(name);
 	}
 }

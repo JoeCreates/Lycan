@@ -149,8 +149,16 @@ class Widget extends UIObject {
 		p.event(new UIEvent(EventType.LayoutRequest));
 		*/
 		
+		// NOTE for now just updating layouts and children directly
 		if(layout != null) {
 			layout.update();
+		}
+		
+		for (child in children) {
+			if(Std.is(child, Widget)) {
+				var w:Widget = cast child;
+				w.updateGeometry();
+			}
 		}
 	}
 	

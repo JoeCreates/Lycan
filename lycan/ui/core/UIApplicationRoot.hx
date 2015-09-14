@@ -56,6 +56,18 @@ class UIApplicationRoot {
 	}
 	*/
 	
+	public function enable() {
+		if (!listenersAttached) {
+			addEventListeners();
+		}
+	}
+	
+	public function disable() {
+		if (listenersAttached) {
+			removeEventListeners();
+		}
+	}
+	
 	public function destroy() {
 		hoveredWidget = null;
 		keyboardFocusWidget = null;
