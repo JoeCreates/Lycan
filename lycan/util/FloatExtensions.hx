@@ -21,4 +21,9 @@ class FloatExtensions {
 	public static inline function lerp(v:Float, a:Float, b:Float):Float {
 		return (b - a) * v + a;
 	}
+	
+	public static inline function coslerp(v:Float, a:Float, b:Float):Float {
+		var c:Float = (1 - Math.cos(v * Math.PI)) / 2;
+		return a * (1 - c) + b * c;
+	}
 }
