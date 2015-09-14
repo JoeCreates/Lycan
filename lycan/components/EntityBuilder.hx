@@ -12,25 +12,19 @@ import lycan.components.Component;
 
 class EntityBuilder {
 	
+	public static var entityPath:TypePath = {pack: ["lycan", "components"], name: "Entity"};
+	
 	public static function build():Array<Field> {
 		var fields:Array<Field> = Context.getBuildFields();
 		
-		// We do something different if the local type is an interface
-		switch(Context.getLocalType()) {
-			case TInst(rt, _):
-				if (rt.get().isInterface) return buildComponentInterface();
-			case _:
-				return fields;
-		}
-		
 		//TODO possibly not needed
-		for (field in fields) {
-			if (field.name == "components") {
-				return fields;
-			}
-		}
+		//for (field in fields) {
+			//if (field.name == "components") {
+				//return fields;
+			//}
+		//}
 		
-		// Add components field
+		// Get local type as ClassType
 		var classType:ClassType;
 		switch (Context.getLocalType()) {
 			case TInst(r, _):
@@ -38,6 +32,13 @@ class EntityBuilder {
 			case _:
 		}
 		
+		// Prevent a type from being built twice
+		if (classType.meta.has("EntityBuilderBuilt")) {
+			return fields;
+		}
+		classType.meta.add("EntityBuilderBuilt", [], Context.currentPos());
+		
+		// Add components field
 		if (!hasFieldIncludingBuildFields("components")) {
 			fields.push({
 				name: "components",
@@ -48,6 +49,14 @@ class EntityBuilder {
 					macro new Array<lycan.components.Component<Dynamic>>() ),
 				pos: Context.currentPos()
 			});
+		}
+		
+		// We do something different if the local type is an interface
+		switch(Context.getLocalType()) {
+			case TInst(rt, _):
+				if (rt.get().isInterface) return buildComponentInterface();
+			case _:
+				return fields;
 		}
 		
 		var addedDraw:Bool = false;
@@ -82,7 +91,7 @@ class EntityBuilder {
 			}
 			// Otherwise, create it
 			else {
-			appendDraw(addFunction("draw", {args: [], ret: null, expr: macro {}}, fields));
+				appendDraw(addFunction("draw", {args: [], ret: null, expr: macro {}}, fields));
 			}
 		}
 		
@@ -133,7 +142,7 @@ class EntityBuilder {
 			var found:Bool = false;
 			if (hasFieldIncludingBuildFields(dummyField.name)) {
 				found = true;
-				break;
+				continue;
 			}
 			// If not, create it
 			if (!found) {
@@ -219,12 +228,13 @@ class EntityBuilder {
 					for (componentInterface in getComponentInterfaces()) {
 						if (classType.superClass != null) {
 							// Do not re-add components that have already been added by a superclass
-							if (hasAddedComponent(classType.superClass.t.get(), componentInterface.name)) {
+							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentInterface))) {
 								continue;
 							}
 						}
+						// Finally, add the component instantation
 						func.expr = appendComponentInstantiation(func.expr,
-							{pack: componentInterface.pack, name: componentInterface.name + "Component"});
+							{pack: componentInterface.pack, name: componentInterface.name + "Component" } );
 					}
 				case _:
 			}
@@ -236,27 +246,50 @@ class EntityBuilder {
 	/**
 	 * Checks if a ClassType should have added a component already
 	 */
-	public static function hasAddedComponent(type:ClassType, componentInterfaceName:String):Bool {
+	public static function hasAddedComponent(type:ClassType, componentInterfacePath:TypePath):Bool {
 		// Only classes can have components added, so return false if type is an interface
 		if (type.isInterface) {
 			return false;
 		}
 		
-		// Check if each interface has the given name
+		// Check if each interface is or extends given interface
 		for (i in type.interfaces) {
-			if (i.t.get().name == componentInterfaceName) {
+			if (typePathEq(getTypePath(i.t.get()), componentInterfacePath) ||
+				interfaceExtendsInterface(i.t.get(), componentInterfacePath))
+			{
 				return true;
 			}
 		}
 		
 		// If not, check the superclass of this type if there is one
 		if (type.superClass != null) {
-			return hasAddedComponent(type.superClass.t.get(), componentInterfaceName);
+			return hasAddedComponent(type.superClass.t.get(), componentInterfacePath);
 		}
 		
 		return false;
 	}
 	
+	/**
+	 * Check recursively if an interface extends another
+	 */
+	public static function interfaceExtendsInterface(type:ClassType, extendedTypePath:TypePath):Bool {
+		if (!(type.isInterface)) {
+			return false;
+		}
+		for (i in type.interfaces) {
+			if (typePathEq( getTypePath(i.t.get()), extendedTypePath)) {
+				return true;
+			}
+			if (interfaceExtendsInterface(i.t.get(), extendedTypePath)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Return all fields from interfaces that might require dummy fields
+	 */
 	public static function getDummyPropertyFields():Array<ClassField> {
 		var fields:Array<ClassField> = new Array<ClassField>();
 		var fieldNameMap:Map<String, ClassField> = new Map<String, ClassField>();
@@ -281,7 +314,7 @@ class EntityBuilder {
 						fields.push(field);
 					}
 				case _:
-					fields.push(field);//TODO !!!!!!!!!!!!!!!!!!!!! AAAAAARGH!!!!!!!!!!!!!!!!
+					fields.push(field);
 			}
 		}
 		return fields;
@@ -354,6 +387,23 @@ class EntityBuilder {
 		return false;
 	}
 	
+	public static function interfaceHasField(i:ClassType, fieldName:String):Bool {
+		if (!i.isInterface) {
+			return false;
+		}
+		for (field in i.fields.get()) {
+			if (field.name == fieldName) {
+				return true;
+			}
+		}
+		for (i2 in i.interfaces) {
+			if (interfaceHasField(i2.t.get(), fieldName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/** Recursively check if given ClassType implements interface of given name */
 	public static function hasInterface(type:ClassType, interfaceName:String):Bool {
 		for (i in type.interfaces) {
@@ -375,7 +425,7 @@ class EntityBuilder {
 			case TInst(r, _):
 				for (i in r.get().interfaces) {
 					if (hasInterface(i.t.get(), "Entity")) {
-						// If we haven;t already, add the inyterface to output array
+						// If we haven't already, add the interface to output array
 						if (out.indexOf(i.t.get()) < 0) {
 							out.push(i.t.get());
 						}
@@ -467,6 +517,12 @@ class EntityBuilder {
 	
 	public static function buildComponentInterface():Array<Field> {
 		var fields:Array<Field> = Context.getBuildFields();
+		var classType:ClassType;
+		switch (Context.getLocalType()) {
+			case TInst(r, _):
+				classType = r.get();
+			case _:
+		}
 		
 		// For each field, check it is not the field for the component, then change its name
 		for (field in fields) {
@@ -475,13 +531,15 @@ class EntityBuilder {
 					switch (t) {
 						case TPath(p):
 							// If this field is for the component, skip it
-							switch (Context.getLocalType()) {
-								case TInst(r, _):
-									var c:ClassType = r.get();
-									if (p.pack == c.pack && p.name == c.name + "Component") {
-										continue;
-									}
-								case _:
+							if (p.pack.toString() == classType.pack.toString() && p.name == classType.name + "Component") {
+								continue;
+							}
+							// If this field has already been substituted, or is itself a substition, skip it
+							if (field.name.substr(0, 7) == "entity_") {
+								continue;
+							}
+							if (hasFieldIncludingBuildFields("entity_" + field.name)) {
+								continue;
 							}
 							// Otherwise, rename it
 							field.name = "entity_" + field.name;
@@ -494,5 +552,14 @@ class EntityBuilder {
 		return fields;
 		
 	}
+	
+	public static function typePathEq(path1:TypePath, path2:TypePath):Bool {
+		return path1.pack.toString() == path2.pack.toString() && path1.name == path2.name;
+	}
+	
+	public static function getTypePath(type:ClassType):TypePath {
+		// TODO not sure what sub is or how to obtain it, but it's probably not necessary right now?
+		// params, too :P
+		return {pack: type.pack, name: type.name};
+	}
 }
-
