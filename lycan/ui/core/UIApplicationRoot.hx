@@ -149,7 +149,7 @@ class UIApplicationRoot {
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new WheelEvent(EventType.WheelScroll));
+			postEvent(hoveredWidget, new WheelEvent(e.delta));
 		}
 	}
 	

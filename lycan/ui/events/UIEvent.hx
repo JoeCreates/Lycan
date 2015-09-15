@@ -3,6 +3,7 @@ package lycan.ui.events;
 import haxe.Utf8;
 import lycan.ui.core.Gesture;
 import lycan.ui.events.UIEvent.ChildEvent;
+import lycan.ui.events.UIEvent.WheelEvent;
 import lycan.ui.pointer.MouseButton;
 
 // TODO macro to just make the enum values increase rather than specifying values manually?
@@ -188,7 +189,12 @@ class ResizeEvent extends UIEvent {
 }
 
 class WheelEvent extends UIEvent {
+	public var delta:Int;
 	
+	public function new(delta:Int) {
+		super(EventType.WheelScroll);
+		this.delta = delta;
+	}
 }
 
 class KeyEvent extends UIEvent {

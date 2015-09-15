@@ -48,7 +48,7 @@ class ConstantRatePath extends BasePath {
 		traversalMode = FORWARD;
 	}
 	
-	public function init(point:FlxPoint, path:Array<FlxPoint>, rate:Float = 100, ?mode:TraversalMode):ConstantRatePath {
+	public function init(point:FlxPoint, path:Array<FlxPoint>, rate:Float, ?mode:TraversalMode):ConstantRatePath {
 		if (mode == null) {
 			mode = FORWARD;
 		}
