@@ -26,4 +26,16 @@ class FloatExtensions {
 		var c:Float = (1 - Math.cos(v * Math.PI)) / 2;
 		return a * (1 - c) + b * c;
 	}
+	
+	public static inline function sign(x:Float):Float {
+		return x > 0 ? 1 : x < 0 ? -1 : 0;
+	}
+	
+	public static inline function fpart(x:Float):Float {
+		return x < 0 ? 1 - (x - Math.floor(x)) : x - Math.floor(x);
+	}
+	
+	public static inline function rfpart(x:Float):Float {
+		return 1.0 - fpart(x);
+	}
 }

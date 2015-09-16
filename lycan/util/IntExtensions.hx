@@ -52,4 +52,8 @@ class IntExtensions {
 	inline public static function isPow2(v:Int):Bool {
 		return (v > 0) && ((v & (v - 1)) == 0); 
 	}
+	
+	inline public static function sign(x:Float):Int {
+		return x > 0 ? 1 : x < 0 ? -1 : 0;
+	}
 }

@@ -1,6 +1,7 @@
 package lycan.world;
 
 import flixel.addons.editors.tiled.TiledMap.FlxTiledAsset;
+import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -9,7 +10,6 @@ import flixel.math.FlxPoint;
 import lycan.world.Layer;
 import lycan.world.Layer.TileLayer;
 import msignal.Signal.Signal1;
-import flixel.addons.editors.tiled.TiledTileSet;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
