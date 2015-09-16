@@ -13,22 +13,12 @@ class Tween extends TimelineItem {
 		super(null, target, startTime, duration);
 		this.ease = ease;
 		this.fields = fields;
-	}
-	
-	override public function onEnterLeft(count:Int):Void {
 		
-	}
-	
-	override public function onExitLeft(count:Int):Void {
-		
-	}
-	
-	override public function onEnterRight(count:Int):Void {
-
-	}
-	
-	override public function onExitRight(count:Int):Void {
-		
+		for (field in fields) {
+			if (field.start == null) {
+				field.start = getField(target, field.name);
+			}
+		}
 	}
 	
 	override public function onUpdate(time:Float):Void {
@@ -37,7 +27,7 @@ class Tween extends TimelineItem {
 		//trace("EASE: " + ease(progressFraction(time, startTime, endTime)));
 		
 		for (field in fields) {
-			setField(target, field.name, ease(progressFraction(time, startTime, endTime)).lerp(field.start , field.end));
+			setField(target, field.name, ease(progressFraction(time, startTime, endTime)).lerp(field.start, field.end));
 		}
 	}
 	
@@ -56,22 +46,32 @@ class Tween extends TimelineItem {
 		Sure.sure(key != null);
 		Sure.sure(value != null);
 		
-		if (Reflect.hasField(target, key)) {
-			#if flash
-			untyped target[key] = value;
-			#else
+		if (#if flash false && #end Reflect.hasField(target, key)) {
 			Reflect.setField(target, key, value);
-			#end
 		} else {
-			// throw "Could not find field " + key + " on target " + target;
-			// NOTE this is necessary to catch cases where a field was optimized away
+			// NOTE this is necessary to catch cases where a field was optimized away, and on Flash to ensure getters/setters are called
 			Reflect.setProperty(target, key, value);
 		}
+	}
+	
+	private inline function getField<T> (target:T, key:String):Dynamic {
+		Sure.sure(target != null);
+		Sure.sure(Reflect.hasField(target, key));
+		
+		if (Reflect.hasField(target, key)) {
+			#if flash
+			return untyped target[key];
+			#else
+			return Reflect.getProperty(target, key);
+			#end
+		}
+		
+		return null;
 	}
 }
 
 typedef FieldDetails = {
 	var name:String;
-	var start:Float;
+	@:optional var start:Float;
 	var end:Float;
 }

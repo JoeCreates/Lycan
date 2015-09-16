@@ -45,18 +45,6 @@ class Button extends Widget {
 		signal_unhovered.dispatch();
 	}
 	
-	override private function set_x(x:Int):Int {
-		super.set_x(x);
-		centerButtonGraphics();
-		return x;
-	}
-	
-	override private function set_y(y:Int):Int {
-		super.set_y(y);
-		centerButtonGraphics();
-		return y;
-	}
-	
 	override private function set_width(width:Int):Int {
 		super.set_width(width);
 		centerButtonGraphics();

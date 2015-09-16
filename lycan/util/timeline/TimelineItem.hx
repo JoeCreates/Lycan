@@ -1,4 +1,5 @@
 package lycan.util.timeline;
+import msignal.Signal.Signal1;
 
 using lycan.util.BitSet;
 
@@ -26,6 +27,12 @@ class TimelineItem {
 	
 	public var removeOnCompletion(default, default):Bool;
 	public var markedForRemoval(default, default):Bool;
+	
+	// TODO lazy initialize?
+	public var signal_enterLeft = new Signal1<Int>();
+	public var signal_exitLeft = new Signal1<Int>();
+	public var signal_enterRight = new Signal1<Int>();
+	public var signal_exitRight = new Signal1<Int>();
 	
 	public function new(?parent:Timeline<Dynamic>, target:Dynamic, startTime:Float, duration:Float) {
 		this.parent = parent;
@@ -55,22 +62,6 @@ class TimelineItem {
 		markedForRemoval = false;
 	}
 	
-	public function onEnterLeft(count:Int):Void {
-		
-	}
-	
-	public function onExitLeft(count:Int):Void {
-		
-	}
-	
-	public function onEnterRight(count:Int):Void {
-		
-	}
-	
-	public function onExitRight(count:Int):Void {
-		
-	}
-	
 	public function onUpdate(time:Float):Void {
 		
 	}
@@ -95,17 +86,17 @@ class TimelineItem {
 		var exitedRight:Bool = (currentTime <= endTime && nextTime > endTime);
 		
 		if (enteredLeft) {
-			onEnterLeft(enterLeftCount++);
+			signal_enterLeft.dispatch(enterLeftCount++);
 		}
 		if (enteredRight) {
-			onEnterRight(enterRightCount++);
+			signal_enterRight.dispatch(enterRightCount++);
 		}
 		
 		if (exitedLeft) {
-			onExitLeft(exitLeftCount++);
+			signal_exitLeft.dispatch(exitLeftCount++);
 		}
 		if (exitedRight) {
-			onExitRight(exitRightCount++);
+			signal_exitRight.dispatch(exitRightCount++);
 		}
 		
 		onUpdate(nextTime);

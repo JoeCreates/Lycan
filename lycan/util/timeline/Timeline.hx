@@ -66,7 +66,7 @@ class Timeline<T:{}> extends TimelineItem {
 		stepTo(absoluteTime);
 	}
 	
-	public function addFunction(target:T, f:Void->Void, startTime:Float):Cue {
+	public function addFunction(target:T, f:Int->Void, startTime:Float):Cue {
 		Sure.sure(target != null);
 		
 		var cue = new Cue(target, startTime, f);
@@ -92,6 +92,7 @@ class Timeline<T:{}> extends TimelineItem {
 		// If the target has no items then simply add one
 		if (items.isEmpty()) {
 			items.add(item);
+			dirtyDuration = true;
 			return;
 		}
 		

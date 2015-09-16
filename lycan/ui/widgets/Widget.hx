@@ -561,7 +561,11 @@ class Widget extends UIObject {
 	}
 	
 	private function set_x(x:Int):Int {
-		for (child in children) {
+		for (graphic in graphics) {
+			graphic.set_x(graphic.get_x() - (this.x - x));
+		}
+		
+		for (child in children) {			
 			if (child.isWidgetType) {
 				var w:Widget = cast child;
 				w.x += (this.x - x);
@@ -571,7 +575,11 @@ class Widget extends UIObject {
 		return this.x = x;
 	}
 	
-	private function set_y(y:Int):Int {		
+	private function set_y(y:Int):Int {
+		for (graphic in graphics) {
+			graphic.set_y(graphic.get_y() - (this.y - y));
+		}
+		
 		for (child in children) {
 			if (child.isWidgetType) {
 				var w:Widget = cast child;
