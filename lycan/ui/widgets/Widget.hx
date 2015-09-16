@@ -50,7 +50,7 @@ enum GamepadFocusPolicy {
 }
 
 class Widget extends UIObject {
-	private var graphics:Array<IRenderItem> = new Array<IRenderItem>();
+	public var graphics:Array<IRenderItem> = new Array<IRenderItem>();
 	public var layout(default,set):Layout = null;
 	public var enabled(default, set):Bool = true;
 	public var x(default, set):Int = 0;
@@ -79,6 +79,7 @@ class Widget extends UIObject {
 	public var marginRight:Int = 2;
 	public var marginBottom:Int = 2;
 	
+	// TODO keep these in subclasses?
 	private var hovered(default, set):Bool = false;
 	private var pressed(default, set):Bool = false;
 	

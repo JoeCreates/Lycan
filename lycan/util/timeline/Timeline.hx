@@ -70,11 +70,11 @@ class Timeline<T:{}> extends TimelineItem {
 		Sure.sure(target != null);
 		
 		var cue = new Cue(target, startTime, f);
-		insert(cue);
+		add(cue);
 		return cue;
 	}
 	
-	public function insert(item:TimelineItem):Void {
+	public function add(item:TimelineItem):Void {
 		Sure.sure(item != null);
 		Sure.sure(item.target != null);
 		Sure.sure(item.parent == null);
