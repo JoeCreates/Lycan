@@ -1,4 +1,5 @@
 package lycan.util.timeline;
+import msignal.Signal;
 import msignal.Signal.Signal1;
 
 using lycan.util.BitSet;
@@ -33,6 +34,7 @@ class TimelineItem {
 	public var signal_exitLeft = new Signal1<Int>();
 	public var signal_enterRight = new Signal1<Int>();
 	public var signal_exitRight = new Signal1<Int>();
+	public var signal_removed = new Signal1<Timeline<Dynamic>>();
 	
 	public function new(?parent:Timeline<Dynamic>, target:Dynamic, startTime:Float, duration:Float) {
 		this.parent = parent;
@@ -51,6 +53,12 @@ class TimelineItem {
 		
 		removeOnCompletion = true;
 		markedForRemoval = false;
+		
+		#if debug
+		signal_removed.add(function(parent:Timeline<Dynamic>) {
+			trace("Removed timeline item from timeline");
+		});
+		#end
 	}
 	
 	public function reset():Void {
@@ -82,21 +90,21 @@ class TimelineItem {
 		
 		var enteredLeft:Bool = (currentTime <= startTime && nextTime > startTime);
 		var enteredRight:Bool = (currentTime >= endTime && nextTime < endTime);
-		var exitedLeft:Bool = (currentTime >= startTime && nextTime < startTime);
-		var exitedRight:Bool = (currentTime <= endTime && nextTime > endTime);
+		var exitedLeft:Bool = (currentTime > startTime && nextTime < startTime);
+		var exitedRight:Bool = (currentTime < endTime && nextTime > endTime);
 		
 		if (enteredLeft) {
-			signal_enterLeft.dispatch(enterLeftCount++);
+			signal_enterLeft.dispatch(++enterLeftCount);
 		}
 		if (enteredRight) {
-			signal_enterRight.dispatch(enterRightCount++);
+			signal_enterRight.dispatch(++enterRightCount);
 		}
 		
 		if (exitedLeft) {
-			signal_exitLeft.dispatch(exitLeftCount++);
+			signal_exitLeft.dispatch(++exitLeftCount);
 		}
 		if (exitedRight) {
-			signal_exitRight.dispatch(exitRightCount++);
+			signal_exitRight.dispatch(++exitRightCount);
 		}
 		
 		onUpdate(nextTime);

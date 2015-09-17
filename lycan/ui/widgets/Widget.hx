@@ -52,7 +52,6 @@ enum GamepadFocusPolicy {
 class Widget extends UIObject {
 	public var graphics:Array<IRenderItem> = new Array<IRenderItem>();
 	public var layout(default,set):Layout = null;
-	public var enabled(default, set):Bool = true;
 	public var x(default, set):Int = 0;
 	public var y(default, set):Int = 0;
 	public var width(default, set):Int = 0;
@@ -605,10 +604,6 @@ class Widget extends UIObject {
 	
 	private function set_pressed(pressed:Bool):Bool {
 		return this.pressed = pressed;
-	}
-	
-	private function set_enabled(enabled:Bool):Bool {
-		return this.enabled = enabled;
 	}
 	
 	private function set_widthHint(widthHint:Int):Int {

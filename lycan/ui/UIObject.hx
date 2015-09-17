@@ -14,6 +14,7 @@ class UIObject {
 	public var id(get, null):Int;
 	public var sendChildEvents:Bool;
 	public var receiveChildEvents:Bool;
+	public var enabled(default, set):Bool = true;
 	
 	public var isWidgetType(get, never):Bool;
 	
@@ -154,5 +155,9 @@ class UIObject {
 		}
 		
 		return this.parent = parent;
+	}
+	
+	private function set_enabled(enabled:Bool):Bool {
+		return this.enabled = enabled;
 	}
 }

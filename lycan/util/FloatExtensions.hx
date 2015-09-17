@@ -14,8 +14,12 @@ class FloatExtensions {
 		return (a < b ? a : b);
 	}
 	
-	public static inline function inRange<T:Float>(p:T, x1:T, x2:T):Bool {
+	public static inline function inRangeInclusive<T:Float>(p:T, x1:T, x2:T):Bool {
 		return (p >= Math.min(x1, x2) && p <= Math.max(x1, x2));
+	}
+	
+	public static inline function inRangeExclusive<T:Float>(p:T, x1:T, x2:T):Bool {
+		return (p > Math.min(x1, x2) && p < Math.max(x1, x2));
 	}
 	
 	public static inline function lerp(v:Float, a:Float, b:Float):Float {

@@ -31,6 +31,8 @@ class Timeline<T:{}> extends TimelineItem {
 	// Items on each target are updated in order of their startTimes (earliest to latest) when stepping forward, and their endTimes (latest to earliest) when stepping backward
 	// Note that this is a per-target object ordering, not a global ordering on all the items
 	override public function stepTo(nextTime:Float, ?unusedCurrentTime:Float):Void {
+		super.stepTo(nextTime, currentTime);
+		
 		nextTime = nextTime.clamp(0, duration);
 		
 		removeMarked();
@@ -60,10 +62,6 @@ class Timeline<T:{}> extends TimelineItem {
 	// Skip to an absolute time without triggering items
 	public function skipTo(nextTime:Float):Void {
 		currentTime = nextTime;
-	}
-	
-	override public function onUpdate(absoluteTime:Float):Void {
-		stepTo(absoluteTime);
 	}
 	
 	public function addFunction(target:T, f:Int->Void, startTime:Float):Cue {
@@ -184,6 +182,7 @@ class Timeline<T:{}> extends TimelineItem {
 			for (item in list) {
 				if (item.markedForRemoval) {
 					list.remove(item);
+					item.signal_removed.dispatch(this);
 				}
 			}
 		}

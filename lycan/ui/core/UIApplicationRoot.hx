@@ -487,14 +487,15 @@ class UIApplicationRoot {
 	
 	// Puts event onto the event loop, to be processed on the next frame
 	private function postEvent(receiver:UIObject, event:UIEvent) {
-		Sure.sure(receiver != null && event != null);
-		
+		Sure.sure(receiver != null && event != null);		
 		eventLoop.add(receiver, event);
 	}
 	
 	// Sends event directly to receiver, bypassing the event loop
 	private static function sendEvent(receiver:UIObject, event:UIEvent):Bool {
 		Sure.sure(receiver != null && event != null);
+		
+		// TODO should we send these even if the receiver is disabled?
 		return receiver.event(event);
 	}
 	
@@ -503,6 +504,7 @@ class UIApplicationRoot {
 		Sure.sure(event != null);
 		Sure.sure(topLevelWidget != null);
 		
+		// TODO should we send these even if the receiver is disabled?
 		receiver.event(event);
 		
 		// TODO see http://code.woboq.org/qt5/qtbase/src/widgets/kernel/qapplication.cpp.html notify (this is gonna take awhile.......)
