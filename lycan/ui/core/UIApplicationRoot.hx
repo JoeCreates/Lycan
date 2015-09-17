@@ -14,6 +14,10 @@ import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.Lib;
 
+#if flash
+import flixel.FlxG;
+#end
+
 // Interface for translation of platform events into UI events and dispatching them
 interface IApplicationRoot {
 	var topLevelWidget(get, set):Widget;
@@ -161,28 +165,55 @@ class UIApplicationRoot {
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
-		// TODO hack for flash touch coordinates is to multiply by (GAME_WIDTH / Lib.current.stage.width)
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerDown(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseMove(e:MouseEvent) {
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerMove(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseUp(e:MouseEvent) {
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerUp(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerDown(e.localX, e.localY, true);
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerMove(e.localX, e.localY, true);
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerUp(e.localX, e.localY, true);
+	}
+	
+	// NOTE flixel has it's own game scale mode, and it seems necessary to take that into account to get the right game coords
+	// TODO check this, but it doesn't seem to be required for non-Flash targets?
+	private inline function flixelScaleModeMouseHack(e:MouseEvent):Void {
+		#if flash
+		e.localX /= FlxG.scaleMode.scale.x;
+		e.localY /= FlxG.scaleMode.scale.y;
+		#end
+	}
+	
+	private inline function flixelScaleModeTouchHack(e:TouchEvent):Void {
+		#if flash
+		e.localX /= FlxG.scaleMode.scale.x;
+		e.localY /= FlxG.scaleMode.scale.y;
+		#end
 	}
 	
 	private function handlePointerDown(x:Float, y:Float, down:Bool) {
@@ -248,9 +279,9 @@ class UIApplicationRoot {
 	
 	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget):PointerEvent {
 		var event:PointerEvent = new PointerEvent(type);
-		event.globalX = x; // TODO should we use the outer margin or the x coordinate of the widget?
+		event.globalX = x;
 		event.globalY = y;
-		event.localX = x - pointerWidget.x;
+		event.localX = x - pointerWidget.x; // TODO should we use the outer margin or the x coordinate of the widget?
 		event.localY = y - pointerWidget.y;
 		// TODO set mouse button
 		
