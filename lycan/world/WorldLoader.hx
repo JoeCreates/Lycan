@@ -166,9 +166,14 @@ class WorldLoader {
 			// Call the loader function for the given object
 			var basic:FlxBasic = rules.get(o.type)(o, layer);
 			
-			// Set the basic name to the object name
+			// Insert the object into the named objects map
 			if (o.name != null) {
-				layer.world.namedObjects.set(o.name, basic);
+				var objects = layer.world.namedObjects.get(o.name);
+				if (objects == null) {
+					objects = new Array<FlxBasic>();
+				}
+				objects.push(basic);
+				layer.world.namedObjects.set(o.name, objects);
 			}
 			
 			// Add the basic to the layer if it exists

@@ -1,6 +1,6 @@
 package lycan.util.timeline;
 
-import flixel.input.FlxAccelerometer;
+import haxe.macro.Expr;
 import lycan.util.timeline.Easing;
 
 using lycan.util.FloatExtensions;
@@ -21,11 +21,27 @@ class Tween extends TimelineItem {
 		}
 	}
 	
-	override public function onUpdate(time:Float):Void {
-		//trace("TIME: " + time);
-		//trace("LINEAR: " + progressFraction(time, startTime, endTime));
-		//trace("EASE: " + ease(progressFraction(time, startTime, endTime)));
+	/*
+	macro public static function tween(target:Dynamic, startTime:Float, duration:Float, fields:Expr, ease:Float->Float):Expr {		
+		var expr:Expr = macro { };
 		
+		for (field in fields) {
+			expr = macro {
+				$ { expr };
+				//$target.$field.$name = ease(progressFraction(time, $v {startTime}, $v {endTime})).lerp($field.$start, $field.$end);
+			}
+		}
+		
+		return macro {
+			//var tween = new Tween(target, startTime, duration, ease);
+			//tween.onUpdate = function(time:Float) {
+			//	$ { expr };
+			//}
+		}
+	}
+	*/
+	
+	override dynamic public function onUpdate(time:Float):Void {		
 		for (field in fields) {
 			setField(target, field.name, ease(progressFraction(time, startTime, endTime)).lerp(field.start, field.end));
 		}

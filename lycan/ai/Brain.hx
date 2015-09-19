@@ -52,6 +52,8 @@ class Brain {
 		this.behaviourPriorityWeights = values;
 	}
 	
+	// TODO we need interrupts (e.g. path finished, so figure out what to do next)
+	
 	public function offerBehaviour(root:Node, suggestedPriority:NodePriority):Bool {
 		var weighting:Null<Float> = behaviourPriorityWeights.get(suggestedPriority.name);
 		

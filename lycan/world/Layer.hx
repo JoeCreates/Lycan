@@ -27,9 +27,19 @@ class ObjectLayer extends FlxGroup implements Layer {
 class TileLayer extends FlxTilemap implements Layer {
 	public var layerType(default, null):LayerType = LayerType.TILE;
 	public var world(default, null):World;
+	public var tileWidth(get, never):Float;
+	public var tileHeight(get, never):Float;
 	
 	public function new(world:World) {
 		super();
 		this.world = world;
+	}
+	
+	public function get_tileWidth():Float {
+		return _scaledTileWidth;
+	}
+	
+	public function get_tileHeight():Float {
+		return _scaledTileHeight;
 	}
 }

@@ -22,7 +22,7 @@ class World extends FlxGroup {
 	public var updateSpeed:Float;
 	public var signal_loadingProgressed(default, null):Signal1<Float>;
 	
-	private var namedObjects(default, null):Map<String, FlxBasic>;
+	private var namedObjects(default, null):Map<String, Array<FlxBasic>>;
 	private var namedLayers(default, null):Map<String, Layer>;
 	private var namedTilesets(default, null):Map<String, TiledTileSet>;
 	private var collidableLayers(default, null):Array<TileLayer>;
@@ -37,7 +37,7 @@ class World extends FlxGroup {
 		name = "Unnamed World";
 		updateSpeed = 1;
 		
-		namedObjects = new Map<String, FlxBasic>();
+		namedObjects = new Map<String, Array<FlxBasic>>();
 		namedLayers = new Map<String, Layer>();
 		collidableLayers = new Array<TileLayer>();
 		
@@ -67,7 +67,7 @@ class World extends FlxGroup {
 		super.update(dt * updateSpeed);
 	}
 	
-	public inline function getNamedObject(name:String):FlxBasic {
+	public inline function getNamedObjects(name:String):Array<FlxBasic> {
 		return namedObjects.get(name);
 	}
 	

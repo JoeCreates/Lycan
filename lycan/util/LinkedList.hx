@@ -4,7 +4,6 @@ package lycan.util;
 
 // NOTE does not extend the standard List implementation because the iterator() is inlined and cannot be overriden
 // TODO complete the unimplemented methods, make sure it all matches up with List
-@:generic
 class LinkedList<T> {
 	private var head:Cell<T>;
 	private var tail:Cell<T>;
@@ -189,7 +188,6 @@ class LinkedList<T> {
 	}
 }
 
-@:generic
 class Cell<T> {
 	public var element:T;
 	public var next:Cell<T>;
@@ -200,7 +198,6 @@ class Cell<T> {
 	}
 }
 
-@:generic
 private class LinkedListIterator<T> {
 	private var head:Cell<T>;
 	private var tmp:T;

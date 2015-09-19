@@ -1,10 +1,32 @@
 package lycan.util.timeline;
-import msignal.Signal;
+
 import msignal.Signal.Signal1;
+import msignal.Signal.Signal2;
 
 using lycan.util.BitSet;
 
 using lycan.util.FloatExtensions;
+
+class Boundary {
+	public var parent(default, null):TimelineItem;
+	public var leftToRightCount:Int = 0;
+	public var rightToLeftCount:Int = 0;
+	
+	private var signal_crossed:Signal2<Bool, Int>;
+	
+	public inline function new(parent:TimelineItem) {
+		this.parent = parent;
+		this.signal_crossed = new Signal2<Bool, Int>();
+	}
+	
+	public function add(f:Bool->Int->Void):Void {
+		signal_crossed.add(f);
+	}
+	
+	public function dispatch(reverse:Bool, count:Int):Void {
+		signal_crossed.dispatch(reverse, count);
+	}
+}
 
 // Base class for anything that can go on a timeline
 class TimelineItem {
@@ -15,12 +37,6 @@ class TimelineItem {
 	@:isVar public var duration(get, set):Float;
 	public var endTime(get, null):Float;
 	
-	public var enterLeftCount:Int;
-	public var exitLeftCount:Int;
-	public var enterRightCount:Int;
-	public var exitRightCount:Int;
-	public var stepOverCount:Int;
-	
 	public var exitLeftLimit(default, null):Int;
 	public var exitRightLimit(default, null):Int;
 	public var completed(get, null):Bool;
@@ -29,11 +45,8 @@ class TimelineItem {
 	public var removeOnCompletion(default, default):Bool;
 	public var markedForRemoval(default, default):Bool;
 	
-	// TODO lazy initialize?
-	public var signal_enterLeft = new Signal1<Int>();
-	public var signal_exitLeft = new Signal1<Int>();
-	public var signal_enterRight = new Signal1<Int>();
-	public var signal_exitRight = new Signal1<Int>();
+	public var left:Boundary;
+	public var right:Boundary;
 	public var signal_removed = new Signal1<Timeline<Dynamic>>();
 	
 	public function new(?parent:Timeline<Dynamic>, target:Dynamic, startTime:Float, duration:Float) {
@@ -42,11 +55,8 @@ class TimelineItem {
 		this.startTime = startTime;
 		this.duration = duration;
 		
-		enterLeftCount = 0;
-		exitLeftCount = 0;
-		enterRightCount = 0;
-		exitRightCount = 0;
-		stepOverCount = 0;
+		left = new Boundary(this);
+		right = new Boundary(this);
 		
 		exitLeftLimit = 1;
 		exitRightLimit = 1;
@@ -62,15 +72,11 @@ class TimelineItem {
 	}
 	
 	public function reset():Void {
-		enterLeftCount = 0;
-		exitLeftCount = 0;
-		enterRightCount = 0;
-		exitRightCount = 0;
-		stepOverCount = 0;
+		// TODO reset boundary counts, remove signals?
 		markedForRemoval = false;
 	}
 	
-	public function onUpdate(time:Float):Void {
+	public dynamic function onUpdate(time:Float):Void {
 		
 	}
 	
@@ -86,25 +92,6 @@ class TimelineItem {
 				markedForRemoval = true;
 			}
 			return;
-		}
-		
-		var enteredLeft:Bool = (currentTime <= startTime && nextTime > startTime);
-		var enteredRight:Bool = (currentTime >= endTime && nextTime < endTime);
-		var exitedLeft:Bool = (currentTime > startTime && nextTime < startTime);
-		var exitedRight:Bool = (currentTime < endTime && nextTime > endTime);
-		
-		if (enteredLeft) {
-			signal_enterLeft.dispatch(++enterLeftCount);
-		}
-		if (enteredRight) {
-			signal_enterRight.dispatch(++enterRightCount);
-		}
-		
-		if (exitedLeft) {
-			signal_exitLeft.dispatch(++exitLeftCount);
-		}
-		if (exitedRight) {
-			signal_exitRight.dispatch(++exitRightCount);
 		}
 		
 		onUpdate(nextTime);
@@ -139,7 +126,7 @@ class TimelineItem {
 	}
 	
 	private function get_completed():Bool {
-		return (exitLeftCount >= exitLeftLimit && exitRightCount >= exitRightLimit);
+		return (left.rightToLeftCount >= exitLeftLimit && right.leftToRightCount >= exitRightLimit);
 	}
 	
 	private function get_hovered():Bool {
