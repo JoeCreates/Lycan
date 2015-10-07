@@ -62,12 +62,8 @@ class Tween extends TimelineItem {
 		Sure.sure(key != null);
 		Sure.sure(value != null);
 		
-		if (#if flash false && #end Reflect.hasField(target, key)) {
-			Reflect.setField(target, key, value);
-		} else {
-			// NOTE this is necessary to catch cases where a field was optimized away, and on Flash to ensure getters/setters are called
-			Reflect.setProperty(target, key, value);
-		}
+		// NOTE this is necessary to catch cases where a field was optimized away, and on Flash to ensure getters/setters are called
+		Reflect.setProperty(target, key, value);
 	}
 	
 	private inline function getField<T> (target:T, key:String):Dynamic {

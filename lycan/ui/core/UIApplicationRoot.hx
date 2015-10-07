@@ -14,6 +14,10 @@ import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.Lib;
 
+#if next
+import lime.ui.Gamepad;
+#end
+
 #if flash
 import flixel.FlxG;
 #end
@@ -291,26 +295,48 @@ class UIApplicationRoot {
 	private function onGamepadButtonDown(gamepad, button) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad button down");
+		// TODO do per-player gamepad ownership, pass player index down to widgets
+		// TODO add methods to set the gamepad focus widget
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadButtonDown));
+		}
 	}
 	
 	private function onGamepadButtonUp(gamepad, button) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad button up");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadButtonUp));
+		}
 	}
 	
 	private function onGamepadConnect(gamepad) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad connect");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadConnect));
+		}
 	}
 	
 	private function onGamepadDisconnect(gamepad) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad disconnect");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadDisconnect));
+		}
 	}
 	
 	private function onGamepadAxisMove(gamepad, axis, value:Float) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad axis move");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadAxisMove));
+		}
 	}
 	
 	private function onAccelerometerUpdate(e:AccelerometerEvent) {
@@ -429,13 +455,16 @@ class UIApplicationRoot {
 		
 		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
 		
-		// TODO requires more recent openfl mode than haxeflixel can use (seeing openfl._legacy.Lib errors)?
-		//Sure.sure(Lib.application.window != null);
-		//Lib.application.window.onGamepadAxisMove.add(onGamepadAxisMove);
-		//Lib.application.window.onGamepadButtonDown.add(onGamepadButtonDown);
-		//Lib.application.window.onGamepadButtonUp.add(onGamepadButtonUp);
-		//Lib.application.window.onGamepadConnect.add(onGamepadConnect);
-		//Lib.application.window.onGamepadDisconnect.add(onGamepadDisconnect);
+		// NOTE requires -Dnext
+		#if next
+		Gamepad.onConnect.add(function(gamepad:Gamepad) {
+			trace("Connected gamepad: " + gamepad.name);
+			gamepad.onAxisMove.add(onGamepadAxisMove.bind(gamepad));
+			gamepad.onButtonDown.add(onGamepadButtonDown.bind(gamepad));
+			gamepad.onButtonUp.add(onGamepadButtonUp.bind(gamepad));
+			gamepad.onDisconnect.add(onGamepadDisconnect.bind(gamepad));
+		});
+		#end
 		
 		listenersAttached = true;
 	}
@@ -475,12 +504,14 @@ class UIApplicationRoot {
 		
 		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
 		
-		//Sure.sure(Lib.application.window != null);
+		#if next
+		// TODO disable gamepads
 		//Lib.application.window.onGamepadAxisMove.remove(onGamepadAxisMove);
 		//Lib.application.window.onGamepadButtonDown.remove(onGamepadButtonDown);
 		//Lib.application.window.onGamepadButtonUp.remove(onGamepadButtonUp);
 		//Lib.application.window.onGamepadConnect.remove(onGamepadConnect);
 		//Lib.application.window.onGamepadDisconnect.remove(onGamepadDisconnect);
+		#end
 		
 		listenersAttached = false;
 	}

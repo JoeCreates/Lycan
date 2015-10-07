@@ -1,9 +1,7 @@
 package lycan.util;
 
-// A conventional linked list replacement for the Haxe List class. This provides functionality for inserting elements.
-
+// A conventional linked list replacement for the Haxe List class. This provides functionality for inserting elements
 // NOTE does not extend the standard List implementation because the iterator() is inlined and cannot be overriden
-// TODO complete the unimplemented methods, make sure it all matches up with List
 class LinkedList<T> {
 	private var head:Cell<T>;
 	private var tail:Cell<T>;

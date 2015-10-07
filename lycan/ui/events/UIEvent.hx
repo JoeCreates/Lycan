@@ -214,7 +214,9 @@ class MoveEvent extends UIEvent {
 }
 
 class GamepadEvent extends UIEvent {
-	
+	public function new(type:EventType) {
+		super(type);
+	}
 }
 
 class AccelerometerEvent extends UIEvent {

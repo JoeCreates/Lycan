@@ -1,6 +1,5 @@
 package lycan.components;
 
-@:autoBuild(lycan.components.ComponentBuilder.build())
 class Component<T> implements IUpdateable {
 	public var entity:T;
 	

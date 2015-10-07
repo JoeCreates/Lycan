@@ -34,12 +34,20 @@ class BatchScreenGrab {
 		if (currentScreenshot >= resolutions.length) {
 			trace("All screenshots taken");
 			Lib.current.stage.removeEventListener(Event.ENTER_FRAME, handler);
+			#if next
+			Lib.application.window.resize(Std.int(originalResolution.x), Std.int(originalResolution.y));
+			#else
 			Lib.current.stage.resize(Std.int(originalResolution.x), Std.int(originalResolution.y));
+			#end
 			return;
 		}
 		
 		if (frameCount % 2 == 0) {
+			#if next
+			Lib.application.window.resize(Std.int(resolutions[currentScreenshot].x), Std.int(resolutions[currentScreenshot].y));
+			#else
 			Lib.current.stage.resize(Std.int(resolutions[currentScreenshot].x), Std.int(resolutions[currentScreenshot].y));
+			#end
 		} else {
 			saveScreenshot();
 		}
