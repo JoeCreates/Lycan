@@ -22,6 +22,7 @@ import lycan.leaderboards.GameJoltFacade;
 
 #if steamworksleaderboards
 import lycan.leaderboards.SteamworksFacade;
+import lycan.leaderboards.SteamworksFacade.DialogName;
 #end
 
 class Leaderboards {
@@ -30,7 +31,7 @@ class Leaderboards {
 	private function new() {
 	}
 	
-	public static function init():Void {
+	public static function init():Void {		
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get;
 		#end
@@ -55,6 +56,9 @@ class Leaderboards {
 		#end
 		
 		#if steamworksleaderboards
+		if (gameId == 0) {
+			throw "Set the Steamworks gameId before initializing leaderboards";
+		}
 		SteamworksFacade.init(gameId);
 		#end
 	}
@@ -79,6 +83,7 @@ class Leaderboards {
 		#end
 		
 		#if steamworksleaderboards
+		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS); // TODO how to open leaderboards tab?
 		#end
 	}
 	
@@ -102,6 +107,7 @@ class Leaderboards {
 		#end
 		
 		#if steamworksleaderboards
+		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS);
 		#end
 	}
 	
@@ -128,7 +134,7 @@ class Leaderboards {
 		#end
 	}
 	
-	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {		
+	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get.submitScore(leaderboardId, score);
 		#end
@@ -150,7 +156,7 @@ class Leaderboards {
 		#end
 		
 		#if steamworksleaderboards
-		SteamworksFacade.submitScore(leaderboardId, score, 0, 0); // TODO detail/rank?
+		SteamworksFacade.submitScore(leaderboardId, score, 0, 0); // TODO detail/rank parameters?
 		#end
 	}
 	

@@ -6,8 +6,7 @@ import steamwrap.SteamWrap;
 import openfl.Lib;
 import openfl.events.Event;
 
-// TODO implement overlay opening achievements panel on native side etc. Source SDK has these but SteamWrap doesn't atm...
-@:enum abstract OverlayOption(String) to String {
+@:enum abstract DialogName(String) to String {
 	var FRIENDS = "Friends";
 	var COMMUNITY = "Community";
 	var PLAYERS = "Players";
@@ -47,11 +46,27 @@ class SteamworksFacade {
 		}
 	}
 	
-	public static function openOverlayToUrl(url:String):Void {
+	public static function openOverlay():Void {
+		Sure.sure(SteamWrap.active);
+		
+		if (SteamWrap.active) {
+			SteamWrap.openOverlay();
+		}
+	}
+	
+	public static function openOverlayToWebPage(url:String):Void {
 		Sure.sure(SteamWrap.active);
 		
 		if(SteamWrap.active) {
-			SteamWrap.openOverlay(url);
+			SteamWrap.openOverlayToWebPage(url);
+		}
+	}
+	
+	public static function openOverlayToDialog(dialog:DialogName):Void {
+		Sure.sure(SteamWrap.active);
+		
+		if (SteamWrap.active) {
+			SteamWrap.openOverlayToDialog(dialog);
 		}
 	}
 	
