@@ -41,12 +41,14 @@ class DebugRenderer extends FlxSprite {
 				
 				var rectLineColor = FlxColor.RED;
 				
-				if (w.keyboardFocus) {
-					rectLineColor.green += 127;
-				}
-				if (w.gamepadFocus) {
-					rectLineColor.blue += 127;
-				}
+				// TODO check the UIApplicationRoot if the focus widgets == the widget
+				//if (w.keyboardFocus) {
+				//	rectLineColor.green += 127;
+				//}
+				//if (w.gamepadFocus) {
+				//	rectLineColor.blue += 127;
+				//}
+				
 				if (!w.shown) {
 					rectLineColor = FlxColor.CYAN;
 				}

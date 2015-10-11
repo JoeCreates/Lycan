@@ -65,8 +65,6 @@ class Widget extends UIObject {
 	public var minHeight:Int = 0;
 	public var maxWidth:Int = 10000;
 	public var maxHeight:Int = 10000;
-	public var keyboardFocus:Bool = false;
-	public var gamepadFocus:Bool = false;
 	public var shown:Bool = true;
 	public var acceptDrops:Bool = true;
 	public var paddingLeft:Int = 2;
@@ -499,6 +497,8 @@ class Widget extends UIObject {
 		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
 		// Should be useful for gamepads
 		// TODO could delegate this to layouts?
+		
+		
 		return null;
 	}
 	
