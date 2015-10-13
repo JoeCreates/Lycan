@@ -30,6 +30,17 @@ class BitSet {
 	inline public static function set(bits:Int, mask:Int, enabled:Bool):Int {
 		return enabled ? add(bits, mask) : remove(bits, mask);
 	}
+	
+	inline public static function hamming(a:Int, b:Int):Int {
+		Sure.sure(a >= 0 && b >= 0);
+		var distance:Int = 0;
+		var diff:Int = a ^ b;
+		while (diff != 0) { // Counts the number of set bits in the difference
+			distance++;
+			diff &= diff - 1;
+		}
+		return distance;
+	}
 }
 
 // Helper constants for working with bitsets
