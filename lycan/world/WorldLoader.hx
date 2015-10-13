@@ -6,7 +6,6 @@ import flixel.addons.editors.tiled.TiledObject;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.FlxBasic;
-import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxPoint;

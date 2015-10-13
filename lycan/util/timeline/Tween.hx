@@ -1,7 +1,7 @@
 package lycan.util.timeline;
 
 import haxe.macro.Expr;
-import lycan.util.timeline.Easing;
+import lycan.util.EasingEquations;
 
 using lycan.util.FloatExtensions;
 

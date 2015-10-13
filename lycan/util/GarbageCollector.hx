@@ -19,8 +19,9 @@ class GarbageCollector {
 		Sure.sure(!paused);
 		paused = true;
 		
+		// TODO review this, was causing GC errors before (does it completely detach the GC, making allocations illegal or something?)
 		#if cpp
-		Gc.enterGCFreeZone();
+		//Gc.enterGCFreeZone();
 		#end
 	}
 	
@@ -29,7 +30,7 @@ class GarbageCollector {
 		paused = false;
 		
 		#if cpp
-		Gc.exitGCFreeZone();
+		//Gc.exitGCFreeZone();
 		#end
 	}
 	

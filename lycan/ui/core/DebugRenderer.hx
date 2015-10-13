@@ -26,7 +26,9 @@ class DebugRenderer extends FlxSprite {
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
 	}
 	
-	override public function draw() {		
+	override public function draw() {
+		super.draw();
+		
 		FlxSpriteUtil.fill(this, FlxColor.TRANSPARENT);
 		
 		var renderWidget = function(o:UIObject) {
@@ -78,7 +80,11 @@ class DebugRenderer extends FlxSprite {
 		
 		var visitElements = function(tlw:UIObject) {
 			var items = new Array<UIObject>();
-			items.push(tlw);
+			
+			if(tlw != null) {
+				items.push(tlw);
+			}
+			
 			while (items.length != 0) {
 				var w = items.pop();
 				

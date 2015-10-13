@@ -1,4 +1,4 @@
-package lycan.util.timeline;
+package lycan.util;
 
 // Easing equations in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license
 // Documentation and easeOutIn algorithms were originally adapted from Qt: http://qt.nokia.com/products/
