@@ -12,6 +12,7 @@ class LineEdit extends Widget {
 	private var restrictInput:EReg = ~/^[A-Za-z0-9]+$/; // Limit *event input* to English alphanumerics
 	public var maxLength:Int = 255;
 	public var signal_textEdited = new Signal1<String>();
+	public var text(get, set):String;
 	
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
@@ -24,6 +25,7 @@ class LineEdit extends Widget {
 		
 		if (len > 0) {
 			textGraphic.set_text(text.substring(0, len - 1));
+			signal_textEdited.dispatch(textGraphic.get_text());
 		}
 	}
 	
@@ -71,5 +73,15 @@ class LineEdit extends Widget {
 		}
 		
 		return super.set_y(y);
+	}
+	
+	private function get_text():String {
+		Sure.sure(textGraphic != null);
+		return textGraphic.get_text();
+	}
+	
+	private function set_text(text:String):String {
+		Sure.sure(textGraphic != null);
+		return textGraphic.set_text(text);
 	}
 }

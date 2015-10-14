@@ -68,7 +68,7 @@ class TweenGraph extends FlxSpriteGroup {
 	}
 }
 
-class EasingGalleryDemo extends LycanState {
+class EasingGalleryDemo extends BaseDemoState {
 	public static inline var TWEENS_PER_ROW:Int = 4;
 	public static inline var ITEM_SPACING:Int = 4;
 	

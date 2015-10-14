@@ -206,6 +206,7 @@ class UIApplicationRoot {
 	
 	// NOTE flixel has it's own game scale mode, and it seems necessary to take that into account to get the right game coords
 	// TODO check this, but it doesn't seem to be required for non-Flash targets?
+	// TODO there's an extra offset on the left side of the window that's missed here?
 	private inline function flixelScaleModeMouseHack(e:MouseEvent):Void {
 		#if flash
 		e.localX /= FlxG.scaleMode.scale.x;

@@ -42,4 +42,15 @@ class FloatExtensions {
 	public static inline function rfpart(x:Float):Float {
 		return 1.0 - fpart(x);
 	}
+	
+	public static inline function wrap(x:Float, lower:Float, upper:Float):Float {
+		Sure.sure(lower <= upper);
+		var range = upper - lower + 1;
+		x = ((x - lower) % range);
+		if (x < 0) {
+			return upper + 1 + x;
+		} else {
+			return lower + x;
+		}
+	}
 }

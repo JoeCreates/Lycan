@@ -16,9 +16,4 @@ class ListView extends Widget {
 	public function new(?parent:UIObject, ?name:String) {
 		super(parent, name);
 	}
-	
-	public function addLabel(graphic:ITextRenderItem, action:Void->Void):Void {
-		var label = new Label(this);
-		label.graphic = graphic;
-	}
 }

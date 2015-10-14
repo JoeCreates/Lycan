@@ -10,7 +10,7 @@ import lycan.ui.widgets.BorderImage;
 import lycan.ui.widgets.BorderImage.BorderImageRepeatMode;
 
 // TODO
-class BorderImageDemo extends LycanState {
+class BorderImageDemo extends BaseDemoState {
 	public static inline var ITEM_SPACING:Int = 4;
 	
 	private var topLeft:FlxSprite = new FlxSprite();
