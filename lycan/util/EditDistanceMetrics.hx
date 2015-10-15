@@ -77,8 +77,8 @@ class EditDistanceMetrics {
 				}
 				
 				costs[x + y * w] = IntExtensions.min(costs[(x - 1) + ((y) * w)] + 1,
-									  IntExtensions.min(costs[(x) + ((y - 1) * w)] + 1,
-														costs[(x - 1) + ((y - 1) * w)] + cost)); // Deletion, insertion, substitution
+								   IntExtensions.min(costs[(x) + ((y - 1) * w)] + 1,
+													 costs[(x - 1) + ((y - 1) * w)] + cost)); // Deletion, insertion, substitution
 				
 				if (enableTransposition && x > 1 && y > 1 && source.charAt(x) == target.charAt(y - 1) && source.charAt(x - 1) == target.charAt(y)) {
 					costs[x + y * w] = IntExtensions.min(costs[x + y * w], costs[x - 2 + ((y - 2) * w)] + cost); // Transposition
@@ -101,36 +101,137 @@ class EditDistanceMetrics {
 		return table[table.length - 1];
 	}
 	
-	// Returns the Jaro distance between the strings, 0 is perfect match, 1 is no match
+	// Returns the Jaro similarity between the strings, 1 is perfect match, 0 is no match
 	public static function jaro(first:String, second:String):Float {
 		var f:Int = first.length;
 		var s:Int = second.length;
 		
 		// If both are empty, match, if only one empty, mismatch
 		if (f == 0) {
-			return s == 0 ? 0.0 : 1.0;
+			return s == 0 ? 1.0 : 0.0;
+		}
+		
+		var fMatches = new Vector<Bool>(f);
+		for (i in 0...f) {
+			fMatches[i] = false;
+		}
+		var sMatches = new Vector<Bool>(s);
+		for (i in 0...s) {
+			sMatches[i] = false;
 		}
 		
 		var matchDistance:Int = Std.int(IntExtensions.max(f, s) / 2 - 1);
+		var matches:Float = 0;
+		var transpositions:Float = 0;
 		
-		return 1; // TODO
+		for (i in 0...f) {
+			var start:Int = IntExtensions.max(0, i - matchDistance);
+			var end:Int = IntExtensions.min(i + matchDistance + 1, s);
+			
+			for (j in start...end) {
+				if (sMatches[j]) {
+					continue;
+				}
+				
+				if (first.charAt(i) != second.charAt(j)) {
+					continue;
+				}
+				
+				fMatches[i] = true;
+				sMatches[j] = true;
+				matches++;
+				break;
+			}
+		}
+		
+		if (matches == 0) {
+			return 0.0;
+		}
+		
+		var k:Int = 0;
+		for (i in 0...f) {
+			if (!fMatches[i]) {
+				continue;
+			}
+			while (!sMatches[k]) {
+				k++;
+			}
+			if (first.charAt(i) != second.charAt(k)) {
+				transpositions++;
+			}
+			k++;
+		}
+		
+		transpositions *= 0.5;
+		
+		var jaro:Float = ((matches / f) + (matches / s) + (matches - transpositions) / matches) / 3.0;
+		return jaro;
 	}
 	
-	// Returns the Jaro-Winkler distance between the strings, 0 is perfect match, 1 is no match
+	// Returns the Jaro-Winkler similarity between the strings, 1 is perfect match, 0 is no match
 	// Winkler modification makes mismatches at the ends more significant
-	// TODO
-	public static function jaroWinkler(first:String, second:String, winklerPrefixLength:Int = 4, winklerSimilarityThreshold:Float = 0.7):Float {
-		if (first == second) {
+	public static function jaroWinkler(first:String, second:String, maxPrefixLength:Int = 4):Float {
+		var jaroSimilarity:Float = jaro(first, second);
+		var prefixLength:Int = 0;
+		if (first.length != 0 && second.length != 0) {
+			var minLen = IntExtensions.min(first.length, second.length);
+			for (i in 0...minLen) {
+				if (first.charAt(i) == second.charAt(i)) {
+					prefixLength++;
+					
+					if (prefixLength >= maxPrefixLength) {
+						break;
+					}
+				} else {
+					break;
+				}
+			}
+		}
+		
+		//if (jaroDistance < 0.7) { // 0.7 is the "boost threshold" Winkler used
+		//	return jaroDistance;
+		//} else {
+		// ...
+		//}
+		
+		return (jaroSimilarity + prefixLength * 0.1 * (1 - jaroSimilarity));
+	}
+	
+	// Returns the Monge-Elkan similarity between the strings, 1 is perfect match, 0 is no match
+	// Uses Jaro as the inner similarity method. Useful for comparing similarities of sets, maybe full names
+	public static function mongeElkan(first:String, second:String, similarityMeasure:String->String->Float, delimiter:String = " "):Float {
+		if (first.length == 0 && second.length == 0) {
+			return 1;
+		}
+		
+		var fTokens = first.split(delimiter);
+		var sTokens = second.split(delimiter);
+		
+		if (fTokens.length == 0 || sTokens.length == 0) {
 			return 0;
 		}
 		
-		return 1;
+		var sum:Float = 0;
+		for (f in fTokens) {
+			var max:Float = 0;
+			for (s in sTokens) {
+				max = Math.max(max, similarityMeasure(first, second));
+			}
+			sum += max;
+		}
+		
+		return sum / fTokens.length;
 	}
 	
-	// Returns the Monge-Elkan distance between the strings, 0 is perfect match, 1 is no match
-	// Uses the Jaro distance as the inner similarity method
-	// TODO
-	public static function mongeElkan(first:String, second:String, separator:String = " "):Float {
+	// Returns the Dice coefficient for the strings
+	// Measure of set similarity
+	public static function diceCoefficient(first:String, second:String):Float {
 		return 0;
 	}
+	
+	public static function jaccard(first:String, second:String):Float {
+		return 0;
+	}
+	
+	//public static function soundex
 }

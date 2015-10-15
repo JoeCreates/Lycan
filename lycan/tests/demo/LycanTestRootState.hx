@@ -31,7 +31,7 @@ class LycanTestRootState extends LycanRootState {
 		// TODO use a macro to generate the list, 'new' the states on opening state not on launch
 		// TODO actually write a scrollable list view
 		addButton(new EasingGalleryDemo(), "Easing Gallery");
-		addButton(new EditDistancesDemo(), "Levenshtein Strings");
+		addButton(new EditDistancesDemo(), "Edit Distances");
 		addButton(new LocaleSwitcherDemo(), "Locale Switcher");
 		
 		menu.updateGeometry();

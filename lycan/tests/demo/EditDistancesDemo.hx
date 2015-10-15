@@ -18,12 +18,16 @@ class EditDistancesDemo extends BaseDemoState {
 	private var fastLevenshteinDistance(default, set):Int;
 	private var levenshteinDistance(default, set):Int;
 	private var damerauLevenshteinDistance(default, set):Int;
+	private var jaroDistance(default, set):Float;
 	private var jaroWinklerDistance(default, set):Float;
+	private var mongeElkanDistance(default, set):Float;
 	
 	private var fastLevenshteinText:FlxText;
 	private var levenshteinText:FlxText;
 	private var damerauLevenshteinText:FlxText;
+	private var jaroText:FlxText;
 	private var jaroWinklerText:FlxText;
+	private var mongeElkanText:FlxText;
 	
 	override public function create():Void {
 		super.create();
@@ -50,7 +54,9 @@ class EditDistancesDemo extends BaseDemoState {
 		fastLevenshteinText = new FlxText(0, 0, 0, "", 24);
 		levenshteinText = new FlxText(0, 0, 0, "", 24);
 		damerauLevenshteinText = new FlxText(0, 0, 0, "", 24);
+		jaroText = new FlxText(0, 0, 0, "", 24);
 		jaroWinklerText = new FlxText(0, 0, 0, "", 24);
+		mongeElkanText = new FlxText(0, 0, 0, "", 24);
 		
 		var fastLevLabel = new Label(descriptionContainer);
 		fastLevLabel.graphic = new FlxTextRenderItem(fastLevenshteinText).addTo(uiGroup);
@@ -59,7 +65,11 @@ class EditDistancesDemo extends BaseDemoState {
 		var damerauLabel = new Label(descriptionContainer);
 		damerauLabel.graphic = new FlxTextRenderItem(damerauLevenshteinText).addTo(uiGroup);
 		var jaroLabel = new Label(descriptionContainer);
-		jaroLabel.graphic = new FlxTextRenderItem(jaroWinklerText).addTo(uiGroup);
+		jaroLabel.graphic = new FlxTextRenderItem(jaroText).addTo(uiGroup);
+		var jaroWinklerLabel = new Label(descriptionContainer);
+		jaroWinklerLabel.graphic = new FlxTextRenderItem(jaroWinklerText).addTo(uiGroup);
+		var mongeElkanLabel = new Label(descriptionContainer);
+		mongeElkanLabel.graphic = new FlxTextRenderItem(mongeElkanText).addTo(uiGroup);
 		
 		descriptionContainer.updateGeometry();
 		lineEditContainer.updateGeometry();
@@ -78,7 +88,9 @@ class EditDistancesDemo extends BaseDemoState {
 		fastLevenshteinDistance = EditDistanceMetrics.levenshtein(sourceLineEdit.text, targetLineEdit.text);
 		levenshteinDistance = EditDistanceMetrics.damerauLevenshtein(sourceLineEdit.text, targetLineEdit.text, false);
 		damerauLevenshteinDistance = EditDistanceMetrics.damerauLevenshtein(sourceLineEdit.text, targetLineEdit.text, true);
+		jaroDistance = EditDistanceMetrics.jaro(sourceLineEdit.text, targetLineEdit.text);
 		jaroWinklerDistance = EditDistanceMetrics.jaroWinkler(sourceLineEdit.text, targetLineEdit.text);
+		mongeElkanDistance = EditDistanceMetrics.mongeElkan(sourceLineEdit.text, targetLineEdit.text, EditDistanceMetrics.jaro, " ");
 	}
 	
 	private function set_fastLevenshteinDistance(d:Int):Int {
@@ -96,8 +108,18 @@ class EditDistancesDemo extends BaseDemoState {
 		return this.damerauLevenshteinDistance = d;
 	}
 	
+	private function set_jaroDistance(d:Float):Float {
+		jaroText.text = "Jaro: " + Std.string(d);
+		return this.jaroDistance = d;
+	}
+	
 	private function set_jaroWinklerDistance(d:Float):Float {
 		jaroWinklerText.text = "JaroWinkler: " + Std.string(d);
 		return this.jaroWinklerDistance = d;
+	}
+	
+	private function set_mongeElkanDistance(d:Float):Float {
+		mongeElkanText.text = "MongeElkan: " + Std.string(d);
+		return this.mongeElkanDistance = d;
 	}
 }

@@ -9,7 +9,7 @@ import openfl.ui.Keyboard;
 
 class LineEdit extends Widget {
 	public var textGraphic(default, set):ITextRenderItem;
-	private var restrictInput:EReg = ~/^[A-Za-z0-9]+$/; // Limit *event input* to English alphanumerics
+	private var restrictInput:EReg = ~/^[A-Za-z0-9 ]+$/; // Limit *event input* to English alphanumerics and spaces (TODO make it work with other input)
 	public var maxLength:Int = 255;
 	public var signal_textEdited = new Signal1<String>();
 	public var text(get, set):String;

@@ -46,7 +46,7 @@ class PrefixTrie {
 	}
 	
 	// Note does linear lookup through unsorted children, it's simple and uses little memory but is really slow
-	private static inline function findChild(node:PrefixNode, letter:String):PrefixNode {		
+	private static function findChild(node:PrefixNode, letter:String):PrefixNode {		
 		var ret:PrefixNode = null;
 		for (child in node.children) {
 			if (child.letter == letter) {
