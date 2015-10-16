@@ -33,13 +33,11 @@ class LycanTestRootState extends LycanRootState {
 		addButton(new EasingGalleryDemo(), "Easing Gallery");
 		addButton(new EditDistancesDemo(), "Edit Distances");
 		addButton(new LocaleSwitcherDemo(), "Locale Switcher");
+		addButton(new NameGeneratorDemo(), "Name Generator");
 		
 		menu.updateGeometry();
 		
 		add(uiGroup);
-		
-		trace(EditDistanceMetrics.levenshtein("rosettacode", "raisethysword"));
-		trace(EditDistanceMetrics.damerauLevenshtein("rosettacode", "raisethysword"));
 	}
 	
 	private function addButton<T:FlxSubState>(state:T, name:String):Void {

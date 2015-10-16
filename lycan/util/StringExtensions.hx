@@ -10,4 +10,14 @@ class StringExtensions {
 		arr.reverse();
 		return arr.join("");
 	}
+	
+	public static inline function repeat(s:String, times:Int):String {
+		Sure.sure(s != null);
+		Sure.sure(times >= 1);
+		var output:String = "";
+		for (i in 0...times) {
+			output += s;
+		}
+		return output;
+	}
 }

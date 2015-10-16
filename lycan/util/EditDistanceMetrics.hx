@@ -4,6 +4,8 @@ import haxe.ds.Vector;
 
 using lycan.util.IntExtensions;
 
+// TODO put these together as a big string similarity Haxelib?
+
 class EditDistanceMetrics {
 	// Returns the number of single-character edits (insertions, deletions and replacements) needed to transform the source into the target
 	// Fast iterative method that doesn't create a whole distance table up front
@@ -224,7 +226,7 @@ class EditDistanceMetrics {
 	}
 	
 	// Returns the Dice coefficient for the strings
-	// Measure of set similarity
+	// Measure of set similarity, also good lexical association of two words
 	public static function diceCoefficient(first:String, second:String):Float {
 		return 0;
 	}
