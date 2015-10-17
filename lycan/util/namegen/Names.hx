@@ -81,7 +81,7 @@ class Names {
 		{ name: "Vladimir", gender: MASCULINE },
 		{ name: "Yaksha", gender: NEUTER },
 		{ name: "Alucard", gender: MASCULINE },
-		{ name: "D.", gender: MASCULINE },
+		{ name: "D", gender: MASCULINE },
 		{ name: "Eli", gender: MASCULINE },
 		{ name: "Ivan", gender: MASCULINE },
 		{ name: "Judas", gender: MASCULINE },
@@ -117,7 +117,7 @@ class Names {
 		{ name: "Blake", gender: NEUTER },
 		{ name: "Night", gender: NEUTER },
 		{ name: "Fitzroy", gender: NEUTER },
-		{ name: "de Lioncourt", gender: NEUTER },
+		{ name: "deLioncourt", gender: NEUTER },
 		{ name: "Blackthorn", gender: NEUTER },
 		{ name: "Souen", gender: NEUTER },
 		{ name: "Tod", gender: NEUTER },
@@ -246,7 +246,7 @@ class Names {
 		{ name: "Theroux", gender: NEUTER },
 		{ name: "Woolf", gender: NEUTER },
 		{ name: "Hannity", gender: NEUTER },
-		{ name: "O'Reilly", gender: NEUTER },
+		{ name: "OReilly", gender: NEUTER },
 		{ name: "Limbaugh", gender: NEUTER },
 		{ name: "Beck", gender: NEUTER },
 		{ name: "Robinson", gender: NEUTER },
@@ -280,7 +280,7 @@ class Names {
 		{ name: "Zim", gender: FEMININE },
 		{ name: "Zaphod", gender: MASCULINE },
 		{ name: "Zeebo", gender: MASCULINE },
-		{ name: "Jean-Luc", gender: MASCULINE },
+		{ name: "JeanLuc", gender: MASCULINE },
 		{ name: "Beldar", gender: MASCULINE },
 		{ name: "Q", gender: MASCULINE },
 		{ name: "Diana", gender: FEMININE },
@@ -336,7 +336,7 @@ class Names {
 		{ name: "Franchesca", gender: FEMININE },
 		{ name: "Isabelle", gender: FEMININE },
 		{ name: "Eleanor", gender: FEMININE },
-		{ name: "Jean-Luc", gender: MASCULINE },
+		{ name: "JeanLuc", gender: MASCULINE },
 		{ name: "Penelope", gender: FEMININE },
 		{ name: "Phoebe", gender: FEMININE },
 		{ name: "Abraham", gender: MASCULINE },
@@ -391,8 +391,4 @@ class Names {
 	
 	public static var elfSurnames:Array<Name> = [
 	];
-	
-	public static function randomName(titles:Array<Name>, forenames:Array<Name>, surnames:Array<Name>):String {
-		return titles.randomElement() + " " + forenames.randomElement() + " " + surnames.randomElement();
-	}
 }

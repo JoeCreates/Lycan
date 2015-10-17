@@ -22,9 +22,21 @@ class Model {
 		this.smoothing = smoothing;
 		this.domain = domain;
 		
-		observations = new StringMap<Array<String>>();
-		chains = new StringMap<Array<Float>>();
+		observations = new StringMap<Array<String>>();		
+		train(data);
+		rebuildChains();
 		
+		//trace(observations.toString());
+		//trace(chains.toString());
+	}
+	
+	public function retrain(data:Array<String>):Void {
+		Sure.sure(data != null);
+		train(data);
+		rebuildChains();
+	}
+	
+	private function train(data:Array<String>):Void {
 		while (data.length != 0) {
 			var d:String = data.pop();
 			d = ("#".repeat(order)) + d + "#";
@@ -40,6 +52,10 @@ class Model {
 				//trace(d.charAt(i + order));
 			}
 		}
+	}
+	
+	private function rebuildChains():Void {
+		chains = new StringMap<Array<Float>>();
 		
 		for (context in observations.keys()) {
 			for (prediction in domain) {
@@ -52,12 +68,7 @@ class Model {
 				//trace(context + " -> " + (smoothing + countMatches(observations.get(context), prediction)));
 			}
 		}
-		
-		trace(observations.toString());
-		trace(chains.toString());
 	}
-	
-	// TODO method to add more data to the model
 	
 	public function generate(context:String):String {
 		Sure.sure(context != null);

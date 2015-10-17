@@ -20,4 +20,12 @@ class StringExtensions {
 		}
 		return output;
 	}
+	
+	public static inline function contains(s:String, substr:String):Bool {
+		#if php
+		return test == "" || s.indexOf(substr) >= 0;
+		#else
+		return s.indexOf(substr) >= 0;
+		#end
+	}
 }

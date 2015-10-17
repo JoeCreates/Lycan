@@ -32,10 +32,10 @@ class PrefixTrie {
 		var current = root;
 		
 		for (i in 0...word.length) {
+			current = findChild(current, word.charAt(i));
 			if (current == null) {
 				return false;
 			}
-			current = findChild(current, word.charAt(i));
 		}
 		
 		if (!current.word) {
