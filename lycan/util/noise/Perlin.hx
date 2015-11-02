@@ -36,7 +36,7 @@ class Perlin {
 		}
 	}
 	
-	// Fractal Brownian motion noise, summed octaves of noise
+	// Fractional Brownian motion noise, summed octaves of noise
 	public function fBm1d(x:Float):Float {
 		var result:Float = 0;
 		var amp:Float = 0.5;
@@ -64,7 +64,7 @@ class Perlin {
 		return result;
 	}
 	
-	// Derivative of fractal Brownian motion
+	// Derivative of fractional Brownian motion
 	public function dfBm2d(x:Float, y:Float):FlxPoint {
 		var result:FlxPoint = new FlxPoint();
 		
