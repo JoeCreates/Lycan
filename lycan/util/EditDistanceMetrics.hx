@@ -50,6 +50,20 @@ class EditDistanceMetrics {
 	
 	// Like levenshtein distance, but may also transpose adjacent symbols
 	// Returns the distance table for finding optimal sequences
+	// Example edit distance matrix (source democrat, target republican)
+	//       D  E  M  O  C  R  A  T
+	//    _  _  _  _  _  _  _  _  _
+	//   |0  1  2  3  4  5  6  7  8
+	// R |1  1  2  3  4  5  5  6  7
+	// E |2  2  1  2  3  4  5  6  7
+	// P |3  3  2  2  3  4  5  6  7
+	// U |4  4  3  3  3  4  5  6  7
+	// B |5  5  4  4  4  4  5  6  7
+	// L |6  6  5  5  5  5  5  6  7
+	// I |7  7  6  6  6  6  6  6  7
+	// C |8  8  7  7  7  6  7  7  7
+	// A |9  9  8  8  8  7  7  7  8
+	// N |10 10 9  9  9  8  8  8  8
 	public static function damerauLevenshteinMatrix(source:String, target:String, enableTransposition:Bool = true):Vector<Int> {
 		Sure.sure(source != null && target != null);
 		var w:Int = source.length;

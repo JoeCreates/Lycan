@@ -3,6 +3,7 @@ package lycan.util;
 // Extension methods for Arrays
 
 class ArrayExtensions {
+	// Returns a random element from one of the arrays
 	public static function randomElementFromArrays<T>(arrays:Array<Array<T>>):Null<T> {
 		Sure.sure(arrays != null && arrays.length != 0);
 		var totalLength:Int = 0;
@@ -27,11 +28,30 @@ class ArrayExtensions {
 		throw "Failed to get random element";
 	}
 	
+	// Returns a random element from the array
 	inline public static function randomElement<T>(array:Array<T>):Null<T> {
 		Sure.sure(array != null && array.length != 0);
 		return array[Std.random(array.length)];
 	}
 	
+	// Array accessor, allows positive out-of-bounds indices to wrap around
+	inline public static function wrappedPositiveIndex<T>(array:Array<T>, idx:Int):Null<T> {
+		Sure.sure(array != null && array.length != 0);
+		Sure.sure(idx >= 0);
+		return array[idx % array.length];
+	}
+	
+	// Array accessor, treats the array as if it is circular
+	inline public static function circularIndex<T>(array:Array<T>, idx:Int):Null<T> {
+		Sure.sure(array != null && array.length != 0);
+		if (idx < 0) {
+			return array[idx + (idx % array.length)];
+		} else {
+			return array[idx % array.length];
+		}
+	}
+	
+	// Returns true if the array contains no null elements
 	public static function noNulls<T>(array:Array<T>):Bool {
 		for (e in array) {
 			if (e == null) {

@@ -34,6 +34,7 @@ class LycanTestRootState extends LycanRootState {
 		addButton(new EditDistancesDemo(), "Edit Distances");
 		addButton(new LocaleSwitcherDemo(), "Locale Switcher");
 		addButton(new NameGeneratorDemo(), "Name Generator");
+		addButton(new StringTransformDemo(), "String Transformer");
 		
 		menu.updateGeometry();
 		
