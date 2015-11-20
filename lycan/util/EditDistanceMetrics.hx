@@ -1,6 +1,7 @@
 package lycan.util;
 
 import haxe.ds.Vector;
+import lycan.util.ArraySet;
 
 using lycan.util.IntExtensions;
 
@@ -239,15 +240,30 @@ class EditDistanceMetrics {
 		return sum / fTokens.length;
 	}
 	
-	// Returns the Dice coefficient for the strings
-	// Measure of set similarity, also good lexical association of two words
-	public static function diceCoefficient(first:String, second:String):Float {
-		return 0;
+	// Returns the Dice coefficient of the unique ngrams in the string
+	// Measure of set similarity, also good measure of lexical association of two words
+	// NOTE that this is technically incorrect because it discards duplicates instead of counting them - e.g. for bigrams, "AA" and "AAAA" are wrongly considered equal
+	public static function diceCoefficient(first:String, second:String, gramLength:Int):Float {
+		Sure.sure(gramLength >= 1);
+		
+		if (first.length == 0 || second.length == 0 || first.length <= gramLength || second.length <= gramLength) {
+			return 0;
+		}
+		
+		var firstNgrams:ArraySet<String> = ArraySet.create();
+		var secondNgrams:ArraySet<String> = ArraySet.create();
+		
+		for (i in 0...first.length - (gramLength - 1)) {
+			firstNgrams.add(first.substr(i, gramLength));
+		}
+		for (i in 0...second.length - (gramLength - 1)) {
+			secondNgrams.add(second.substr(i, gramLength));
+		}
+		
+		var intersections = firstNgrams.intersection(secondNgrams);
+		
+		var total:Float = firstNgrams.length + secondNgrams.length;
+		var dice:Float = (intersections.length * 2.0) / total;
+		return dice;
 	}
-	
-	public static function jaccard(first:String, second:String):Float {
-		return 0;
-	}
-	
-	//public static function soundex
 }

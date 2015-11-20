@@ -21,6 +21,7 @@ class EditDistancesDemo extends BaseDemoState {
 	private var jaroDistance(default, set):Float;
 	private var jaroWinklerDistance(default, set):Float;
 	private var mongeElkanDistance(default, set):Float;
+	private var diceCoefficient(default, set):Float;
 	
 	private var fastLevenshteinText:FlxText;
 	private var levenshteinText:FlxText;
@@ -28,6 +29,7 @@ class EditDistancesDemo extends BaseDemoState {
 	private var jaroText:FlxText;
 	private var jaroWinklerText:FlxText;
 	private var mongeElkanText:FlxText;
+	private var diceText:FlxText;
 	
 	override public function create():Void {
 		super.create();
@@ -57,6 +59,7 @@ class EditDistancesDemo extends BaseDemoState {
 		jaroText = new FlxText(0, 0, 0, "", 24);
 		jaroWinklerText = new FlxText(0, 0, 0, "", 24);
 		mongeElkanText = new FlxText(0, 0, 0, "", 24);
+		diceText = new FlxText(0, 0, 0, "", 24);
 		
 		var fastLevLabel = new Label(descriptionContainer);
 		fastLevLabel.graphic = new FlxTextRenderItem(fastLevenshteinText).addTo(uiGroup);
@@ -70,6 +73,8 @@ class EditDistancesDemo extends BaseDemoState {
 		jaroWinklerLabel.graphic = new FlxTextRenderItem(jaroWinklerText).addTo(uiGroup);
 		var mongeElkanLabel = new Label(descriptionContainer);
 		mongeElkanLabel.graphic = new FlxTextRenderItem(mongeElkanText).addTo(uiGroup);
+		var diceLabel = new Label(descriptionContainer);
+		diceLabel.graphic = new FlxTextRenderItem(diceText).addTo(uiGroup);
 		
 		descriptionContainer.updateGeometry();
 		lineEditContainer.updateGeometry();
@@ -91,6 +96,7 @@ class EditDistancesDemo extends BaseDemoState {
 		jaroDistance = EditDistanceMetrics.jaro(sourceLineEdit.text, targetLineEdit.text);
 		jaroWinklerDistance = EditDistanceMetrics.jaroWinkler(sourceLineEdit.text, targetLineEdit.text);
 		mongeElkanDistance = EditDistanceMetrics.mongeElkan(sourceLineEdit.text, targetLineEdit.text, EditDistanceMetrics.jaro, " ");
+		diceCoefficient = EditDistanceMetrics.diceCoefficient(sourceLineEdit.text, targetLineEdit.text, 1);
 	}
 	
 	private function set_fastLevenshteinDistance(d:Int):Int {
@@ -121,5 +127,10 @@ class EditDistancesDemo extends BaseDemoState {
 	private function set_mongeElkanDistance(d:Float):Float {
 		mongeElkanText.text = "MongeElkan: " + Std.string(d);
 		return this.mongeElkanDistance = d;
+	}
+	
+	private function set_diceCoefficient(d:Float):Float {
+		diceText.text = "Dice (characters): " + Std.string(d);
+		return this.diceCoefficient = d;
 	}
 }
