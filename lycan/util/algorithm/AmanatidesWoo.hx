@@ -1,4 +1,4 @@
-package lycan.ai;
+package lycan.util.algorithm;
 
 using lycan.util.IntExtensions;
 using lycan.util.FloatExtensions;

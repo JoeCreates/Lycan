@@ -1,4 +1,4 @@
-package lycan.ai;
+package lycan.util.algorithm;
 
 // Derived from http://deepnight.net/bresenham-magic-raycasting-line-of-sight-pathfinding/
 // Returns a raster representation of a line between two points. Lines can have narrow diagonals.
