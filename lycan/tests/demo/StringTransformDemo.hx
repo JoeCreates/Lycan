@@ -5,7 +5,6 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxAxes;
 import flixel.util.FlxTimer;
-import lycan.ui.TweeningTransformingText;
 import lycan.util.EditDistanceMetrics;
 import lycan.util.StringTransforms;
 import flixel.tweens.FlxTween;
