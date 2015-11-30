@@ -4,6 +4,7 @@ import flixel.math.FlxPoint;
 import lycan.ui.events.UIEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
 import lycan.ui.events.UIEventLoop;
+import lycan.ui.pointer.MouseButton;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
 import openfl.events.AccelerometerEvent;
@@ -223,14 +224,15 @@ class UIApplicationRoot {
 	
 	private function handlePointerDown(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
-		trace("Pointer down");
+		//trace("Pointer down");
 		
 		var pointerWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
 		hoveredWidget = pointerWidget;
 		
 		if (hoveredWidget != null) {
-			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerPress, hoveredWidget));
+			if (hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
+				// TODO down isn't the same as LEFT/RIGHT, fix this
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerPress, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 			}
 		}
 		
@@ -260,7 +262,7 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerMove, hoveredWidget));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerMove, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 				
 				if (down) {
 					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
@@ -271,24 +273,24 @@ class UIApplicationRoot {
 	
 	private function handlePointerUp(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
-		trace("Pointer up");
+		//trace("Pointer up");
 		
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerRelease, hoveredWidget));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerRelease, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 			}
 		}
 	}
 	
-	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget):PointerEvent {
+	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget, trigger:MouseButton):PointerEvent {
 		var event:PointerEvent = new PointerEvent(type);
 		event.globalX = x;
 		event.globalY = y;
 		event.localX = x - pointerWidget.x; // TODO should we use the outer margin or the x coordinate of the widget?
 		event.localY = y - pointerWidget.y;
-		// TODO set mouse button
+		event.button = trigger;
 		
 		return event;
 	}

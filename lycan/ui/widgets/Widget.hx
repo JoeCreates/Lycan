@@ -1,10 +1,10 @@
 package lycan.ui.widgets;
 
+import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import lycan.ui.events.UIEvent;
 import lycan.ui.layouts.Layout;
-import lycan.ui.renderer.IRenderItem;
 import lycan.ui.UIObject;
 
 enum Direction {
@@ -50,14 +50,12 @@ enum GamepadFocusPolicy {
 }
 
 class Widget extends UIObject {
-	public var graphics:Array<IRenderItem> = new Array<IRenderItem>();
+	public var graphics = new Array<FlxSprite>();
 	public var layout(default,set):Layout = null;
-	public var x(default, set):Int = 0;
-	public var y(default, set):Int = 0;
-	public var width(default, set):Int = 0;
-	public var height(default, set):Int = 0;
-	public var widthHint(default, set):Int = -1;
-	public var heightHint(default, set):Int = -1;
+	@:isVar public var x(get, set):Int = 0;
+	@:isVar public var y(get, set):Int = 0;
+	@:isVar public var width(get, set):Int = 0;
+	@:isVar public var height(get, set):Int = 0;
 	public var pointerTrackingPolicy:PointerTrackingPolicy = PointerTrackingPolicy.EnterExit;
 	public var keyboardFocusPolicy:KeyboardFocusPolicy = KeyboardFocusPolicy.NoFocus;
 	public var gamepadFocusPolicy:GamepadFocusPolicy = GamepadFocusPolicy.NoFocus;
@@ -123,31 +121,9 @@ class Widget extends UIObject {
 		return FlxPoint.get(outerRect.x + outerRect.width / 2, outerRect.y + outerRect.height / 2); // TODO avoid FlxPoint and minimize calculation
 	}
 	
-	public function updateGeometry() {
-		// TODO
-		/*
-		// Invalidates the current layout
-		if(layout != null) {
-			layout.dirty = true;
-		}
-		
-		// Mark this and all parent objects as dirty
-		var p = cast(this, UIObject);
-		while (true) {
-			p.dirty = true;
-			
-			if (p.parent != null) {
-				p = p.parent;
-			} else {
-				break;
-			}
-		}
-		
-		// Ask the top-level object to recalculate the geometries of the dirty objects
-		p.event(new UIEvent(EventType.LayoutRequest));
-		*/
-		
-		// NOTE for now just updating layouts and children directly
+	public function updateGeometry() {		
+		// NOTE for now just updating all children directly
+		// NOTE ideally this would work in a smart way
 		if(layout != null) {
 			layout.update();
 		}
@@ -249,6 +225,11 @@ class Widget extends UIObject {
 		
 	}
 	
+	// TODO Steal ALL pointer input until release
+	public function grabPointer() {
+		
+	}
+	
 	// TODO Steal ALL keyboard input until release
 	public function grabKeyboard() {
 		
@@ -293,7 +274,7 @@ class Widget extends UIObject {
 	
 	private function pointerMoveEvent(e:PointerEvent) {
 		#if debug
-		trace(name + " received pointer move");
+		//trace(name + " received pointer move");
 		#end
 	}
 	
@@ -382,7 +363,7 @@ class Widget extends UIObject {
 	
 	private function dragMoveEvent(e:DragMoveEvent) {
 		#if debug
-		trace(name + " got drag move");
+		//trace(name + " got drag move");
 		#end
 	}
 	
@@ -560,9 +541,13 @@ class Widget extends UIObject {
 		return this.layout = layout;
 	}
 	
+	private function get_x():Int {
+		return x;
+	}
+	
 	private function set_x(x:Int):Int {
 		for (graphic in graphics) {
-			graphic.set_x(graphic.get_x() - (this.x - x));
+			graphic.x -= (this.x - x);
 		}
 		
 		for (child in children) {			
@@ -575,9 +560,13 @@ class Widget extends UIObject {
 		return this.x = x;
 	}
 	
+	private function get_y():Int {
+		return y;
+	}
+	
 	private function set_y(y:Int):Int {
 		for (graphic in graphics) {
-			graphic.set_y(graphic.get_y() - (this.y - y));
+			graphic.y -= (this.y - y);
 		}
 		
 		for (child in children) {
@@ -588,6 +577,14 @@ class Widget extends UIObject {
 		}
 		
 		return this.y = y;
+	}
+	
+	private function get_width():Int {
+		return this.width;
+	}
+	
+	private function get_height():Int {
+		return height;
 	}
 	
 	private function set_width(width:Int):Int {
@@ -604,13 +601,5 @@ class Widget extends UIObject {
 	
 	private function set_pressed(pressed:Bool):Bool {
 		return this.pressed = pressed;
-	}
-	
-	private function set_widthHint(widthHint:Int):Int {
-		return this.widthHint = widthHint;
-	}
-	
-	private function set_heightHint(heightHint:Int):Int {
-		return this.heightHint = heightHint;
 	}
 }

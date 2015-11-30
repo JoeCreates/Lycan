@@ -35,7 +35,7 @@ class UIObject {
 	}
 	
 	public function installEventFilter(filter:UIObject):Void {
-		Sure.sure(filter != null);	
+		Sure.sure(filter != null);
 		
 		eventFilters.add(filter);
 	}
@@ -145,8 +145,8 @@ class UIObject {
 	
 	private function set_parent(parent:UIObject):UIObject {		
 		if (this.parent != null) {
-			this.parent.removeChild(this);
-			parent.event(new ChildEvent(EventType.ChildRemoved, this));
+			this.parent.children.remove(this);
+			this.parent.event(new ChildEvent(EventType.ChildRemoved, this));
 		}
 		
 		if(parent != null) {

@@ -5,7 +5,6 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lycan.ui.layouts.HBoxLayout;
 import lycan.ui.layouts.VBoxLayout;
-import lycan.ui.renderer.flixel.FlxTextRenderItem;
 import lycan.ui.widgets.Label;
 import lycan.ui.widgets.LayoutContainer;
 import lycan.ui.widgets.LineEdit;
@@ -47,10 +46,10 @@ class EditDistancesDemo extends BaseDemoState {
 		descriptionContainer.height = FlxG.height - 100;
 		
 		sourceLineEdit = new LineEdit(lineEditContainer);
-		sourceLineEdit.textGraphic = new FlxTextRenderItem(new FlxText(0, 0, 0, "Source", 24)).addTo(uiGroup);
+		sourceLineEdit.textGraphic = cast uiGroup.add(new FlxText(0, 0, 0, "Source", 24));
 		sourceLineEdit.signal_textEdited.add(textChanged);
 		targetLineEdit = new LineEdit(lineEditContainer);
-		targetLineEdit.textGraphic = new FlxTextRenderItem(new FlxText(0, 0, 0, "Target", 24)).addTo(uiGroup);
+		targetLineEdit.textGraphic = cast uiGroup.add(new FlxText(0, 0, 0, "Target", 24));
 		targetLineEdit.signal_textEdited.add(textChanged);
 		
 		fastLevenshteinText = new FlxText(0, 0, 0, "", 24);
@@ -62,19 +61,19 @@ class EditDistancesDemo extends BaseDemoState {
 		diceText = new FlxText(0, 0, 0, "", 24);
 		
 		var fastLevLabel = new Label(descriptionContainer);
-		fastLevLabel.graphic = new FlxTextRenderItem(fastLevenshteinText).addTo(uiGroup);
+		fastLevLabel.graphic = cast uiGroup.add(fastLevenshteinText);
 		var levLabel = new Label(descriptionContainer);
-		levLabel.graphic = new FlxTextRenderItem(levenshteinText).addTo(uiGroup);
+		levLabel.graphic = cast uiGroup.add(levenshteinText);
 		var damerauLabel = new Label(descriptionContainer);
-		damerauLabel.graphic = new FlxTextRenderItem(damerauLevenshteinText).addTo(uiGroup);
+		damerauLabel.graphic = cast uiGroup.add(damerauLevenshteinText);
 		var jaroLabel = new Label(descriptionContainer);
-		jaroLabel.graphic = new FlxTextRenderItem(jaroText).addTo(uiGroup);
+		jaroLabel.graphic = cast uiGroup.add(jaroText);
 		var jaroWinklerLabel = new Label(descriptionContainer);
-		jaroWinklerLabel.graphic = new FlxTextRenderItem(jaroWinklerText).addTo(uiGroup);
+		jaroWinklerLabel.graphic = cast uiGroup.add(jaroWinklerText);
 		var mongeElkanLabel = new Label(descriptionContainer);
-		mongeElkanLabel.graphic = new FlxTextRenderItem(mongeElkanText).addTo(uiGroup);
+		mongeElkanLabel.graphic = cast uiGroup.add(mongeElkanText);
 		var diceLabel = new Label(descriptionContainer);
-		diceLabel.graphic = new FlxTextRenderItem(diceText).addTo(uiGroup);
+		diceLabel.graphic = cast uiGroup.add(diceText);
 		
 		descriptionContainer.updateGeometry();
 		lineEditContainer.updateGeometry();

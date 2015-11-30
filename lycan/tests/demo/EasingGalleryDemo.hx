@@ -6,12 +6,11 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import lycan.states.LycanState;
+import lycan.util.EasingEquations;
 import lycan.util.timeline.Timeline;
 import lycan.util.timeline.Tween;
 import openfl.events.MouseEvent;
 import openfl.Lib;
-import lycan.util.EasingEquations;
 
 using flixel.util.FlxSpriteUtil;
 using lycan.util.IntExtensions;

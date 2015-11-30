@@ -1,13 +1,13 @@
 package lycan.ui.widgets.sliders;
 
-import lycan.ui.renderer.IRenderItem;
+import flixel.FlxSprite;
 
 // Basic horizontal slider with a handle and bar graphic
 class SimpleHorizontalSlider extends AbstractSlider {
-	private var handleGraphic:IRenderItem;
-	private var barGraphic:IRenderItem;
+	private var handleGraphic:FlxSprite;
+	private var barGraphic:FlxSprite;
 	
-	public function new(min:Float, max:Float, value:Float, handleGraphic:IRenderItem, barGraphic:IRenderItem, ?parent:UIObject, ?name:String) {
+	public function new(min:Float, max:Float, value:Float, handleGraphic:FlxSprite, barGraphic:FlxSprite, ?parent:UIObject, ?name:String) {
 		super(min, max, value, parent, name);
 		this.handleGraphic = handleGraphic;
 		this.barGraphic = barGraphic;
@@ -30,8 +30,8 @@ class SimpleHorizontalSlider extends AbstractSlider {
 		var maxHeight:Int = 0;
 		
 		for (graphic in [barGraphic]) {
-			maxWidth = cast Math.max(maxWidth, graphic.get_width());
-			maxHeight = cast Math.max(maxHeight, graphic.get_height());
+			maxWidth = cast Math.max(maxWidth, graphic.width);
+			maxHeight = cast Math.max(maxHeight, graphic.height);
 		}
 		
 		width = maxWidth;
@@ -54,21 +54,21 @@ class SimpleHorizontalSlider extends AbstractSlider {
 	
 	private function updateHandlePosition():Void {
 		if(handleGraphic != null) {
-			var nextX = barGraphic.get_x() + (barGraphic.get_width() * (value / maximum) - (handleGraphic.get_width() / 2));
-			var nextY = barGraphic.get_y() + (barGraphic.get_height() / 2) - (handleGraphic.get_height() / 2);
+			var nextX = barGraphic.x + (barGraphic.width * (value / maximum) - (handleGraphic.width / 2));
+			var nextY = barGraphic.y + (barGraphic.height / 2) - (handleGraphic.height / 2);
 			
-			handleGraphic.set_x(Std.int(nextX));
-			handleGraphic.set_y(Std.int(nextY));
+			handleGraphic.x = Std.int(nextX);
+			handleGraphic.y = Std.int(nextY);
 		}
 	}
 	
 	private function updateBarPosition():Void {
 		if(barGraphic != null) {
-			var nextX = x + width / 2 - barGraphic.get_width() / 2;
-			var nextY = y + height / 2 - barGraphic.get_height() / 2;
+			var nextX = x + width / 2 - barGraphic.width / 2;
+			var nextY = y + height / 2 - barGraphic.height / 2;
 			
-			barGraphic.set_x(Std.int(nextX));
-			barGraphic.set_y(Std.int(nextY));
+			barGraphic.x = Std.int(nextX);
+			barGraphic.y = Std.int(nextY);
 		}
 	}
 }

@@ -1,8 +1,8 @@
 package lycan.tests.demo;
 
-import lycan.states.LycanState;
+import lycan.tests.demo.BaseDemoState;
 
-class LocaleSwitcherDemo extends LycanState {
+class LocaleSwitcherDemo extends BaseDemoState {
 	override public function create():Void {
 		super.create();
 	}

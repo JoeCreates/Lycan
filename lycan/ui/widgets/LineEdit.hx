@@ -2,13 +2,13 @@ package lycan.ui.widgets;
 
 import lycan.ui.events.UIEvent.EventType;
 import lycan.ui.events.UIEvent.KeyEvent;
-import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.widgets.Widget.KeyboardFocusPolicy;
 import msignal.Signal.Signal1;
 import openfl.ui.Keyboard;
+import flixel.text.FlxText;
 
 class LineEdit extends Widget {
-	public var textGraphic(default, set):ITextRenderItem;
+	public var textGraphic(default, set):FlxText;
 	private var restrictInput:EReg = ~/^[A-Za-z0-9 ]+$/; // Limit *event input* to English alphanumerics and spaces (TODO make it work with other input)
 	public var maxLength:Int = 255;
 	public var signal_textEdited = new Signal1<String>();
@@ -20,12 +20,12 @@ class LineEdit extends Widget {
 	}
 	
 	public function backspace() {
-		var text = textGraphic.get_text();
+		var text = textGraphic.text;
 		var len = text.length;
 		
 		if (len > 0) {
-			textGraphic.set_text(text.substring(0, len - 1));
-			signal_textEdited.dispatch(textGraphic.get_text());
+			textGraphic.text = text.substring(0, len - 1);
+			signal_textEdited.dispatch(textGraphic.text);
 		}
 	}
 	
@@ -35,7 +35,7 @@ class LineEdit extends Widget {
 			return;
 		}
 		
-		if (textGraphic.get_text().length >= maxLength) {
+		if (textGraphic.text.length >= maxLength) {
 			return;
 		}
 		
@@ -44,44 +44,44 @@ class LineEdit extends Widget {
 			
 			if (evtText != null && evtText.length == 1) {
 				if (restrictInput.match(evtText)) {
-					textGraphic.set_text(textGraphic.get_text() + evtText);
-					signal_textEdited.dispatch(textGraphic.get_text());
+					textGraphic.text += evtText;
+					signal_textEdited.dispatch(textGraphic.text);
 				}
 			}
 		}
 	}
 	
-	private function set_textGraphic(graphic:ITextRenderItem) {
-		width = graphic.get_width();
-		height = graphic.get_height();
-		graphic.set_x(x);
-		graphic.set_y(y);
+	private function set_textGraphic(graphic:FlxText) {
+		width = Std.int(graphic.width);
+		height = Std.int(graphic.height);
+		graphic.x = x;
+		graphic.y = y;
 		return this.textGraphic = graphic;
 	}
 	
 	override private function set_x(x:Int):Int {
 		if(textGraphic != null) {
-			textGraphic.set_x(x);	
+			textGraphic.x = x;	
 		}
 		
-		return super.set_x(x);
+		return this.x = x;
 	}
 	
 	override private function set_y(y:Int):Int {
 		if (textGraphic != null) {
-			textGraphic.set_y(y);
+			textGraphic.y = y;
 		}
 		
-		return super.set_y(y);
+		return this.y = y;
 	}
 	
 	private function get_text():String {
 		Sure.sure(textGraphic != null);
-		return textGraphic.get_text();
+		return textGraphic.text;
 	}
 	
 	private function set_text(text:String):String {
 		Sure.sure(textGraphic != null);
-		return textGraphic.set_text(text);
+		return textGraphic.text = text;
 	}
 }

@@ -1,7 +1,5 @@
 package lycan.ui.widgets;
 
-import lycan.ui.renderer.flixel.FlxTextRenderItem;
-import lycan.ui.renderer.ITextRenderItem;
 import lycan.ui.widgets.buttons.PushButton;
 import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;

@@ -1,15 +1,15 @@
 package lycan.ui.widgets.buttons ;
 
-import lycan.ui.renderer.IRenderItem;
+import flixel.FlxSprite;
 import lycan.ui.widgets.buttons.Button;
 
 class CheckBox extends Button {
-	private var uncheckedGraphic:IRenderItem;
-	private var checkedGraphic:IRenderItem;
-	private var disabledGraphic:IRenderItem;
+	private var uncheckedGraphic:FlxSprite;
+	private var checkedGraphic:FlxSprite;
+	private var disabledGraphic:FlxSprite;
 	private var checked(default, set):Bool;
 	
-	public function new(uncheckedGraphic:IRenderItem, checkedGraphic:IRenderItem, disabledGraphic:IRenderItem, ?checked:Bool = false, ?parent:UIObject, ?name:String) {
+	public function new(uncheckedGraphic:FlxSprite, checkedGraphic:FlxSprite, disabledGraphic:FlxSprite, ?checked:Bool = false, ?parent:UIObject, ?name:String) {
 		super(parent, name);
 		this.uncheckedGraphic = uncheckedGraphic;
 		this.checkedGraphic = checkedGraphic;
@@ -34,8 +34,8 @@ class CheckBox extends Button {
 		var maxHeight:Int = 0;
 		
 		for (graphic in [uncheckedGraphic, checkedGraphic, disabledGraphic]) {
-			maxWidth = cast Math.max(maxWidth, graphic.get_width());
-			maxHeight = cast Math.max(maxHeight, graphic.get_height());
+			maxWidth = cast Math.max(maxWidth, graphic.width);
+			maxHeight = cast Math.max(maxHeight, graphic.height);
 		}
 		
 		width = maxWidth;
@@ -44,19 +44,19 @@ class CheckBox extends Button {
 	
 	private function updateCheckboxVisibility():Void {
 		if (!enabled) {
-			uncheckedGraphic.hide();
-			checkedGraphic.hide();
-			disabledGraphic.show();
+			uncheckedGraphic.visible = false;
+			checkedGraphic.visible = false;
+			disabledGraphic.visible = true;
 			return;
 		} else if (checked) {
-			uncheckedGraphic.hide();
-			checkedGraphic.show();
-			disabledGraphic.hide();
+			uncheckedGraphic.visible = false;
+			checkedGraphic.visible = true;
+			disabledGraphic.visible = false;
 			return;
 		} else {
-			uncheckedGraphic.show();
-			checkedGraphic.hide();
-			disabledGraphic.hide();
+			uncheckedGraphic.visible = true;
+			checkedGraphic.visible = false;
+			disabledGraphic.visible = false;
 		}
 	}
 	

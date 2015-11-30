@@ -7,6 +7,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import haxe.io.Path;
 import lycan.ui.core.DebugRenderer;
 import lycan.ui.core.UIApplicationRoot;
 import lycan.util.BatchScreenGrab;
@@ -64,12 +65,16 @@ class LycanRootState extends FlxState {
 		stateStackText = new FlxSpriteGroup();
 		stateStackText.scrollFactor.set(0, 0);
 		
-		FlxG.signals.postDraw.add(function():Void {
-			debugUiRenderer.draw();
-			updateStateVisualisation();
-			stateStackText.draw();
-		});
+		FlxG.signals.postDraw.add(debugPostDraw);
 		#end
+	}
+	
+	override public function destroy():Void {
+		#if debug
+		FlxG.signals.postDraw.remove(debugPostDraw);
+		#end
+		
+		super.destroy();
 	}
 	
 	public static function getInstance<T>():T {
@@ -117,4 +122,12 @@ class LycanRootState extends FlxState {
 		
 		throw "Failed to find a substate of type " + Type.getClassName(type) + " in current states...";
 	}
+	
+	#if debug
+	private function debugPostDraw():Void {
+		debugUiRenderer.draw();
+		updateStateVisualisation();
+		stateStackText.draw();
+	}
+	#end
 }

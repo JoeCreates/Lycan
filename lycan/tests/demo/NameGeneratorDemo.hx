@@ -4,9 +4,7 @@ import flixel.FlxG;
 import flixel.text.FlxText;
 import lycan.ui.layouts.AbsoluteLayout;
 import lycan.ui.layouts.HBoxLayout;
-import lycan.ui.renderer.flixel.FlxDebugRenderItem;
-import lycan.ui.renderer.flixel.FlxTextRenderItem;
-import lycan.ui.widgets.buttons.PushButton;
+import lycan.ui.widgets.buttons.IconButton;
 import lycan.ui.widgets.LayoutContainer;
 import lycan.ui.widgets.LineEdit;
 import lycan.util.EditDistanceMetrics;
@@ -28,21 +26,18 @@ class NameGeneratorDemo extends BaseDemoState {
 		var controls = new LayoutContainer(new HBoxLayout(10), ui, "buttons");
 		controls.width = FlxG.width;
 		controls.height = 200;
-		controls.widthHint = FlxG.width;
-		controls.heightHint = 200;
 		
-		var vampireButton = new PushButton(new FlxDebugRenderItem(120, 80).addTo(uiGroup), new FlxDebugRenderItem(100, 60).addTo(uiGroup), new FlxDebugRenderItem(80, 40).addTo(uiGroup));
-		var armyButton = new PushButton(new FlxDebugRenderItem(120, 80).addTo(uiGroup), new FlxDebugRenderItem(100, 60).addTo(uiGroup), new FlxDebugRenderItem(80, 40).addTo(uiGroup));
-		var journoButton = new PushButton(new FlxDebugRenderItem(120, 80).addTo(uiGroup), new FlxDebugRenderItem(100, 60).addTo(uiGroup), new FlxDebugRenderItem(80, 40).addTo(uiGroup));
-		var richButton = new PushButton(new FlxDebugRenderItem(120, 80).addTo(uiGroup), new FlxDebugRenderItem(100, 60).addTo(uiGroup), new FlxDebugRenderItem(80, 40).addTo(uiGroup));
-		var clearButton = new PushButton(new FlxDebugRenderItem(120, 80).addTo(uiGroup), new FlxDebugRenderItem(100, 60).addTo(uiGroup), new FlxDebugRenderItem(80, 40).addTo(uiGroup));
+		var vampireButton = new IconButton(uiGroup.add(new FlxText(0, 0, 0, "Vampires", 24)));
+		var armyButton = new IconButton(uiGroup.add(new FlxText(0, 0, 0, "Soldiers", 24)));
+		var journoButton = new IconButton(uiGroup.add(new FlxText(0, 0, 0, "Journalists", 24)));
+		var clearButton = new IconButton(uiGroup.add(new FlxText(0, 0, 0, "Clear", 24)));
 		similarNameField = new LineEdit();
-		similarNameField.textGraphic = new FlxTextRenderItem(new FlxText(0, 0, 0, "Similar To...", 16)).addTo(uiGroup);
+		similarNameField.textGraphic = new FlxText(0, 0, 0, "Similar To...", 16);
+		uiGroup.add(similarNameField.textGraphic);
 		
 		controls.addChild(vampireButton);
 		controls.addChild(armyButton);
 		controls.addChild(journoButton);
-		controls.addChild(richButton);
 		controls.addChild(clearButton);
 		controls.addChild(similarNameField);
 		
@@ -55,7 +50,6 @@ class NameGeneratorDemo extends BaseDemoState {
 		vampireButton.signal_clicked.add(generateNames.bind(Names.vampireForenames, true));
 		armyButton.signal_clicked.add(generateNames.bind(Names.armyForenames, true));
 		journoButton.signal_clicked.add(generateNames.bind(Names.journoForenames, true));
-		richButton.signal_clicked.add(generateNames.bind(Names.richForenames, true));
 		clearButton.signal_clicked.add(function() {
 			namesText.text = "Click a button to generate unique names!";
 		});
@@ -92,7 +86,7 @@ class NameGeneratorDemo extends BaseDemoState {
 		var uniqueNames = new Array<String>();
 		while (uniques < 100) {
 			var name = nameGenerator.generateName(5, 12, "", "", "", "");
-			if (!trie.find(name)) {
+			if (name != null && !trie.find(name)) {
 				trie.insert(name);
 				uniques++;
 				uniqueNames.push(name);
@@ -136,7 +130,7 @@ class NameGeneratorDemo extends BaseDemoState {
 				text += "\n";
 				charCount = 0;
 			}
-			text += name + ", ";
+			text += name + " ";
 			charCount += name.length + 2;
 		}
 		return text;

@@ -5,11 +5,10 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lycan.ui.layouts.HBoxLayout;
 import lycan.ui.layouts.VBoxLayout;
-import lycan.ui.renderer.flixel.FlxDebugRenderItem;
-import lycan.ui.renderer.flixel.FlxTextRenderItem;
 import lycan.ui.widgets.buttons.CheckBox;
 import lycan.ui.widgets.buttons.PushButton;
 import lycan.ui.widgets.sliders.SimpleHorizontalSlider;
+import lycan.util.DebugRenderItem;
 import lycan.util.timeline.Timeline;
 
 class TimelineControls extends Widget {
@@ -37,13 +36,14 @@ class TimelineControls extends Widget {
 		speedMultiplier = 1.0;
 		totalTime = 0;
 		
-		slider = new SimpleHorizontalSlider(timeline.startTime, timeline.endTime, timeline.startTime, new FlxDebugRenderItem(10, 100, FlxColor.RED).addTo(group), new FlxDebugRenderItem(400, 20, FlxColor.BLUE).addTo(group), null, "slider"); 
-		rewind = new PushButton(new FlxDebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "rewind");
-		togglePlay = new CheckBox(new FlxDebugRenderItem(40, 40, FlxColor.RED).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), false, null, "togglePlay");
-		fastForward = new PushButton(new FlxDebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new FlxDebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "fastForward");
-		reset = new PushButton(new FlxDebugRenderItem(60, 40, FlxColor.PURPLE).addTo(group), new FlxDebugRenderItem(60, 40, FlxColor.LIME).addTo(group), new FlxDebugRenderItem(60, 40, FlxColor.GRAY).addTo(group), null, "reset");
+		slider = new SimpleHorizontalSlider(timeline.startTime, timeline.endTime, timeline.startTime, new DebugRenderItem(10, 100, FlxColor.RED).addTo(group), new DebugRenderItem(400, 20, FlxColor.BLUE).addTo(group), null, "slider"); 
+		rewind = new PushButton(new DebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new DebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new DebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "rewind");
+		togglePlay = new CheckBox(new DebugRenderItem(40, 40, FlxColor.RED).addTo(group), new DebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new DebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), false, null, "togglePlay");
+		fastForward = new PushButton(new DebugRenderItem(40, 40, FlxColor.PINK).addTo(group), new DebugRenderItem(40, 40, FlxColor.GREEN).addTo(group), new DebugRenderItem(40, 40, FlxColor.GRAY).addTo(group), null, "fastForward");
+		reset = new PushButton(new DebugRenderItem(60, 40, FlxColor.PURPLE).addTo(group), new DebugRenderItem(60, 40, FlxColor.LIME).addTo(group), new DebugRenderItem(60, 40, FlxColor.GRAY).addTo(group), null, "reset");
 		infoLabel = new Label(null, "infoLabel");
-		infoLabel.graphic = new FlxTextRenderItem(new FlxText()).addTo(group);
+		infoLabel.graphic = new FlxText();
+		group.add(infoLabel.graphic);
 		
 		sliderContainer = new LayoutContainer(new HBoxLayout(10, HBoxLayoutDirection.LEFT_TO_RIGHT), null, "sliderContainer");
 		sliderContainer.addChild(slider);
@@ -105,6 +105,6 @@ class TimelineControls extends Widget {
 		}
 		timeline.onUpdate(totalTime);
 		
-		infoLabel.graphic.set_text("Playing: " + playing + ", Speed multiplier: " + speedMultiplier);
+		infoLabel.graphic.text = "Playing: " + playing + ", Speed multiplier: " + speedMultiplier;
 	}
 }

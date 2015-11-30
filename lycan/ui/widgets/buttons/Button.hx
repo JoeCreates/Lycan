@@ -59,8 +59,8 @@ class Button extends Widget {
 	
 	private function centerButtonGraphics():Void {
 		for (graphic in graphics) {
-			graphic.set_x(x + cast ((width - graphic.get_width()) / 2));
-			graphic.set_y(y + cast ((height - graphic.get_height()) / 2));
+			graphic.x = x +  cast ((width - graphic.width) / 2);
+			graphic.y = y + cast ((height - graphic.height) / 2);
 		}
 	}
 }

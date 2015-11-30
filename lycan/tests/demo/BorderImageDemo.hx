@@ -1,15 +1,11 @@
 package lycan.tests.demo;
 
 import flixel.FlxSprite;
-import lycan.states.LycanState;
 import flixel.util.FlxColor;
 import lycan.ui.renderer.flixel.FlxImageRenderItem;
-import lycan.ui.renderer.flixel.IFlxRenderItem;
-
 import lycan.ui.widgets.BorderImage;
 import lycan.ui.widgets.BorderImage.BorderImageRepeatMode;
 
-// TODO
 class BorderImageDemo extends BaseDemoState {
 	public static inline var ITEM_SPACING:Int = 4;
 	

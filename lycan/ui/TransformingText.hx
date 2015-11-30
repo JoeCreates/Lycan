@@ -7,14 +7,17 @@ import lycan.util.StringTransforms.EditOperation;
 import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
 
+// Text that transforms from one string to another by executing a series of edit operations
 class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
+	public var signal_operationHandled(default, null) = new Signal1<EditOperation>(); // Fires when a string operation happens
+	public var signal_operationsHandled(default, null) = new Signal0(); // Fires when all operations have been executed
+	
 	private var letters:Array<TransformingLetter>;
 	private var textSize:Int;
-	private var operations:Array<EditOperation>;
 	private var spacing:Float;
 	
-	public var signal_operationsHandled = new Signal0();
-	public var signal_operationHandled = new Signal1<EditOperation>();
+	private var operations:Array<EditOperation>;
+	private var opIdx:Int; // Index of the next operation
 	
 	public function new(x:Float, y:Float, initialText:String, operations:Array<EditOperation>, size:Int = 24, spacing:Float = 0, font:String = "fairfax") {
 		super();
@@ -26,27 +29,24 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 		for (i in 0...initialText.length) {
 			letters.push(getLetter(initialText.charAt(i)));
 		}
+		
+		opIdx = 0;
 	}
 	
-	public function run(time:Float):Void {
-		var timePerLetter:Float = time / operations.length;
+	// Perform the next operation, if there is one
+	public function pump():Void {
+		Sure.sure(opIdx >= 0);
 		
-		for (i in 0...operations.length) {
-			var t:FlxTimer = new FlxTimer();
-			
-			t.start(timePerLetter * i, function(t:FlxTimer):Void {
-				handle(operations[i]);
-			}, 1);
-		}
-		
-		var t:FlxTimer = new FlxTimer();
-		
-		t.start(time + 0.05, function(t:FlxTimer):Void {
+		if(opIdx < operations.length) {
+			handle(operations[opIdx]);
+			opIdx++;
+		} else {
 			signal_operationsHandled.dispatch();
-		}, 1);
+		}
 	}
 	
 	public function retarget(ops:Array<EditOperation>):Void {
+		opIdx = 0;
 		operations = ops;
 	}
 	
@@ -60,20 +60,21 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 	
 	private function handle(e:EditOperation):Void {
 		switch(e) {
-			case EditOperation.DELETION(s, idx):
+			case EditOperation.DELETE(s, idx):
+				Sure.sure(idx >= 0 && idx < letters.length);
 				delete(s, idx);
-			case EditOperation.INSERTION(s, src, target):
+			case EditOperation.INSERT(s, src, target):
+				Sure.sure(target >= 0 && target < letters.length);
 				insert(s, src, target);
 			case EditOperation.KEEP(s, idx):
+				Sure.sure(idx >= 0 && idx < letters.length);
 				keep(s, idx);
-			case EditOperation.SUBSTITUTION(r, i, idx):
-				if(i.length != 0) {
-					substitute(r, i, idx);
-				} else {
-					delete(r, idx);
-				}
+			case EditOperation.SUBSTITUTE(r, i, idx):
+				Sure.sure(idx >= 0 && idx < letters.length);
+				substitute(r, i, idx);
 			default:
 				throw "Unhandled string edit operation encountered";
+				return;
 		}
 		
 		signal_operationHandled.dispatch(e);
@@ -102,18 +103,18 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 		letters[idx] = getLetter(i);
 	}
 	
-	private function getLetter(letter:String):TransformingLetter {
-		var txt = new TransformingLetter(letter, textSize);
-		add(txt);
-		return txt;
-	}
-	
 	private function layoutLetters():Void {
 		var cumulativeX:Float = 0;
 		for (letter in letters) {
 			letter.x = x + cumulativeX;
 			cumulativeX += letter.width + spacing;
 		}
+	}
+	
+	private function getLetter(letter:String):TransformingLetter {
+		var txt = new TransformingLetter(letter, textSize);
+		add(txt);
+		return txt;
 	}
 	
 	override public function destroy():Void {

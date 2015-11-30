@@ -5,8 +5,6 @@ import lycan.util.ArraySet;
 
 using lycan.util.IntExtensions;
 
-// TODO put these together as a big string similarity Haxelib?
-
 class EditDistanceMetrics {
 	// Returns the number of single-character edits (insertions, deletions and replacements) needed to transform the source into the target
 	// Fast iterative method that doesn't create a whole distance table up front
@@ -242,7 +240,7 @@ class EditDistanceMetrics {
 	
 	// Returns the Dice coefficient of the unique ngrams in the string
 	// Measure of set similarity, also good measure of lexical association of two words
-	// NOTE that this is technically incorrect because it discards duplicates instead of counting them - e.g. for bigrams, "AA" and "AAAA" are wrongly considered equal
+	// NOTE that this is technically incorrect because it discards duplicates instead of counting them - e.g. for bigrams, "AA" and "AAAA" are (wrongly) considered equal
 	public static function diceCoefficient(first:String, second:String, gramLength:Int):Float {
 		Sure.sure(gramLength >= 1);
 		

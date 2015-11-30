@@ -1,9 +1,9 @@
 package lycan.tests.demo;
 
+import flixel.FlxG;
 import lycan.states.LycanRootState;
 import lycan.states.LycanState;
 import lycan.ui.widgets.Widget;
-import flixel.FlxG;
 
 class BaseDemoState extends LycanState {
 	private var game(default, null):LycanTestRootState;
