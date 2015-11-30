@@ -23,7 +23,7 @@ class ThresholdTriggerDemo extends BaseDemoState {
 	override public function create():Void {
 		super.create();
 		
-		triggers = new ThresholdTrigger<DemoThreshold>();
+		triggers = new ThresholdTrigger<DemoThreshold>(0);
 		triggers.add(new DemoThreshold(5, [print]));
 		triggers.add(new DemoThreshold(10, [print]));
 		triggers.add(new DemoThreshold(20, [print]));
