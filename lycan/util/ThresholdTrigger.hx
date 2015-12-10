@@ -25,7 +25,7 @@ class SimpleThreshold implements Threshold {
 	}
 }
 
-// This watches a value and dispatches signals from thresholds that were crossed when that value changes
+// This watches a value and dispatches signals when thresholds are crossed due to that value changing
 class ThresholdTrigger<T:Threshold> {
 	public var value(default, set):Float;
 	private var thresholds = new Array<T>();
@@ -59,6 +59,10 @@ class ThresholdTrigger<T:Threshold> {
 	}
 	
 	private function set_value(v:Float):Float {
+		if (v == this.value) {
+			return this.value;
+		}
+		
 		if (thresholds.length == 0) {
 			return this.value = v;
 		}

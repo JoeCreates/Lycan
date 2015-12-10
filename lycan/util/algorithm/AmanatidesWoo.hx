@@ -15,7 +15,6 @@ class AmanatidesWoo {
 		
 		var points:Array<{ x:Float, y:Float }> = [];
 		
-		// The edge case is where a coordinate of the ray origin is an integer value, and the corresponding part of the ray direction is negative
 		x1 = edgeCase(x1);
 		y1 = edgeCase(y1);
 		
@@ -37,11 +36,11 @@ class AmanatidesWoo {
 		var iterations:Int = 0;
 		while (!(xReached && yReached) && iterations < maxSteps) {
 			if (xMax < yMax) {
-				x += xStep;
 				xMax += dx;
+				x += xStep;
 			} else {
-				y += yStep;
 				yMax += dy;
+				y += yStep;
 			}
 			
 			if (xStep > 0.0) {
@@ -67,6 +66,7 @@ class AmanatidesWoo {
 		return points;
 	}
 	
+	// The edge case is where a coordinate of the ray origin is an integer value, and the corresponding part of the ray direction is negative
 	private static inline function edgeCase(v:Float):Float {
 		return v.fpart() == 0 ? v + 0.1 : v;
 	}
