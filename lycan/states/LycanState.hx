@@ -9,6 +9,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
 import flixel.util.FlxColor;
+import lycan.util.MasterCamera;
 import lycan.world.World;
 import openfl.filters.BlurFilter;
 
@@ -19,7 +20,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	public var uiGroup:FlxSpriteGroup;
 	
 	public var uiCamera:FlxCamera;
-	public var worldCamera:FlxCamera;
+	public var worldCamera:MasterCamera;
 	
 	public var worldZoom(default, set):Float;
 	public var baseZoom:Float;
@@ -33,11 +34,15 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		
 		exclusiveTweens = new Map<String, FlxTween>();
 		
-		// Cameras
-		worldCamera = FlxG.camera;
+		// Cameras TODO messy removal of original camera
+		worldCamera = new MasterCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), 
+		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), 
 		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
+		FlxG.cameras.remove(FlxG.camera);
+		FlxG.camera = worldCamera;
+		FlxG.cameras.add(worldCamera);
 		FlxG.cameras.add(uiCamera);
 		FlxCamera.defaultCameras = [worldCamera];
 		
@@ -64,7 +69,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		}
 	}
 	
-	public function lateUpdate(dt:Float) {
+	public function lateUpdate(dt:Float):Void {
 		updatesWithoutLateUpdates = 0;
 		
 		forEach(function(o:FlxBasic) {

@@ -9,7 +9,7 @@ class Text extends FlxText {
 
 	var tween:FlxTween;
 	
-	public function new(y:Float, size:Float = 24, font:String = "fairfax") {
+	public function new(y:Float, size:Int = 24, font:String = "fairfax") {
 		super(0, y, FlxG.width, "", size);
 		this.font = font;
 		scrollFactor.set(0, 0);
