@@ -7,6 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import lycan.util.GameUtil;
 
 class Stars extends FlxTypedSpriteGroup<Star> {
 	public var starCount:Int;
@@ -44,6 +45,8 @@ class Stars extends FlxTypedSpriteGroup<Star> {
 class Star extends FlxSprite {
 	public var tween:FlxTween;
 	
+	private static var point:FlxPoint = FlxPoint.get();
+	
 	public function new(x:Float, y:Float, stars:Stars) {
 		super(x, y);
 		solid = false;
@@ -56,5 +59,18 @@ class Star extends FlxSprite {
 		alpha = r.float(stars.minAlpha, stars.maxAlpha);
 		tween = FlxTween.tween(this, { alpha: 0.1 }, r.float(0.4, 3.5), { type: FlxTween.PINGPONG } );
 		scrollFactor.set();
+	}
+	
+	override public function update(dt):Void {
+		super.update(dt);
+		getScreenPosition(point, FlxG.camera);
+		
+		//TODO: for both axis and efficincy
+		if (point.x < 0 - frameWidth) {
+			GameUtil.setPositionAtScroll(this, FlxG.camera.scroll.x + FlxG.width, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+		}
+		if (point.x > FlxG.width) {
+			GameUtil.setPositionAtScroll(this, FlxG.camera.scroll.x - frameWidth, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+		}
 	}
 }
