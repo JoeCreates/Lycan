@@ -54,30 +54,26 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		uiGroup.cameras = [uiCamera];
 		
 		add(uiGroup);
-		
-		var blur:BlurFilter = new BlurFilter();
-		worldCamera.flashSprite.filters.push(blur);
-		worldCamera.flashSprite.filters = worldCamera.flashSprite.filters;
 	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
 		
-		updatesWithoutLateUpdates++;
-		if (updatesWithoutLateUpdates > 1) {
-			throw("lateUpdate has not been called since last update");
-		}
+		//updatesWithoutLateUpdates++;
+		//if (updatesWithoutLateUpdates > 1) {
+			//throw("lateUpdate has not been called since last update");
+		//}
 	}
 	
 	public function lateUpdate(dt:Float):Void {
 		updatesWithoutLateUpdates = 0;
 		
-		forEach(function(o:FlxBasic) {
-			if (Std.is(o, LateUpdatable)) {
-				var u:LateUpdatable = cast o;
-				u.lateUpdate(dt);
-			}
-		}, true);
+		//forEach(function(o:FlxBasic) {
+			//if (Std.is(o, LateUpdatable)) {
+				//var u:LateUpdatable = cast o;
+				//u.lateUpdate(dt);
+			//}
+		//}, true);
 	}
 	
 	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {
