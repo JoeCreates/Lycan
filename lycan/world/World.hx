@@ -11,6 +11,7 @@ import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
+import flixel.util.FlxBitmapDataUtil;
 import haxe.io.Path;
 import openfl.display.BitmapData;
 
@@ -48,6 +49,8 @@ class World extends FlxGroup {
 	public function load(tiledLevel:Dynamic, worldLoader:WorldLoader):Void {
 		tiledMap = new TiledMap(tiledLevel);
 		
+		var tileSize:FlxPoint = FlxPoint.get(tiledMap.tileWidth, tiledMap.tileHeight);
+		
 		// Camera scroll bounds
 		FlxG.camera.setScrollBoundsRect(0, 0, tiledMap.fullWidth * scale.x, tiledMap.fullHeight * scale.x, true);
 		FlxG.camera.maxScrollY += FlxG.height / 2;
@@ -57,12 +60,12 @@ class World extends FlxGroup {
 		for (tileset in tiledMap.tilesetArray) {
 			var imagePath = new Path(tileset.imageSource);
 			var processedPath = TILESET_PATH + imagePath.file + "." + imagePath.ext;
+			//TODO add padding when its fixed
 			tilesetBitmaps.push(FlxAssets.getBitmapData(processedPath));
 		}
 		
 		// Combine tilesets into single tileset
-		var tileSize:FlxPoint = FlxPoint.get(tiledMap.tileWidth, tiledMap.tileHeight);
-		var combinedTileset:FlxTileFrames = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize);
+		var combinedTileset:FlxTileFrames = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize, FlxPoint.weak(2, 2), FlxPoint.weak(2, 2));
 		tileSize.put();
 		
 		// Load layers
@@ -85,6 +88,7 @@ class World extends FlxGroup {
 					var tileLayer:TileLayer = loadTileLayer(cast tiledLayer, combinedTileset);
 					namedLayers.set(tiledLayer.name, tileLayer);
 					add(tileLayer);
+				case _:
 			}
 		}
 	}
