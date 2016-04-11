@@ -4,9 +4,9 @@ import flixel.math.FlxPoint;
 import lycan.ui.events.UIEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
 import lycan.ui.events.UIEventLoop;
+import lycan.ui.pointer.MouseButton;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
-import msignal.Signal.Signal1;
 import openfl.events.AccelerometerEvent;
 import openfl.events.Event;
 import openfl.events.FocusEvent;
@@ -14,6 +14,14 @@ import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.events.TouchEvent;
 import openfl.Lib;
+
+#if next
+import lime.ui.Gamepad;
+#end
+
+#if flash
+import flixel.FlxG;
+#end
 
 // Interface for translation of platform events into UI events and dispatching them
 interface IApplicationRoot {
@@ -30,13 +38,12 @@ class UIApplicationRoot {
 	private var gestureRecognizers:Array<GestureRecognizer> = new Array<GestureRecognizer>();
 	private var listenersAttached:Bool = false;
 	
-	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
-	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
-	
 	// Assumes there can only be one top level widget active at any one time
 	// TODO a solution to this is probably to use a stack/priority queue of TLWs - only one gets updated at a time, but multiple ones can still be active and rendering
 	@:isVar public var topLevelWidget(get, set):Widget = null;
 	
+	// The widget currently hovered by a pointer device, updated as events spontaneously arrive. Null if no widget is hovered.
+	// Note that since this is updated spontaneously by events, it may have a stale reference if an event nulling it out does not arrive for whatever reason.
 	// TODO this gets screwed if you resize the window on Flash and move the mouse about - probably a mouse coordinate problem
 	private var hoveredWidget(default, set):Widget = null;
 	
@@ -49,7 +56,7 @@ class UIApplicationRoot {
 	}
 	
 	/*
-	// Returns the next selectable selectable widget in the direction given
+	// Returns the next selectable widget in the direction given
 	private function getNextSelectableForDirection(direction:Direction, wrapAround:Bool = true):Widget {
 		// TODO either iterate over the entire widget tree or pass the root object in? e.g. specifying a list widget will cause it to search only in the list items
 		// Should be useful for gamepads
@@ -57,6 +64,18 @@ class UIApplicationRoot {
 		return null;
 	}
 	*/
+	
+	public function enable() {
+		if (!listenersAttached) {
+			addEventListeners();
+		}
+	}
+	
+	public function disable() {
+		if (listenersAttached) {
+			removeEventListeners();
+		}
+	}
 	
 	public function destroy() {
 		hoveredWidget = null;
@@ -101,8 +120,8 @@ class UIApplicationRoot {
 	private function onResize(e:Event) {
 		Sure.sure(topLevelWidget != null);
 		trace("TLW resized");
-		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
 		
+		// TODO make the current topLevelWidget resize itself accordingly (possibly rate-limit this to avoid it doing it hundreds of times during the resize)
 		// TODO only if the TLW should resize rather than ignoring and letting flixel do the scaling or whatever?
 		// sendEvent(topLevelWidget, new ResizeEvent());
 		
@@ -139,7 +158,7 @@ class UIApplicationRoot {
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(e.localX, e.localY));
 		
 		if (hoveredWidget != null) {
-			postEvent(hoveredWidget, new WheelEvent(EventType.WheelScroll));
+			postEvent(hoveredWidget, new WheelEvent(e.delta));
 		}
 	}
 	
@@ -151,39 +170,69 @@ class UIApplicationRoot {
 	}
 	
 	private function onMouseDown(e:MouseEvent) {
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerDown(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseMove(e:MouseEvent) {
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerMove(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onMouseUp(e:MouseEvent) {
+		flixelScaleModeMouseHack(e);
+		
 		handlePointerUp(e.localX, e.localY, e.buttonDown);
 	}
 	
 	private function onTouchBegin(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerDown(e.localX, e.localY, true);
 	}
 	
 	private function onTouchMove(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerMove(e.localX, e.localY, true);
 	}
 	
 	private function onTouchEnd(e:TouchEvent) {
+		flixelScaleModeTouchHack(e);
+		
 		handlePointerUp(e.localX, e.localY, true);
+	}
+	
+	// NOTE flixel has it's own game scale mode, and it seems necessary to take that into account to get the right game coords
+	// TODO check this, but it doesn't seem to be required for non-Flash targets?
+	// TODO there's an extra offset on the left side of the window that's missed here?
+	private inline function flixelScaleModeMouseHack(e:MouseEvent):Void {
+		#if flash
+		e.localX /= FlxG.scaleMode.scale.x;
+		e.localY /= FlxG.scaleMode.scale.y;
+		#end
+	}
+	
+	private inline function flixelScaleModeTouchHack(e:TouchEvent):Void {
+		#if flash
+		e.localX /= FlxG.scaleMode.scale.x;
+		e.localY /= FlxG.scaleMode.scale.y;
+		#end
 	}
 	
 	private function handlePointerDown(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
-		trace("Pointer down");
+		//trace("Pointer down");
 		
 		var pointerWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
 		hoveredWidget = pointerWidget;
 		
 		if (hoveredWidget != null) {
-			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerPress, hoveredWidget));
+			if (hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
+				// TODO down isn't the same as LEFT/RIGHT, fix this
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerPress, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 			}
 		}
 		
@@ -213,7 +262,7 @@ class UIApplicationRoot {
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down,EventType.PointerMove, hoveredWidget));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerMove, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 				
 				if (down) {
 					postEvent(hoveredWidget, new DragMoveEvent(EventType.DragMove));
@@ -224,24 +273,24 @@ class UIApplicationRoot {
 	
 	private function handlePointerUp(x:Float, y:Float, down:Bool) {
 		Sure.sure(topLevelWidget != null);
-		trace("Pointer up");
+		//trace("Pointer up");
 		
 		hoveredWidget = Widget.getAt(topLevelWidget, FlxPoint.get(x, y));
 		
 		if (hoveredWidget != null) {
 			if(hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.EnterExit || hoveredWidget.pointerTrackingPolicy == PointerTrackingPolicy.StrongTracking) {
-				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerRelease, hoveredWidget));
+				postEvent(hoveredWidget, makePointerEvent(x, y, down, EventType.PointerRelease, hoveredWidget, down ? MouseButton.LEFT : MouseButton.RIGHT));
 			}
 		}
 	}
 	
-	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget):PointerEvent {
+	private inline function makePointerEvent(x:Float, y:Float, down:Bool, type:EventType, pointerWidget:Widget, trigger:MouseButton):PointerEvent {
 		var event:PointerEvent = new PointerEvent(type);
-		event.globalX = x; // TODO should we use the outer margin or the x coordinate of the widget?
+		event.globalX = x;
 		event.globalY = y;
-		event.localX = x - pointerWidget.x;
+		event.localX = x - pointerWidget.x; // TODO should we use the outer margin or the x coordinate of the widget?
 		event.localY = y - pointerWidget.y;
-		// TODO set mouse button
+		event.button = trigger;
 		
 		return event;
 	}
@@ -249,26 +298,48 @@ class UIApplicationRoot {
 	private function onGamepadButtonDown(gamepad, button) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad button down");
+		// TODO do per-player gamepad ownership, pass player index down to widgets
+		// TODO add methods to set the gamepad focus widget
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadButtonDown));
+		}
 	}
 	
 	private function onGamepadButtonUp(gamepad, button) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad button up");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadButtonUp));
+		}
 	}
 	
 	private function onGamepadConnect(gamepad) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad connect");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadConnect));
+		}
 	}
 	
 	private function onGamepadDisconnect(gamepad) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad disconnect");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadDisconnect));
+		}
 	}
 	
 	private function onGamepadAxisMove(gamepad, axis, value:Float) {
 		Sure.sure(topLevelWidget != null);
 		trace("Gamepad axis move");
+		
+		if(gamepadFocusWidget != null) {
+			postEvent(gamepadFocusWidget, new GamepadEvent(EventType.GamepadAxisMove));
+		}
 	}
 	
 	private function onAccelerometerUpdate(e:AccelerometerEvent) {
@@ -387,13 +458,16 @@ class UIApplicationRoot {
 		
 		Lib.current.stage.addEventListener(Event.RESIZE, onResize);
 		
-		// TODO requires more recent openfl mode than haxeflixel can use (seeing openfl._legacy.Lib errors)?
-		//Sure.sure(Lib.application.window != null);
-		//Lib.application.window.onGamepadAxisMove.add(onGamepadAxisMove);
-		//Lib.application.window.onGamepadButtonDown.add(onGamepadButtonDown);
-		//Lib.application.window.onGamepadButtonUp.add(onGamepadButtonUp);
-		//Lib.application.window.onGamepadConnect.add(onGamepadConnect);
-		//Lib.application.window.onGamepadDisconnect.add(onGamepadDisconnect);
+		// NOTE requires -Dnext
+		#if next
+		Gamepad.onConnect.add(function(gamepad:Gamepad) {
+			trace("Connected gamepad: " + gamepad.name);
+			gamepad.onAxisMove.add(onGamepadAxisMove.bind(gamepad));
+			gamepad.onButtonDown.add(onGamepadButtonDown.bind(gamepad));
+			gamepad.onButtonUp.add(onGamepadButtonUp.bind(gamepad));
+			gamepad.onDisconnect.add(onGamepadDisconnect.bind(gamepad));
+		});
+		#end
 		
 		listenersAttached = true;
 	}
@@ -433,26 +507,29 @@ class UIApplicationRoot {
 		
 		Lib.current.stage.removeEventListener(Event.RESIZE, onResize);
 		
-		//Sure.sure(Lib.application.window != null);
+		#if next
+		// TODO disable gamepads
 		//Lib.application.window.onGamepadAxisMove.remove(onGamepadAxisMove);
 		//Lib.application.window.onGamepadButtonDown.remove(onGamepadButtonDown);
 		//Lib.application.window.onGamepadButtonUp.remove(onGamepadButtonUp);
 		//Lib.application.window.onGamepadConnect.remove(onGamepadConnect);
 		//Lib.application.window.onGamepadDisconnect.remove(onGamepadDisconnect);
+		#end
 		
 		listenersAttached = false;
 	}
 	
 	// Puts event onto the event loop, to be processed on the next frame
 	private function postEvent(receiver:UIObject, event:UIEvent) {
-		Sure.sure(receiver != null && event != null);
-		
+		Sure.sure(receiver != null && event != null);		
 		eventLoop.add(receiver, event);
 	}
 	
 	// Sends event directly to receiver, bypassing the event loop
 	private static function sendEvent(receiver:UIObject, event:UIEvent):Bool {
 		Sure.sure(receiver != null && event != null);
+		
+		// TODO should we send these even if the receiver is disabled?
 		return receiver.event(event);
 	}
 	
@@ -461,6 +538,7 @@ class UIApplicationRoot {
 		Sure.sure(event != null);
 		Sure.sure(topLevelWidget != null);
 		
+		// TODO should we send these even if the receiver is disabled?
 		receiver.event(event);
 		
 		// TODO see http://code.woboq.org/qt5/qtbase/src/widgets/kernel/qapplication.cpp.html notify (this is gonna take awhile.......)

@@ -25,6 +25,7 @@ class UIEventLoop {
 	// TODO consider the fastest data structure and how else to make this faster somehow
 	public function process() {
 		for (event in events) {
+			// TODO should notify even if item isn't enabled?
 			application.notify(event.receiver, event.event);
 		}
 		

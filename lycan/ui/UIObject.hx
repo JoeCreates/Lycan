@@ -14,6 +14,7 @@ class UIObject {
 	public var id(get, null):Int;
 	public var sendChildEvents:Bool;
 	public var receiveChildEvents:Bool;
+	public var enabled(default, set):Bool = true;
 	
 	public var isWidgetType(get, never):Bool;
 	
@@ -22,7 +23,6 @@ class UIObject {
 	private var eventFilters:List<UIObject>;
 	
 	public function new(?parent:UIObject = null, ?name:String = null) {
-		this.parent = parent;
 		this.name = name;
 		id = idTick++;
 		sendChildEvents = true;
@@ -30,10 +30,12 @@ class UIObject {
 		
 		children = new List<UIObject>();
 		eventFilters = new List<UIObject>();
+		
+		this.parent = parent;
 	}
 	
 	public function installEventFilter(filter:UIObject):Void {
-		Sure.sure(filter != null);	
+		Sure.sure(filter != null);
 		
 		eventFilters.add(filter);
 	}
@@ -143,8 +145,8 @@ class UIObject {
 	
 	private function set_parent(parent:UIObject):UIObject {		
 		if (this.parent != null) {
-			this.parent.removeChild(this);
-			parent.event(new ChildEvent(EventType.ChildRemoved, this));
+			this.parent.children.remove(this);
+			this.parent.event(new ChildEvent(EventType.ChildRemoved, this));
 		}
 		
 		if(parent != null) {
@@ -153,5 +155,9 @@ class UIObject {
 		}
 		
 		return this.parent = parent;
+	}
+	
+	private function set_enabled(enabled:Bool):Bool {
+		return this.enabled = enabled;
 	}
 }

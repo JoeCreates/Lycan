@@ -1,7 +1,7 @@
-package lycan.loading.tasks ;
+package lycan.loading.tasks;
 
-import openfl.Lib;
 import lycan.loading.tasks.PriorityTask;
+import openfl.Lib;
 
 class DummyTask extends PriorityTask {
 	private var duration:Float;

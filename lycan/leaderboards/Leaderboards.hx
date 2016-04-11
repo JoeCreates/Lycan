@@ -20,13 +20,18 @@ import lycan.leaderboards.KongregateFacade;
 import lycan.leaderboards.GameJoltFacade;
 #end
 
+#if steamworksleaderboards
+import lycan.leaderboards.SteamworksFacade;
+import lycan.leaderboards.SteamworksFacade.DialogName;
+#end
+
 class Leaderboards {
 	public static var get(default, never):Leaderboards = new Leaderboards();
 	
 	private function new() {
 	}
 	
-	public static function init():Void {
+	public static function init():Void {		
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get;
 		#end
@@ -49,6 +54,13 @@ class Leaderboards {
 		}
 		GameJoltFacade.init(gameId, privateKey, autoAuth, userName, onGameJoltLoaded);
 		#end
+		
+		#if steamworksleaderboards
+		if (gameId == 0) {
+			throw "Set the Steamworks gameId before initializing leaderboards";
+		}
+		SteamworksFacade.init(gameId);
+		#end
 	}
 	
 	public static function openLeaderboard(id:Dynamic):Void {
@@ -68,6 +80,10 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
+		#end
+		
+		#if steamworksleaderboards
+		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS); // TODO how to open leaderboards tab?
 		#end
 	}
 	
@@ -89,6 +105,10 @@ class Leaderboards {
 		
 		#if gamejoltleaderboards
 		#end
+		
+		#if steamworksleaderboards
+		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS);
+		#end
 	}
 	
 	public static function signIn():Void {
@@ -109,9 +129,12 @@ class Leaderboards {
 		
 		#if gamejoltleaderboards
 		#end
+		
+		#if steamworksleaderboards
+		#end
 	}
 	
-	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {		
+	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get.submitScore(leaderboardId, score);
 		#end
@@ -131,6 +154,10 @@ class Leaderboards {
 		#if gamejoltleaderboards
 		GameJoltFacade.addScore(Std.string(score), score);
 		#end
+		
+		#if steamworksleaderboards
+		SteamworksFacade.submitScore(leaderboardId, score, 0, 0); // TODO detail/rank parameters?
+		#end
 	}
 	
 	#if kongregateleaderboards
@@ -140,11 +167,11 @@ class Leaderboards {
 	#end
 	
 	#if gamejoltleaderboards
-	public var gameId:Int = 0;
-	public var privateKey:String = null;
-	public var autoAuth:Bool = false;
-	public var userName:String = null;
-	public var userToken:String = null;
+	public static var gameId:Int = 0;
+	public static var privateKey:String = null;
+	public static var autoAuth:Bool = false;
+	public static var userName:String = null;
+	public static var userToken:String = null;
 	
 	private static function onGameJoltLoaded():Void {
 		GameJoltFacade.authUser(null, null, onGameJoltAuthorized);
@@ -165,5 +192,9 @@ class Leaderboards {
 		trace("Pinged GameJolt session");
 		#end
 	}
+	#end
+	
+	#if steamworksleaderboards
+	public static var gameId:Int = 0;
 	#end
 }

@@ -1,12 +1,9 @@
 package lycan.ui.widgets.buttons ;
 
-import flixel.FlxSprite;
-import lycan.ui.renderer.IRenderItem;
-import lycan.ui.UIObject;
-import msignal.Signal.Signal0;
-import msignal.Signal.Signal1;
 import lycan.ui.events.UIEvent.HoverEvent;
 import lycan.ui.events.UIEvent.PointerEvent;
+import lycan.ui.UIObject;
+import msignal.Signal.Signal0;
 
 // Base class
 class Button extends Widget {	
@@ -48,18 +45,6 @@ class Button extends Widget {
 		signal_unhovered.dispatch();
 	}
 	
-	override private function set_x(x:Int):Int {
-		super.set_x(x);
-		centerButtonGraphics();
-		return x;
-	}
-	
-	override private function set_y(y:Int):Int {
-		super.set_y(y);
-		centerButtonGraphics();
-		return y;
-	}
-	
 	override private function set_width(width:Int):Int {
 		super.set_width(width);
 		centerButtonGraphics();
@@ -74,8 +59,8 @@ class Button extends Widget {
 	
 	private function centerButtonGraphics():Void {
 		for (graphic in graphics) {
-			graphic.set_x(x + cast ((width - graphic.get_width()) / 2));
-			graphic.set_y(y + cast ((height - graphic.get_height()) / 2));
+			graphic.x = x +  cast ((width - graphic.width) / 2);
+			graphic.y = y + cast ((height - graphic.height) / 2);
 		}
 	}
 }

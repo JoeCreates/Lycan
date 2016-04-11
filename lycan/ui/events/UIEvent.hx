@@ -1,15 +1,10 @@
 package lycan.ui.events;
 
 import haxe.Utf8;
+import lycan.ui.core.Gesture;
 import lycan.ui.events.UIEvent.ChildEvent;
-import lycan.ui.widgets.Widget;
+import lycan.ui.events.UIEvent.WheelEvent;
 import lycan.ui.pointer.MouseButton;
-
-import openfl.events.KeyboardEvent;
-import openfl.events.MouseEvent;
-import openfl.events.Event;
-import openfl.events.TouchEvent;
-import openfl.ui.Keyboard;
 
 // TODO macro to just make the enum values increase rather than specifying values manually?
 // TODO macro to add additional user/game-specific events onto the 1000+ range or whatever?
@@ -153,7 +148,12 @@ class GamepadFocusEvent extends UIEvent {
 }
 
 class GestureEvent extends UIEvent {
+	public var gesture(default, null):Gesture;
 	
+	public function new(gesture:Gesture) {
+		super(EventType.Gesture);
+		this.gesture = gesture;
+	}
 }
 
 class ShowEvent extends UIEvent {
@@ -172,7 +172,7 @@ class LocaleChangeEvent extends UIEvent {
 	
 }
 
-class PointerEvent extends UIEvent {
+class PointerEvent extends UIEvent {	
 	public var button:MouseButton;
 	public var localX:Float;
 	public var localY:Float;
@@ -189,7 +189,12 @@ class ResizeEvent extends UIEvent {
 }
 
 class WheelEvent extends UIEvent {
+	public var delta:Int;
 	
+	public function new(delta:Int) {
+		super(EventType.WheelScroll);
+		this.delta = delta;
+	}
 }
 
 class KeyEvent extends UIEvent {
@@ -209,7 +214,9 @@ class MoveEvent extends UIEvent {
 }
 
 class GamepadEvent extends UIEvent {
-	
+	public function new(type:EventType) {
+		super(type);
+	}
 }
 
 class AccelerometerEvent extends UIEvent {

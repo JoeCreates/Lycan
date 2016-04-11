@@ -1,15 +1,15 @@
 package lycan.ui.widgets.buttons;
 
-import lycan.ui.renderer.IRenderItem;
 import lycan.ui.UIObject;
+import flixel.FlxSprite;
 
 // Button that has graphics for when released, hovered or pressed
 class PushButton extends Button {
-	private var unhoveredGraphic(default, set):IRenderItem;
-	private var hoveredGraphic(default, set):IRenderItem;
-	private var pushedGraphic(default, set):IRenderItem;
+	private var unhoveredGraphic(default, set):FlxSprite;
+	private var hoveredGraphic(default, set):FlxSprite;
+	private var pushedGraphic(default, set):FlxSprite;
 	
-	public function new(unhoveredGraphic:IRenderItem, hoveredGraphic:IRenderItem, pushedGraphic:IRenderItem, ?parent:UIObject, ?name:String) {
+	public function new(unhoveredGraphic:FlxSprite, hoveredGraphic:FlxSprite, pushedGraphic:FlxSprite, ?parent:UIObject, ?name:String) {
 		super(parent, name);
 		this.unhoveredGraphic = unhoveredGraphic;
 		this.hoveredGraphic = hoveredGraphic;
@@ -30,8 +30,8 @@ class PushButton extends Button {
 		var maxHeight:Int = 0;
 		
 		for (graphic in [unhoveredGraphic, hoveredGraphic, pushedGraphic]) {
-			maxWidth = cast Math.max(maxWidth, graphic.get_width());
-			maxHeight = cast Math.max(maxHeight, graphic.get_height());
+			maxWidth = cast Math.max(maxWidth, graphic.width);
+			maxHeight = cast Math.max(maxHeight, graphic.height);
 		}
 		
 		width = maxWidth;
@@ -40,31 +40,31 @@ class PushButton extends Button {
 	
 	private function updateButtonVisibility():Void {
 		if (pressed) {
-			unhoveredGraphic.hide();
-			hoveredGraphic.hide();
-			pushedGraphic.show();
+			unhoveredGraphic.visible = false;
+			hoveredGraphic.visible = false;
+			pushedGraphic.visible = true;
 			return;
 		} else if (hovered) {
-			unhoveredGraphic.hide();
-			hoveredGraphic.show();
-			pushedGraphic.hide();
+			unhoveredGraphic.visible = false;
+			hoveredGraphic.visible = true;
+			pushedGraphic.visible = false;
 			return;
 		} else {
-			unhoveredGraphic.show();
-			hoveredGraphic.hide();
-			pushedGraphic.hide();
+			unhoveredGraphic.visible = true;
+			hoveredGraphic.visible = false;
+			pushedGraphic.visible = false;
 		}
 	}
 	
-	private function set_unhoveredGraphic(unhoveredGraphic:IRenderItem) {
+	private function set_unhoveredGraphic(unhoveredGraphic:FlxSprite) {
 		return this.unhoveredGraphic = unhoveredGraphic;
 	}
 	
-	private function set_hoveredGraphic(hoveredGraphic:IRenderItem) {
+	private function set_hoveredGraphic(hoveredGraphic:FlxSprite) {
 		return this.hoveredGraphic = hoveredGraphic;
 	}
 	
-	private function set_pushedGraphic(pushedGraphic:IRenderItem) {
+	private function set_pushedGraphic(pushedGraphic:FlxSprite) {
 		return this.pushedGraphic = pushedGraphic;
 	}
 	

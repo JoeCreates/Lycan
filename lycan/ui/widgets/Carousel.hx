@@ -1,12 +1,7 @@
 package lycan.ui.widgets;
 
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
 import lycan.ui.events.UIEvent;
-import lycan.ui.layouts.Layout;
-import lycan.ui.layouts.SizePolicy;
 import lycan.ui.UIObject;
-import Sure;
 
 class Carousel extends Widget {
 	public function new(?parent:UIObject, ?name:String) {

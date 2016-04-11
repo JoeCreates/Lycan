@@ -20,6 +20,10 @@ import lycan.leaderboards.KongregateFacade;
 import lycan.leaderboards.GameJoltFacade;
 #end
 
+#if steamworksleaderboards
+import lycan.leaderboards.SteamworksFacade;
+#end
+
 class Achievement {
 	public var id(default, null):AchievementId;
 	public var unlocked(default, null):Bool = false;
@@ -42,6 +46,10 @@ class Achievement {
 		
 		#if debug
 		trace("Achievement unlocked: " + id.gameCenterId);
+		#end
+		
+		#if steamworksleaderboards
+		SteamworksFacade.unlockAchievement(id.steamworksId);
 		#end
 		
 		#if googleplayleaderboards
@@ -74,6 +82,10 @@ class Achievement {
 		
 		var progressPercent:Float = Math.min(100, ((currentValue / targetValue) * 100));
 		
+		#if steamworksleaderboards
+		SteamworksFacade.indicateAchievementProgress(id.steamworksId, IntExtensions.min(currentValue, targetValue), targetValue);
+		#end
+		
 		#if googleplayleaderboards
 		GooglePlayLeaderboards.get.setAchievementSteps(id.googlePlayId, Std.int(currentValue));
 		#end
@@ -103,5 +115,6 @@ typedef AchievementId = {
 	gameCenterId:String,
 	kongregateId:String,
 	gameJoltId:Int,
-	amazonId:String
+	amazonId:String,
+	steamworksId:String
 };

@@ -1,12 +1,13 @@
-package lycan.loading.loaders ;
+package lycan.loading.loaders;
+
 import flixel.FlxG;
 import haxe.Timer;
-import openfl.events.Event;
-import openfl.Lib;
+import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;
 import lycan.loading.tasks.IRunnable;
 import lycan.util.queue.IPrioritizable;
-import lycan.loading.tasks.IDescribable;
+import openfl.events.Event;
+import openfl.Lib;
 
 // Loader that runs on the main thread but timeshares, so it does not block the game loop
 class EventPumpLoader<T:(IPrioritizable, IRunnable, ILoadingSignalDispatcher, IDescribable)> extends Loader<T> {

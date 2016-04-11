@@ -10,27 +10,27 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
 import flixel.util.FlxColor;
 import lycan.util.MasterCamera;
-import lycan.world.World;
-import openfl.filters.BlurFilter;
 
+// Base state for all substates in a game
 class LycanState extends FlxSubState implements LateUpdatable {
-	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called
+	#if debug
+	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called // TODO remove
+	#end
 	
-	public var world:World;
-	public var uiGroup:FlxSpriteGroup;
-	
-	public var uiCamera:FlxCamera;
-	public var worldCamera:MasterCamera;
+	public var uiGroup(default, null):FlxSpriteGroup;
+	public var uiCamera(default, null):FlxCamera;
+	public var worldCamera(default, null):FlxCamera;
 	
 	public var worldZoom(default, set):Float;
 	public var baseZoom:Float;
 	
-	public var zoomTween:FlxTween;
-	/** Map of IDs to tweens that should be cancelled before another tween of the same ID plays */
+	public var zoomTween(default, null):FlxTween;
+	
+	// Tweens that should be cancelled before another tween of the same ID plays
 	public var exclusiveTweens:Map<String, FlxTween>;
 	
-	override public function create():Void {
-		super.create();
+	public function new() {
+		super();
 		
 		exclusiveTweens = new Map<String, FlxTween>();
 		
@@ -44,15 +44,15 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		FlxG.camera = worldCamera;
 		FlxG.cameras.add(worldCamera);
 		FlxG.cameras.add(uiCamera);
+
 		FlxCamera.defaultCameras = [worldCamera];
 		
 		baseZoom = worldCamera.zoom;
 		worldZoom = 1;
 		
-		// Groups
 		uiGroup = new FlxSpriteGroup();
+		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
-		
 		add(uiGroup);
 	}
 	
@@ -67,6 +67,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	
 	public function lateUpdate(dt:Float):Void {
 		updatesWithoutLateUpdates = 0;
+		#end
 		
 		//forEach(function(o:FlxBasic) {
 			//if (Std.is(o, LateUpdatable)) {
@@ -86,8 +87,9 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	}
 	
 	public function zoomTo(zoom:Float, duration:Float = 0.5, ?ease:Float->Float):FlxTween {
-		if (ease == null) ease = FlxEase.quadInOut;
-		
+		if (ease == null) {
+			ease = FlxEase.quadInOut;
+		}
 		if (zoomTween != null) {
 			zoomTween.cancel();
 		}
@@ -95,13 +97,13 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		return zoomTween;
 	}
 	
+	// Sets world and camera zoom
 	private function set_worldZoom(worldZoom:Float):Float {
-		// Set world and camera zoom
 		worldCamera.zoom = baseZoom * worldZoom;
 		return this.worldZoom = worldZoom;
 	}
 	
-	//TODO autotweening
-	//TODO camera targetting
-	//TODO sound fading
+	// TODO autotweening
+	// TODO camera targeting
+	// TODO sound fading
 }

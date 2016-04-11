@@ -2,13 +2,21 @@ package lycan.components;
 
 import lycan.LateUpdatable;
 
-interface Attachable extends LateUpdatable {
-	public var x(default, set):Float;
-	public var y(default, set):Float;
+interface Attachable extends LateUpdatable extends Entity {
 	public var attachable:AttachableComponent;
+	public var x(get, set):Float;
+	public var y(get, set):Float;
+	
+	// TODO: decide if this is worthwhile after a bit of use
+	public var active(get, set):Bool;
+	public var visible(get, set):Bool;
+	public var exists(get, set):Bool;
+	
+	public function update(dt:Float):Void;
+	public function draw():Void;
 }
 
-class AttachableComponent extends Component<Attachable> implements LateUpdatable {
+class AttachableComponent extends Component<Attachable> {
 	public var parent:Attachable;
 	public var children:Array<Attachable>;
 	public var isRoot(get, never):Bool;
@@ -17,6 +25,8 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	public var y(default, set):Float;
 	public var originX(default, set):Float;
 	public var originY(default, set):Float;
+	// Whether this atachable should be updated and drawn by the attachable chain
+	public var updateAndDraw:Bool;
 	
 	// True if attached position or origin have changed since last update
 	private var dirty:Bool;
@@ -28,9 +38,38 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		y = 0;
 		originX = 0;
 		originY = 0;
+		
+		updateAndDraw = true;
+		
+		requiresLateUpdate = true;
+		requiresUpdate = true;
+		requiresDraw = true;
 	}
 	
-	public function lateUpdate(dt:Float):Void {
+	override public function update(dt):Void {
+		super.update(dt);
+		if (children != null) {
+			for (child in children) {
+				if (child.entity_exists && child.entity_active && child.attachable.updateAndDraw) {
+					child.update(dt);
+				}
+				
+			}
+		}
+	}
+	
+	override public function draw():Void {
+		super.draw();
+		if (children != null) {
+			for (child in children) {
+				if (child.entity_exists && child.entity_visible && child.attachable.updateAndDraw) {
+					child.draw();
+				}
+			}
+		}
+	}
+	
+	override public function lateUpdate(dt:Float):Void {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
@@ -45,8 +84,12 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 	 * @param	x The x position of the attachment
 	 * @param	y The y position of the attachment
 	 */
-	public function attach(child:Attachable, x:Float, y:Float, ?originX:Float, ?originY:Float):Void {
+	public function attach(child:Attachable, x:Float, y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
 		Sure.sure(child != null);
+		
+		if (updateAndDraw != null) {
+			child.attachable.updateAndDraw = updateAndDraw;
+		}
 		
 		// Detach child from current parent
 		if (child.attachable.parent != null) {
@@ -87,8 +130,8 @@ class AttachableComponent extends Component<Attachable> implements LateUpdatable
 		// Recursively update children
 		for (child in children) {
 			// Update child's position
-			child.x = entity.x + child.attachable.x - child.attachable.originX;
-			child.y = entity.y + child.attachable.y - child.attachable.originY;
+			child.entity_x = entity.entity_x + child.attachable.x - child.attachable.originX;
+			child.entity_y = entity.entity_y + child.attachable.y - child.attachable.originY;
 			// Update child's children
 			child.attachable.recursiveUpdate(dt);
 		}

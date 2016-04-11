@@ -1,5 +1,6 @@
 package lycan.ui.core;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
@@ -9,7 +10,7 @@ import lycan.ui.core.UIApplicationRoot;
 import lycan.ui.UIObject;
 import lycan.ui.widgets.Widget;
 
-// HaxeFlixel debug/development rendererer for UI elements
+// HaxeFlixel debug/development renderer for UI elements
 @:access(lycan.ui.core.UIApplicationRoot)
 @:access(lycan.ui.UIObject)
 class DebugRenderer extends FlxSprite {
@@ -19,11 +20,15 @@ class DebugRenderer extends FlxSprite {
 	public function new(root:UIApplicationRoot) {
 		super(0, 0);
 		this.root = root;
+		this.scrollFactor.set(0, 0);
 		this.text = new FlxText();
+		text.scrollFactor.set(0, 0);
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, false, "debug_ui_renderer");
 	}
 	
 	override public function draw() {
+		super.draw();
+		
 		FlxSpriteUtil.fill(this, FlxColor.TRANSPARENT);
 		
 		var renderWidget = function(o:UIObject) {
@@ -34,16 +39,18 @@ class DebugRenderer extends FlxSprite {
 				var outer = w.outerRect();
 				var border = w.borderRect();
 				var inner = w.innerRect();
-				var center = w.innerCenter();
+				var center = w.outerCenter();
 				
 				var rectLineColor = FlxColor.RED;
 				
-				if (w.keyboardFocus) {
-					rectLineColor.green += 127;
-				}
-				if (w.gamepadFocus) {
-					rectLineColor.blue += 127;
-				}
+				// TODO check the UIApplicationRoot if the focus widgets == the widget
+				//if (w.keyboardFocus) {
+				//	rectLineColor.green += 127;
+				//}
+				//if (w.gamepadFocus) {
+				//	rectLineColor.blue += 127;
+				//}
+				
 				if (!w.shown) {
 					rectLineColor = FlxColor.CYAN;
 				}
@@ -63,7 +70,8 @@ class DebugRenderer extends FlxSprite {
 				FlxSpriteUtil.drawLine(this, center.x, center.y + Math.min(20, inner.width / 6), center.x, center.y - Math.min(20, inner.width / 6), centerLineStyle);
 				FlxSpriteUtil.drawLine(this, center.x - Math.min(20, inner.width / 6), center.y, center.x + Math.min(20, inner.width / 6), center.y, centerLineStyle);
 				
-				text.text = w.name + ": (" + w.x + "," + w.y + "), (" + w.width + "," + w.height + ")";
+				//text.text = w.name + ": (" + w.x + "," + w.y + "), (" + w.width + "," + w.height + ")";
+				text.text = "(" + w.x + "," + w.y + "),(" + w.width + "," + w.height + ");\n(" + center.x + "," + center.y + ")";
 				text.x = w.x;
 				text.y = w.y;
 				text.draw();
@@ -72,7 +80,11 @@ class DebugRenderer extends FlxSprite {
 		
 		var visitElements = function(tlw:UIObject) {
 			var items = new Array<UIObject>();
-			items.push(tlw);
+			
+			if(tlw != null) {
+				items.push(tlw);
+			}
+			
 			while (items.length != 0) {
 				var w = items.pop();
 				
