@@ -21,7 +21,7 @@ class ConditionalEvent extends FlxBasic {
 		super();
 		this.condition = condition;
 		this.callback = callback;
-		this.state = FlxG.state;
+		this.state = FlxG.state.subState;
 	}
 	
 	override public function update(dt:Float):Void {
