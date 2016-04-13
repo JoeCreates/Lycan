@@ -525,7 +525,7 @@ class Widget extends UIObject {
 	}
 	
 	private static function isPointOver(w:Widget, point:FlxPoint):Bool {
-		return w.borderRect().containsFlxPoint(point);
+		return w.borderRect().containsPoint(point);
 	}
 	
 	override private function get_isWidgetType():Bool {

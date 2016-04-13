@@ -1,4 +1,4 @@
-package lycan.world;
+package lycan.world.entities;
 import flixel.FlxObject;
 
 // TODO generalise to multiple states
@@ -6,7 +6,7 @@ interface Switchable {
 	
 }
 
-class SwitchComponent extends Component {
+class MovingPlatform extends Component {
 	
 	public var on(default, set):Bool;
 	

@@ -1,36 +1,53 @@
 package lycan.world;
 
 import flixel.addons.editors.tiled.TiledMap.FlxTiledAsset;
+import flixel.addons.editors.tiled.TiledPropertySet;
 import flixel.addons.editors.tiled.TiledTileSet;
+import flixel.addons.editors.tiled.TiledLayer;
+import flixel.addons.editors.tiled.TiledTileLayer;
+import flixel.addons.editors.tiled.TiledMap;
+import flixel.addons.editors.tiled.TiledObjectLayer;
+import flixel.addons.editors.tiled.TiledObject;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
+import flixel.graphics.frames.FlxTileFrames;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
+import flixel.tile.FlxTilemap;
 import flixel.util.FlxBitmapDataUtil;
+import haxe.ds.StringMap;
 import haxe.io.Path;
+import lycan.world.layer.ILayer;
 import openfl.display.BitmapData;
-import lycan.world.Layer;
-import lycan.world.Layer.TileLayer;
+import lycan.world.layer.TileLayer;
+import lycan.world.layer.ObjectLayer;
+import lycan.world.layer.TileLayer;
 import msignal.Signal.Signal1;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
 @:allow(lycan.world.WorldLoader)
 class World extends FlxGroup {
+	public var name:String;
 	public var width(default, null):Int;
 	public var height(default, null):Int;
 	public var scale(default, null):FlxPoint;
-	public var name:String;
+	
 	public var updateSpeed:Float;
 	public var signal_loadingProgressed(default, null):Signal1<Float>;
 	
-	private var namedObjects(default, null):Map<String, Array<FlxBasic>>;
-	private var namedLayers(default, null):Map<String, Layer>;
-	private var namedTilesets(default, null):Map<String, TiledTileSet>;
-	private var collidableLayers(default, null):Array<TileLayer>;
+	public var namedObjects(default, null):Map<String, FlxBasic>;
+	public var namedLayers(default, null):Map<String, ILayer>;
+	public var namedTilesets(default, null):Map<String, TiledTileSet>;
+	public var collidableTilemaps(default, null):Array<FlxTilemap>;
+	
+	public var properties:TiledPropertySet;
+	public var combinedTileset:FlxTileFrames;
+	
+	private static inline var TILESET_PATH = "assets/images/"; // TODO avoid explicit tileset path if possible
 	
 	public function new(?scale:FlxPoint) {
 		super();
@@ -42,19 +59,19 @@ class World extends FlxGroup {
 		name = "Unnamed World";
 		updateSpeed = 1;
 		
-		namedObjects = new Map<String, Array<FlxBasic>>();
-		namedLayers = new Map<String, Layer>();
-		collidableLayers = new Array<TileLayer>();
+		namedObjects = new Map<String, FlxBasic>();
+		namedLayers = new Map<String, ILayer>();
+		collidableTilemaps = new Array<FlxTilemap>();
 		
 		signal_loadingProgressed = new Signal1<Float>();
 	}
 	
 	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
-		if (collidableLayers == null) {
+		if (collidableTilemaps == null) {
 			return false;
 		}
 		
-		for (map in collidableLayers) {
+		for (map in collidableTilemaps) {
 			// NOTE Always collide the map with objects, not the other way around
 			if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
 				return true;
@@ -64,23 +81,86 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledAsset, loadingRules:WorldLoader):Void {
-		WorldLoader.load(this, tiledLevel, loadingRules);
+	public function load(tiledLevel:FlxTiledAsset, objectLoaders:StringMap<ObjectLoader>):World {
+		var tiledMap = new TiledMap(tiledLevel);
+		
+		width = tiledMap.fullWidth;
+		height = tiledMap.fullHeight;
+		
+		processProperties(tiledMap);
+		loadTilesets(tiledMap);
+		
+		// Load layers
+		var layersLoaded:Float = 0;
+		for (tiledLayer in tiledMap.layers) {
+			switch (tiledLayer.type) {
+				case TiledLayerType.OBJECT: loadObjectLayer(cast tiledLayer, objectLoaders);
+				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer);
+				default:
+					trace("Encountered unknown TiledLayerType");
+			}
+			
+			var loadingProgressPercent:Float = (layersLoaded / tiledMap.layers.length) * 100;
+			signal_loadingProgressed.dispatch(loadingProgressPercent);
+			layersLoaded++;
+		}
+		
+		return this;
+	}
+	
+	public function loadTileLayer(tiledLayer:TiledTileLayer):ILayer {
+		var layer:TileLayer = cast new TileLayer(this).load(tiledLayer, new FlxTilemap());
+		add(layer.tilemap);
+		namedLayers.set(tiledLayer.name, layer);
+		return layer;
+	}
+	
+	public function loadObjectLayer(tiledLayer:TiledObjectLayer, objectLoaders:StringMap<ObjectLoader>):ILayer {
+		var layer:ObjectLayer = new ObjectLayer(this).load(tiledLayer, objectLoaders);
+		add(layer);
+		namedLayers.set(tiledLayer.name, layer);
+		return layer;
+	}
+	
+	public function processProperties(tiledMap:TiledMap):World {
+		return this;
 	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt * updateSpeed);
 	}
 	
-	public inline function getNamedObjects(name:String):Array<FlxBasic> {
+	public inline function getObject(name:String):FlxBasic {
 		return namedObjects.get(name);
 	}
 	
-	public inline function getNamedLayer(name:String):Layer {
+	public inline function getLayer(name:String):ILayer {
 		return namedLayers.get(name);
 	}
 	
-	public inline function getNamedTileSet(name:String):TiledTileSet {
+	public inline function getTileSet(name:String):TiledTileSet {
 		return namedTilesets.get(name);
+	}
+	
+	private function loadTilesets(tiledMap:TiledMap):Void {
+		// Load tileset graphics
+		var tilesetBitmaps:Array<BitmapData> = new Array<BitmapData>();
+		for (tileset in tiledMap.tilesetArray) {
+			var imagePath = new Path(tileset.imageSource);
+			var processedPath = TILESET_PATH + imagePath.file + "." + imagePath.ext;
+			tilesetBitmaps.push(FlxAssets.getBitmapData(processedPath));
+		}
+		
+		if (tilesetBitmaps.length == 0) {
+			throw "Cannot load an empty tilemap, as it will result in invalid bitmap data errors";
+		}
+		
+		// Combine tilesets into single tileset
+		var tileSize:FlxPoint = FlxPoint.get(tiledMap.tileWidth, tiledMap.tileHeight);
+		combinedTileset = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize);
+		tileSize.put();
+		
+		// Save a reference to the tileset map
+		namedTilesets = tiledMap.tilesets;
 	}
 }

@@ -19,8 +19,8 @@ class LycanRootState extends FlxState {
 	private var uiCamera:FlxCamera;
 	
 	#if debug
-	private var	debugUiRenderer:DebugRenderer;
-	private var stateStackText:FlxSpriteGroup;
+	//private var	debugUiRenderer:DebugRenderer;
+	//private var stateStackText:FlxSpriteGroup;
 	#end
 	
 	private function new() {
@@ -61,18 +61,18 @@ class LycanRootState extends FlxState {
 		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		
 		#if debug		
-		debugUiRenderer = new DebugRenderer(uiRoot);
-		stateStackText = new FlxSpriteGroup();
-		stateStackText.scrollFactor.set(0, 0);
-		
-		FlxG.signals.postDraw.add(debugPostDraw);
+		//debugUiRenderer = new DebugRenderer(uiRoot);
+		//stateStackText = new FlxSpriteGroup();
+		//stateStackText.scrollFactor.set(0, 0);
+		//
+		//FlxG.signals.postDraw.add(debugPostDraw);
 		#end
 	}
 	
 	override public function destroy():Void {
-		#if debug
-		FlxG.signals.postDraw.remove(debugPostDraw);
-		#end
+		//#if debug
+		//FlxG.signals.postDraw.remove(debugPostDraw);
+		//#end
 		
 		super.destroy();
 	}
@@ -83,29 +83,29 @@ class LycanRootState extends FlxState {
 		return cast self;
 	}
 	
-	#if debug
-	private function updateStateVisualisation():Void {
-		stateStackText.clear();
-		
-		var y = 0;
-		var makeText = function(o:Dynamic):FlxText {
-			var str = Type.getClassName(Type.getClass(o));
-			var text = new FlxText(0, y, 0, str, 16);
-			text.color = FlxColor.WHITE;
-			text.borderSize = 1;
-			text.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 2);
-			y += 30;
-			return text;
-		}
-		
-		var child = subState;
-		stateStackText.add(makeText(this));
-		while (child != null) {
-			stateStackText.add(makeText(child));
-			child = child.subState;
-		}
-	}
-	#end
+	//#if debug
+	//private function updateStateVisualisation():Void {
+		//stateStackText.clear();
+		//
+		//var y = 0;
+		//var makeText = function(o:Dynamic):FlxText {
+			//var str = Type.getClassName(Type.getClass(o));
+			//var text = new FlxText(0, y, 0, str, 16);
+			//text.color = FlxColor.WHITE;
+			//text.borderSize = 1;
+			//text.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 2);
+			//y += 30;
+			//return text;
+		//}
+		//
+		//var child = subState;
+		//stateStackText.add(makeText(this));
+		//while (child != null) {
+			//stateStackText.add(makeText(child));
+			//child = child.subState;
+		//}
+	//}
+	//#end
 	
 	// Returns the first state of type T in the state stack, throws if there isn't one of that type
 	public static function getFirstStateOfType<T>(type:Class<T>):T {
@@ -124,10 +124,10 @@ class LycanRootState extends FlxState {
 	}
 	
 	#if debug
-	private function debugPostDraw():Void {
-		debugUiRenderer.draw();
-		updateStateVisualisation();
-		stateStackText.draw();
-	}
+	//private function debugPostDraw():Void {
+		//debugUiRenderer.draw();
+		//updateStateVisualisation();
+		//stateStackText.draw();
+	//}
 	#end
 }

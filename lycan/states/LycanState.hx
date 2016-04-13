@@ -66,8 +66,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	}
 	
 	public function lateUpdate(dt:Float):Void {
-		updatesWithoutLateUpdates = 0;
-		#end
+		//updatesWithoutLateUpdates = 0;
 		
 		//forEach(function(o:FlxBasic) {
 			//if (Std.is(o, LateUpdatable)) {

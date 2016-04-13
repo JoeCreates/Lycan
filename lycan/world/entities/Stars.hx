@@ -1,4 +1,4 @@
-package lycan.world;
+package lycan.world.entities;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -7,7 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import lycan.util.GameUtil;
+import lycan.util.Parallax;
 
 class Stars extends FlxTypedSpriteGroup<Star> {
 	public var starCount:Int;
@@ -67,10 +67,10 @@ class Star extends FlxSprite {
 		
 		//TODO: for both axis and efficincy
 		if (point.x < 0 - frameWidth) {
-			GameUtil.setPositionAtScroll(this, FlxG.camera.scroll.x + FlxG.width, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			Parallax.setPositionAtScroll(this, FlxG.camera.scroll.x + FlxG.width, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 		}
 		if (point.x > FlxG.width) {
-			GameUtil.setPositionAtScroll(this, FlxG.camera.scroll.x - frameWidth, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			Parallax.setPositionAtScroll(this, FlxG.camera.scroll.x - frameWidth, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 		}
 	}
 }
