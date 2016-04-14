@@ -29,7 +29,8 @@ class TypedTileLayer<T:FlxTilemap> implements ILayer {
 		tilemap.loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, world.combinedTileset,
 			Std.int(tiledLayer.map.tileWidth), Std.int(tiledLayer.map.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
 		tilemap.scale.copyFrom(world.scale);
-		
+		tilemap.pixelPerfectPosition = true;
+		tilemap.pixelPerfectRender = true;
 		this.tileWidth = tiledLayer.map.tileWidth;
 		this.tileHeight = tiledLayer.map.tileHeight;
 		

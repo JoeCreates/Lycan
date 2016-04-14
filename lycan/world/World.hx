@@ -66,7 +66,8 @@ class World extends FlxGroup {
 		signal_loadingProgressed = new Signal1<Float>();
 	}
 	
-	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
+	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void,
+			?processCallback:FlxObject->FlxObject->Bool):Bool {
 		if (collidableTilemaps == null) {
 			return false;
 		}
@@ -87,6 +88,7 @@ class World extends FlxGroup {
 		width = tiledMap.fullWidth;
 		height = tiledMap.fullHeight;
 		
+		updateCameraAndWorldBounds();
 		processProperties(tiledMap);
 		loadTilesets(tiledMap);
 		
@@ -157,10 +159,18 @@ class World extends FlxGroup {
 		
 		// Combine tilesets into single tileset
 		var tileSize:FlxPoint = FlxPoint.get(tiledMap.tileWidth, tiledMap.tileHeight);
-		combinedTileset = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize);
+		var spacing:FlxPoint = FlxPoint.get(2, 2);
+		combinedTileset = FlxTileFrames.combineTileSets(tilesetBitmaps, tileSize, spacing, spacing);
 		tileSize.put();
+		spacing.put();
 		
 		// Save a reference to the tileset map
 		namedTilesets = tiledMap.tilesets;
+	}
+	
+	private function updateCameraAndWorldBounds():Void {
+		// Camera scroll bounds
+		FlxG.camera.setScrollBoundsRect(0, 0, width * scale.x, width * scale.x, true);
+		FlxG.camera.maxScrollY += FlxG.height / 2;
 	}
 }

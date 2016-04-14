@@ -1,5 +1,6 @@
 package lycan.world.entities;
 import flixel.FlxObject;
+import lycan.components.Component;
 
 // TODO generalise to multiple states
 interface Switchable {

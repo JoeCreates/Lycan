@@ -217,9 +217,9 @@ class EntityBuilder {
 				});
 			}
 			return macro {
-				$ { e };
 				$i{componentFields.get(c.name).name} = new $c(this);
 				components.push($i{componentFields.get(c.name).name});
+				$ { e };
 			}
 		}
 		for (field in fields) {

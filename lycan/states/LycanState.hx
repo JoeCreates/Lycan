@@ -3,6 +3,7 @@ package lycan.states;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
@@ -29,8 +30,11 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	// Tweens that should be cancelled before another tween of the same ID plays
 	public var exclusiveTweens:Map<String, FlxTween>;
 	
-	public function new() {
-		super();
+	public var overlay:FlxSprite;
+	public var overlayColor(default, set):FlxColor;
+	
+	override public function create():Void {
+		super.create();
 		
 		exclusiveTweens = new Map<String, FlxTween>();
 		
@@ -44,7 +48,7 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		FlxG.camera = worldCamera;
 		FlxG.cameras.add(worldCamera);
 		FlxG.cameras.add(uiCamera);
-
+		
 		FlxCamera.defaultCameras = [worldCamera];
 		
 		baseZoom = worldCamera.zoom;
@@ -54,6 +58,12 @@ class LycanState extends FlxSubState implements LateUpdatable {
 		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
 		add(uiGroup);
+		
+		overlay = new FlxSprite();
+		overlay.scrollFactor.set();
+		overlayColor = FlxColor.BLACK;
+		overlay.alpha = 0;
+		uiGroup.add(overlay);
 	}
 	
 	override public function update(dt:Float):Void {
@@ -100,6 +110,12 @@ class LycanState extends FlxSubState implements LateUpdatable {
 	private function set_worldZoom(worldZoom:Float):Float {
 		worldCamera.zoom = baseZoom * worldZoom;
 		return this.worldZoom = worldZoom;
+	}
+	
+	private function set_overlayColor(color:FlxColor):FlxColor {
+		overlayColor = color;
+		overlay.makeGraphic(FlxG.width, FlxG.height, color, true, "lycan.states.LycanState.overlay");
+		return color;
 	}
 	
 	// TODO autotweening
