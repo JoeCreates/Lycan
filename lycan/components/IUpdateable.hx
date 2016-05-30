@@ -1,5 +1,5 @@
 package lycan.components;
 
 interface IUpdateable {
-	function update(dt:Float):Void;
+    function update(dt:Float):Void;
 }
