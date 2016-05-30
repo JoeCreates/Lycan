@@ -200,7 +200,7 @@ class CodingStandardExample { // PascalCase/UpperCamelCase for class names
     
     public function neededBraces():Void {
         var x:Float = 0.0;
-        //if (x > A_CONSTANT) x = ANOTHER_CONSTANT; // Single line statements are not allowed
+        //if (x > A_CONSTANT) x = ANOTHER_CONSTANT; // Single line if/loop statements are not allowed
         
         // Braces are required for if and looping constructs
         if (x > A_CONSTANT) {
@@ -333,7 +333,7 @@ class CodingStandardExample { // PascalCase/UpperCamelCase for class names
     }
     
     public function traceUsage():Void {
-        //trace("Useful debug trace"); // Traces should be commented out before being committing to Lycan.
+        //trace("Useful debug trace"); // Traces should be commented out before being committed to Lycan.
     }
     
     public function whitespaceAroundOperators():Void {
