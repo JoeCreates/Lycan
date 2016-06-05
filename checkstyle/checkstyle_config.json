@@ -327,8 +327,8 @@
             {
                 "minLength": 2,
                 "ignore": "^\\s+$",
-                "allowDuplicates": 2,
-                "severity": "ERROR"
+                "allowDuplicates": 3,
+                "severity": "WARNING"
             }
         },
         {
@@ -489,7 +489,7 @@
             "props":
             {
                 "max": 4,
-                "severity": "ERROR"
+                "severity": "WARNING"
             }
         },
         {
@@ -589,7 +589,7 @@
             "props":
             {
                 "format": "TODO|FIXME|HACK|XXX|BUG",
-                "severity": "ERROR"
+                "severity": "WARNING"
             }
         },
         {

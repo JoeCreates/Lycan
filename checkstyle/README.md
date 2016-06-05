@@ -66,18 +66,20 @@ A maximum of one empty line is allowed for separating anything. Empty lines are 
 Empty packages are not allowed. Packages must adhere to the Lycan package structure.
 
 ### File Length
-Files must be less than 1000 lines long.
+Files in Lycan should be less than 1000 lines long, with one file per class.
+
+A class that exceeds this length may be taking on too many responsibilities, and should be reviewed to decide whether it is an exception to the rule, or needs to be reworked.
 
 ### Hexadecimal Literals
-Hex literals are written in uppercase e.g. 0xFFFFFF.
+Hex literals are written uppercase e.g. 0xFFFFFF.
 
 ### Hidden Fields
 Local variables or function parameters may not shadow fields defined in the same class. This excludes constructor parameters and setter methods, which should use carefully "this" to disambiguate.
 
 ### Indentation
-Lycan uses four spaces for indentation. This is because tabs can be a different number of columns depending on the editor, but spaces are always consistent. Tabs are banned from Lycan Haxe code.
+Lycan uses tabs for indentation. For consistency, other indentation styles are banned from Lycan code.
 
-### Inner Assignment
+## Inner Assignment
 Avoid assignments in subexpressions. These are easily missed and can be mistaken for typos.
 
 ### Left Curly Braces
@@ -111,7 +113,7 @@ Method names follow an alphanumeric camelCase naming convention.
 Member modifier order is as follows [override][public/private][dynamic][static][inline][macro].
 
 ### Multiple String Literals In File
-More than two identical string constants in a file is disallowed. Use constants (static inlines) instead.
+More than two identical string constants in a file is discouraged. Prefer constants (static inlines) wherever it makes sense.
 
 ### Multiple Variable Declarations On Line
 Disallowed. Each variable declaration must be in its own statement.
@@ -120,7 +122,7 @@ Disallowed. Each variable declaration must be in its own statement.
 One true brace style matching braces are required for ```for```, ```if/else if```, ```while``` and ```do while``` statements. Single line statements are not allowed.
 
 ### Nested For Depth
-For loops may not be nested more than two deep.
+For loops may not be nested more than three deep.
 
 ### Nullable Function Parameters
 Mark function parameters nullable with a question mark.
@@ -135,9 +137,9 @@ The maximum number of parameters a function may take is 7. In cases where more a
 Modifiers access should be added to functions even where they are implicit. This ensures programmer intent is explicitly stated.
 
 ### Returns
-Multiple returns in a function are sometimes useful, but sometimes makes code harder to debug and indicates that code should be refactored into smaller functions.
+Multiple returns in a function are sometimes useful for early exits. But it often makes code harder to debug, and is an indication that code should be refactored into smaller functions.
 
-A maximum of 4 returns are allowed in any single function.
+More than 4 returns in any single function will result in a style warning.
 
 ### Right Curly Braces
 Lycan uses the one true brace style. Right curly braces go on a new line after the statement body.
@@ -162,7 +164,7 @@ String literals may be enclosed in double quotes. Single quotes are used with st
 ### TODO Comments
 Incomplete code must not be added to Lycan.
 
-Throw an exception, return an error code, or refactor code with unhandled options or code paths instead of adding a TODO. Or open an issue.
+Throw an exception, return an error code, or refactor code with unhandled options or code paths. If a TODO must be added, label it with a link to the GitHub issue for the problem.
 
 ### Trace Usage
 Traces useful for debugging purposes should be commented out before commit.
@@ -179,5 +181,5 @@ Unused imports are not allowed.
 ### Variable Initialization
 Instance variables must be initialized in class constructors.
 
-### Whitespace Around Operators
-All Haxe operators should be used with one space of whitespace padding around them.
+### Whitespace Around Binary Operators
+All binary operators should be used with one space of whitespace padding around them.
