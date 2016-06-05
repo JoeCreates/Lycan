@@ -14,75 +14,81 @@ class AbstractSlider extends Widget {
     public var signal_sliderPressed(default,null) = new Signal0();
     public var signal_sliderMoved(default,null) = new Signal0();
     public var signal_sliderReleased(default,null) = new Signal0();
-    
+
     private var minimum:Float;
     private var maximum:Float;
     public var value(default, set):Float;
-    
+
     public function new(min:Float, max:Float, value:Float, ?parent:UIObject, ?name:String) {
         super(parent, name);
-        
+
         pointerTrackingPolicy = PointerTrackingPolicy.StrongTracking;
-        
+
         this.minimum = min;
         this.maximum = max;
         this.value = value;
     }
-    
+
     override private function wheelEvent(e:WheelEvent) {
-        super.wheelEvent(e);
+        return super.wheelEvent(e);
         // scroll value
     }
-    
+
     override private function keyPressEvent(e:KeyEvent) {
-        super.keyPressEvent(e);
+        return super.keyPressEvent(e);
         // scroll value
     }
-    
+
     override private function pointerPressEvent(e:PointerEvent) {
         super.pointerPressEvent(e);
-        
+
         pressed = true;
-        
+
         value = maximum * e.localX / width;
-        
+
         signal_sliderPressed.dispatch();
+
+		return true;
     }
-    
+
     override private function pointerReleaseEvent(e:PointerEvent) {
         super.pointerReleaseEvent(e);
-        
+
         pressed = false;
-        
+
         value = maximum * e.localX / width;
-        
+
         signal_sliderReleased.dispatch();
+
+		return true;
     }
-    
+
     override private function pointerMoveEvent(e:PointerEvent) {
         super.pointerMoveEvent(e);
-        
+
         if (pressed) {
             value = maximum * e.localX / width;
         }
-        
+
         signal_sliderMoved.dispatch();
+
+		return true;
     }
-    
+
     override private function hoverEnterEvent(e:HoverEvent) {
-        super.hoverEnterEvent(e);
-        
+        return super.hoverEnterEvent(e);
+
         // TODO if left mouse or touch is already pressed down on entering, then set pressed to true
     }
-    
+
     override private function hoverLeaveEvent(e:HoverEvent) {
-        super.hoverLeaveEvent(e);
+        return  super.hoverLeaveEvent(e);
     }
-    
+
     private function calculateValue(e:PointerEvent):Float {
         return value; // TODO calculate the % the pointer is across the widget
     }
-    
+
     private function set_value(v:Float):Float {
         v = Math.max(v, minimum);
         v = Math.min(v, maximum);

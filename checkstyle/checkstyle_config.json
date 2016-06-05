@@ -44,7 +44,7 @@
             "props":
             {
                 "format": "^(ex)$",
-                "severity": "ERROR"
+                "severity": "IGNORE"
             }
         },
         {
@@ -165,7 +165,7 @@
             "type": "IndentationCharacter",
             "props":
             {
-                "character": "space",
+                "character": "tab",
                 "severity": "ERROR"
             }
         },

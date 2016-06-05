@@ -1,5 +1,6 @@
 package lycan.util;
 
+import lycan.util.structure.PrefixTrie;
 import massive.munit.Assert;
 
 class PrefixTrieTest extends LycanTest {

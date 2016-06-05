@@ -42,69 +42,57 @@ abstract EventType(Int) {
     var WheelScroll = 29; // The mouse wheel was scrolled
     var KeyPress = 30; // Key pressed down
     var KeyRelease = 31; // Key released
-    
+
     var GamepadButtonDown = 32; // Gamepad button pressed down
     var GamepadButtonUp = 33; // Gamepad button released
     var GamepadConnect = 34; // Gamepad connected/detected
     var GamepadDisconnect = 35; // Gamepad disconnected
     var GamepadAxisMove = 36; // Gamepad analog stick moved
-    
+
     var GamepadFocusIn = 37; // Widget gains the gamepad focus
     var GamepadFocusOut = 38; // Widget loses the gamepad focus
-    
+
     var AccelerometerUpdate = 39; // An accelerometer sent an update
-    
+
     // ZOrderChange; // The widget's z-order changed
 }
 
 // Base of event classes. Events are generally passed from the input system to UI objects to handle.
 class UIEvent {
     public var type(get, null):EventType;
-    
-    // The receiver usually sets the accept flag to indicate that it wants to consume the event. Unwanted events may be propagated to the parent objects via UIObject.event() 
-    @:isVar
-    public var accept(get, set):Bool = false;
-    
+
     public function new(type:EventType) {
         this.type = type;
     }
-    
+
     private function get_type():EventType {
         return type;
     }
-    
-    private function get_accept():Bool {
-        return accept;
-    }
-    
-    private function set_accept(accept:Bool):Bool {
-        return this.accept = accept;
-    }
-    
+
     /*
     // For extending the Type enum with user generated events
     static public function registerEventType(hint:Int):Void {
-    
+
     }
     */
 }
 
 class ChildEvent extends UIEvent {
     public var child(get, null):UIObject;
-    
+
     public function new(type:EventType, child:UIObject) {
         super(type);
         this.child = child;
     }
-    
+
     public function added():Bool {
         return type == EventType.ChildAdded;
     }
-    
+
     public function removed():Bool {
         return type == EventType.ChildRemoved;
     }
-    
+
     private function get_child():UIObject {
         return child;
     }
@@ -112,44 +100,44 @@ class ChildEvent extends UIEvent {
 
 // NOTE in theory all of these event types could be implemented just by passing the right data, so don't expose the OpenFL events passed into them, so that the system will be flexible enough to work with alternative different input systems
 class CloseEvent extends UIEvent {
-    
+
 }
 
 class DragEnterEvent extends UIEvent {
-    
+
 }
 
 class DragLeaveEvent extends UIEvent {
-    
+
 }
 
 class DragMoveEvent extends UIEvent {
-    
+
 }
 
 class DropEvent extends UIEvent {
-    
+
 }
 
 class EnabledChangeEvent extends UIEvent {
-    
+
 }
 
 class EnterEvent extends UIEvent {
-    
+
 }
 
 class KeyboardFocusEvent extends UIEvent {
-    
+
 }
 
 class GamepadFocusEvent extends UIEvent {
-    
+
 }
 
 class GestureEvent extends UIEvent {
     public var gesture(default, null):Gesture;
-    
+
     public function new(gesture:Gesture) {
         super(EventType.Gesture);
         this.gesture = gesture;
@@ -157,22 +145,22 @@ class GestureEvent extends UIEvent {
 }
 
 class ShowEvent extends UIEvent {
-    
+
 }
 
 class HideEvent extends UIEvent {
-    
+
 }
 
 class HoverEvent extends UIEvent {
-    
+
 }
 
 class LocaleChangeEvent extends UIEvent {
-    
+
 }
 
-class PointerEvent extends UIEvent {    
+class PointerEvent extends UIEvent {
     public var button:MouseButton;
     public var localX:Float;
     public var localY:Float;
@@ -181,16 +169,16 @@ class PointerEvent extends UIEvent {
 }
 
 class PropertyChangeEvent extends UIEvent {
-    
+
 }
 
 class ResizeEvent extends UIEvent {
-    
+
 }
 
 class WheelEvent extends UIEvent {
     public var delta:Int;
-    
+
     public function new(delta:Int) {
         super(EventType.WheelScroll);
         this.delta = delta;
@@ -200,7 +188,7 @@ class WheelEvent extends UIEvent {
 class KeyEvent extends UIEvent {
     public var charCode:UInt;
     public var keyCode:UInt;
-    
+
     public function text():String {
         // TODO this may flake for foreign/weird keyboards, and obviously lots of key events don't have glyphs that we can display
         var u = new Utf8();
@@ -210,7 +198,7 @@ class KeyEvent extends UIEvent {
 }
 
 class MoveEvent extends UIEvent {
-    
+
 }
 
 class GamepadEvent extends UIEvent {
@@ -220,5 +208,5 @@ class GamepadEvent extends UIEvent {
 }
 
 class AccelerometerEvent extends UIEvent {
-    
+
 }

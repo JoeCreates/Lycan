@@ -3,7 +3,7 @@ package lycan.ui.core;
 import lycan.ui.core.Gesture;
 import lycan.ui.events.UIEvent;
 import lycan.ui.UIObject;
-import lycan.util.ArraySet;
+import lycan.util.structure.container.ArraySet;
 
 // The current result of the event filtering step in the gesture recognizer
 @:enum abstract GestureRecognizerResult(Int) {
@@ -18,32 +18,32 @@ import lycan.util.ArraySet;
 // Widgets subscribe to a gesture recognizer which then listens to their events
 class GestureRecognizer {
     public function new() {
-        
+
     }
-    
+
     //public function create(target:UIObject):Gesture {
-    //  
+    //
     //}
-    
+
     public function recognize(gesture:Gesture, watched:UIObject, event:UIEvent):GestureRecognizerResult {
         return Ignore;
     }
-    
+
     public function reset(gesture:Gesture):Void {
-        
+
     }
 }
 
 private class GestureManager {
     public static var instance(get, null):GestureManager;
-    
+
     public function new() {
-        
+
     }
-    
+
     private var activeGestures:ArraySet<Gesture>;
     private var possibleGestures:ArraySet<Gesture>;
-    
+
     private static function get_instance():GestureManager {
         if (instance == null) {
             instance = new GestureManager();

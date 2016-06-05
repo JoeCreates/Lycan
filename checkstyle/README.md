@@ -41,16 +41,13 @@ Only use inline conditionals (```?``` operator) for ```if/else``` checks that en
 ### Avoid Star Imports
 Avoid star imports, because they clutter the namespace they are added to. Explicitly list required imports for code clarity.
 
-### Catch Parameter Names
-In exception catch blocks, the capture parameter should be named ```ex```.
-
 ### Constant Names
 Static and static inline variable names must be uppercase alphanumeric, with underscores to separate words.
 
 ### Cyclomatic Complexity
 The [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity) of methods must be under 10.
 
-### Default Comes Last In Switch
+### Default Case Comes Last In Switch
 The default keyword must come after the last ```case``` in a ```switch``` statement. This increases code readability.
 
 ### Dynamic Type Usage

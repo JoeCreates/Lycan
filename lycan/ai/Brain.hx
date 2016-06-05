@@ -4,9 +4,9 @@ import ai.NeedId;
 import haxe.ds.IntMap;
 import msignal.Signal;
 import haxe.ds.GenericStack;
-import lycan.util.LinkedList;
+import lycan.util.structure.container.LinkedList;
 
-using lycan.util.ArrayExtensions;
+using lycan.core.ArrayExtensions;
 
 // Represents an AI
 class Brain<T:SmartEnvironment> {

@@ -25,63 +25,65 @@ POSSIBILITY OF SUCH DAMAGE.
 
 import flixel.math.FlxPoint;
 
+import lycan.core.Limits;
+
 class Perlin {
     public var octaves(default, default):Int;
     public var seed(default, default):Int;
-    
+
     public function new(octaves:Int = 4, ?seed:Null<Int>) {
         this.octaves = octaves;
         if (seed == null) {
             seed = Std.random(Limits.INT32_MAX);
         }
     }
-    
+
     // Fractional Brownian motion noise, summed octaves of noise
     public function fBm1d(x:Float):Float {
         var result:Float = 0;
         var amp:Float = 0.5;
-        
+
         for (i in 0...octaves) {
             result += noise1d(x) * amp;
             x *= 2;
             amp *= 0.5;
         }
-        
+
         return result;
     }
-    
+
     public function fBm2d(x:Float, y:Float):Float {
         var result:Float = 0;
         var amp:Float = 0.5;
-        
+
         for (i in 0...octaves) {
             result += noise2d(x, y) * amp;
             x *= 2;
             y *= 2;
             amp *= 0.5;
         }
-        
+
         return result;
     }
-    
+
     // Derivative of fractional Brownian motion
     public function dfBm2d(x:Float, y:Float):FlxPoint {
         var result:FlxPoint = new FlxPoint();
-        
+
         var amp:Float = 0.5;
         var x:Float = x;
         var y:Float = y;
-        
+
         for (i in 0...octaves) {
             result.addPoint(dnoise1d(x * amp, y * amp));
             x *= 2;
             y *= 2;
             amp *= 0.5;
         }
-        
+
         return result;
     }
-    
+
     // Single octaves of noise
     public function noise1d(x:Float):Float {
         var X:Int = Math.floor(x) & 255;
@@ -93,7 +95,7 @@ class Perlin {
         var BA:Int = permutations[B];
         return lerp(u, grad1d(permutations[AA], x), grad1d(permutations[BA], x - 1));
     }
-    
+
     public function noise2d(x:Float, y:Float):Float {
         var X:Int = Math.floor(x) & 255;
         var Y:Int = Math.floor(y) & 255;
@@ -110,7 +112,7 @@ class Perlin {
         return lerp(v, lerp(u, grad2d(permutations[AA], x, y), grad2d(permutations[BA], x - 1, y)),
                         lerp(u, grad2d(permutations[AB], x, y - 1), grad2d(permutations[BB], x - 1, y - 1)));
     }
-    
+
     // Derivative of single octave of noise
     public function dnoise1d(x:Float, y:Float):FlxPoint { // TODO avoid use of flxpoint/pass a reference in as a parameter
         var X:Int = Math.floor(x) & 255;
@@ -127,26 +129,26 @@ class Perlin {
         var B:Int = permutations[X + 1] + Y;
         var BA = permutations[B];
         var BB = permutations[B + 1];
-        
+
         if (du < 0.000001) {
             du = 1.0;
         }
         if (dv < 0.000001) {
             dv = 1.0;
         }
-        
+
         var a:Float = grad2d(permutations[AA], x, y);
         var b:Float = grad2d(permutations[BA], x - 1, y);
         var c:Float = grad2d(permutations[AB], x, y - 1);
         var d:Float = grad2d(permutations[BB], x - 1, y - 1);
-        
+
         var k1:Float = b - a;
         var k2:Float = c - a;
         var k4:Float = a - b - c + d;
-        
+
         return new FlxPoint(du * (k1 + k4 * v), dv * (k2 + k4 * u));
     }
-    
+
     // Gradients
     private function grad1d(hash:Int, x:Float):Float {
         var h:Int = hash & 15;
@@ -154,26 +156,26 @@ class Perlin {
         var v:Float = h < 4 ? 0 : (h == 12 || h == 14) ? x : 0;
         return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
     }
-    
+
     private function grad2d(hash:Int, x:Float, y:Float):Float {
         var h:Int = hash & 15;
         var u:Float = h < 8 ? x : y;
         var v:Float = h < 4 ? y : (h == 12 || h == 14) ? x : 0;
         return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
     }
-    
+
     private static inline function fade(t:Float):Float {
         return t * t * t * (t * (t * 6 - 15) + 10);
     }
-    
+
     private static inline function dfade(t:Float):Float {
         return 30 * t * t * (t * (t - 2) + 1);
     }
-    
+
     private static inline function lerp(t:Float, a:Float, b:Float):Float {
         return a + t * (b - a);
     }
-    
+
     private static var permutations:Array<Int> = [ 151,160,137,91,90,15,
         131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
         190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,

@@ -1,10 +1,9 @@
 package lycan.util.timeline;
 
 import haxe.macro.Expr;
-import lycan.util.EasingEquations;
 import haxe.macro.Context;
 
-using lycan.util.FloatExtensions;
+using lycan.core.FloatExtensions;
 
 class TweenItem extends TimelineItem {
     public var ease:Float->Float;
