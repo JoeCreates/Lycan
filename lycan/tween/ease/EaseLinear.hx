@@ -9,7 +9,7 @@ class EaseLinear {
 	 * @param	t	The value to ease.
 	 * @return	The eased value.
 	 */
-    public inline static function none(t:Float):Float {
-        return t;
-    }
+	public inline static function none(t:Float):Float {
+		return t;
+	}
 }

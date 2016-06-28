@@ -15,67 +15,67 @@ import msignal.Signal.Signal1;
 // Consists of TileLayers and FlxGroups of game objects
 @:allow(lycan.world.WorldLoader)
 class World extends FlxGroup {
-    public var width(default, null):Int;
-    public var height(default, null):Int;
-    public var scale(default, null):FlxPoint;
-    public var name:String;
-    public var updateSpeed:Float;
-    public var signal_loadingProgressed(default, null):Signal1<Float>;
+	public var width(default, null):Int;
+	public var height(default, null):Int;
+	public var scale(default, null):FlxPoint;
+	public var name:String;
+	public var updateSpeed:Float;
+	public var signal_loadingProgressed(default, null):Signal1<Float>;
 
-    private var namedObjects(default, null):Map<String, Array<FlxBasic>>;
-    private var namedLayers(default, null):Map<String, Layer>;
-    private var namedTilesets(default, null):Map<String, TiledTileSet>;
-    private var collidableLayers(default, null):Array<TileLayer>;
+	private var namedObjects(default, null):Map<String, Array<FlxBasic>>;
+	private var namedLayers(default, null):Map<String, Layer>;
+	private var namedTilesets(default, null):Map<String, TiledTileSet>;
+	private var collidableLayers(default, null):Array<TileLayer>;
 
-    public function new(?scale:FlxPoint) {
-        super();
+	public function new(?scale:FlxPoint) {
+		super();
 
-        if (scale == null) {
-            scale = new FlxPoint(1, 1);
-        }
-        this.scale = scale;
-        name = "Unnamed World";
-        updateSpeed = 1;
+		if (scale == null) {
+			scale = new FlxPoint(1, 1);
+		}
+		this.scale = scale;
+		name = "Unnamed World";
+		updateSpeed = 1;
 
-        namedObjects = new Map<String, Array<FlxBasic>>();
-        namedLayers = new Map<String, Layer>();
-        collidableLayers = [];
+		namedObjects = new Map<String, Array<FlxBasic>>();
+		namedLayers = new Map<String, Layer>();
+		collidableLayers = [];
 
-        signal_loadingProgressed = new Signal1<Float>();
-    }
+		signal_loadingProgressed = new Signal1<Float>();
+	}
 
-    public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
-        if (collidableLayers == null) {
-            return false;
-        }
+	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
+		if (collidableLayers == null) {
+			return false;
+		}
 
-        for (map in collidableLayers) {
-            // NOTE Always collide the map with objects, not the other way around
-            if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
-                return true;
-            }
-        }
+		for (map in collidableLayers) {
+			// NOTE Always collide the map with objects, not the other way around
+			if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    public function load(tiledLevel:FlxTiledAsset, loadingRules:WorldLoader):Void {
-        WorldLoader.load(this, tiledLevel, loadingRules);
-    }
+	public function load(tiledLevel:FlxTiledAsset, loadingRules:WorldLoader):Void {
+		WorldLoader.load(this, tiledLevel, loadingRules);
+	}
 
-    override public function update(dt:Float):Void {
-        super.update(dt * updateSpeed);
-    }
+	override public function update(dt:Float):Void {
+		super.update(dt * updateSpeed);
+	}
 
-    public inline function getNamedObjects(name:String):Array<FlxBasic> {
-        return namedObjects.get(name);
-    }
+	public inline function getNamedObjects(name:String):Array<FlxBasic> {
+		return namedObjects.get(name);
+	}
 
-    public inline function getNamedLayer(name:String):Layer {
-        return namedLayers.get(name);
-    }
+	public inline function getNamedLayer(name:String):Layer {
+		return namedLayers.get(name);
+	}
 
-    public inline function getNamedTileSet(name:String):TiledTileSet {
-        return namedTilesets.get(name);
-    }
+	public inline function getNamedTileSet(name:String):TiledTileSet {
+		return namedTilesets.get(name);
+	}
 }

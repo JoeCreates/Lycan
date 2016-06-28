@@ -12,71 +12,71 @@ import flixel.util.FlxColor;
 
 // Base state for all substates in a game
 class LycanState extends FlxSubState {
-    #if debug
-    private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called // TODO remove
-    #end
+	#if debug
+	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called // TODO remove
+	#end
 
-    public var uiGroup(default, null):FlxSpriteGroup;
-    public var uiCamera(default, null):FlxCamera;
-    public var worldCamera(default, null):FlxCamera;
+	public var uiGroup(default, null):FlxSpriteGroup;
+	public var uiCamera(default, null):FlxCamera;
+	public var worldCamera(default, null):FlxCamera;
 
-    public var worldZoom(default, set):Float;
-    public var baseZoom:Float;
+	public var worldZoom(default, set):Float;
+	public var baseZoom:Float;
 
-    public var zoomTween(default, null):FlxTween;
+	public var zoomTween(default, null):FlxTween;
 
-    // Tweens that should be cancelled before another tween of the same ID plays
-    public var exclusiveTweens:Map<String, FlxTween>;
+	// Tweens that should be cancelled before another tween of the same ID plays
+	public var exclusiveTweens:Map<String, FlxTween>;
 
-    public function new() {
-        super();
+	public function new() {
+		super();
 
-        exclusiveTweens = new Map<String, FlxTween>();
+		exclusiveTweens = new Map<String, FlxTween>();
 
-        worldCamera = FlxG.camera;
+		worldCamera = FlxG.camera;
 
-        uiCamera = LycanRootState.getInstance().uiCamera;
-        uiCamera.bgColor = FlxColor.TRANSPARENT;
+		uiCamera = LycanRootState.getInstance().uiCamera;
+		uiCamera.bgColor = FlxColor.TRANSPARENT;
 
-        FlxG.cameras.add(uiCamera);
-        FlxCamera.defaultCameras = [worldCamera];
+		FlxG.cameras.add(uiCamera);
+		FlxCamera.defaultCameras = [worldCamera];
 
-        baseZoom = worldCamera.zoom;
-        worldZoom = 1;
+		baseZoom = worldCamera.zoom;
+		worldZoom = 1;
 
-        uiGroup = new FlxSpriteGroup();
-        uiGroup.scrollFactor.set(0, 0);
-        uiGroup.cameras = [uiCamera];
-        add(uiGroup);
-    }
+		uiGroup = new FlxSpriteGroup();
+		uiGroup.scrollFactor.set(0, 0);
+		uiGroup.cameras = [uiCamera];
+		add(uiGroup);
+	}
 
-    public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {
-        if (exclusiveTweens.exists(id)) {
-            exclusiveTweens.get(id).cancel();
-        }
-        var tween:FlxTween = FlxTween.tween(object, values, duration, options);
-        exclusiveTweens.set(id, tween);
-        return tween;
-    }
+	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {
+		if (exclusiveTweens.exists(id)) {
+			exclusiveTweens.get(id).cancel();
+		}
+		var tween:FlxTween = FlxTween.tween(object, values, duration, options);
+		exclusiveTweens.set(id, tween);
+		return tween;
+	}
 
-    public function zoomTo(zoom:Float, duration:Float = 0.5, ?ease:Float->Float):FlxTween {
-        if (ease == null) {
-            ease = FlxEase.quadInOut;
-        }
-        if (zoomTween != null) {
-            zoomTween.cancel();
-        }
-        zoomTween = FlxTween.tween(this, { worldZoom: zoom }, duration, { type: FlxTween.ONESHOT, ease: ease } );
-        return zoomTween;
-    }
+	public function zoomTo(zoom:Float, duration:Float = 0.5, ?ease:Float->Float):FlxTween {
+		if (ease == null) {
+			ease = FlxEase.quadInOut;
+		}
+		if (zoomTween != null) {
+			zoomTween.cancel();
+		}
+		zoomTween = FlxTween.tween(this, { worldZoom: zoom }, duration, { type: FlxTween.ONESHOT, ease: ease } );
+		return zoomTween;
+	}
 
-    // Sets world and camera zoom
-    private function set_worldZoom(worldZoom:Float):Float {
-        worldCamera.zoom = baseZoom * worldZoom;
-        return this.worldZoom = worldZoom;
-    }
+	// Sets world and camera zoom
+	private function set_worldZoom(worldZoom:Float):Float {
+		worldCamera.zoom = baseZoom * worldZoom;
+		return this.worldZoom = worldZoom;
+	}
 
-    // TODO autotweening
-    // TODO camera targeting
-    // TODO sound fading
+	// TODO autotweening
+	// TODO camera targeting
+	// TODO sound fading
 }

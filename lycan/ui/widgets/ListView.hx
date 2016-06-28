@@ -15,10 +15,10 @@ import openfl.ui.Keyboard;
 import lycan.ui.widgets.Widget.KeyboardFocusPolicy;
 
 class ListView extends Widget {
-    public var signal_currentItemChanged = new Signal2<Widget, Widget>();
-    public var signal_itemActivated = new Signal1<Widget>();
-    public var signal_itemPressed = new Signal1<Widget>();
-    public var signal_itemHovered = new Signal1<Widget>();
+	public var signal_currentItemChanged = new Signal2<Widget, Widget>();
+	public var signal_itemActivated = new Signal1<Widget>();
+	public var signal_itemPressed = new Signal1<Widget>();
+	public var signal_itemHovered = new Signal1<Widget>();
 
 	public var wheelEventDeltaMultiplier:Float;
 	public var keyboardDeltaMultiplier:Float;
@@ -26,8 +26,8 @@ class ListView extends Widget {
 
 	public var lastPressY:Float;
 
-    public function new(?parent:UIObject, ?name:String) {
-        super(parent, name);
+	public function new(?parent:UIObject, ?name:String) {
+		super(parent, name);
 		wheelEventDeltaMultiplier = 10.0;
 		keyboardDeltaMultiplier = 30.0;
 		pointerDeltaMultiplier = 1.0;
@@ -37,25 +37,25 @@ class ListView extends Widget {
 		lastPressY = y;
 		pointerTrackingPolicy = PointerTrackingPolicy.StrongTracking;
 		keyboardFocusPolicy = KeyboardFocusPolicy.ClickFocus;
-    }
+	}
 
-    override private function wheelEvent(e:WheelEvent) {
+	override private function wheelEvent(e:WheelEvent) {
 		super.wheelEvent(e);
 
 		moveChildren(e.delta * wheelEventDeltaMultiplier);
 
 		return false;
-    }
+	}
 
-    override private function pointerPressEvent(e:PointerEvent) {
+	override private function pointerPressEvent(e:PointerEvent) {
 		super.pointerPressEvent(e);
 
 		lastPressY = e.globalY;
 
 		return false;
-    }
+	}
 
-    override private function pointerMoveEvent(e:PointerEvent) {
+	override private function pointerMoveEvent(e:PointerEvent) {
 		super.pointerMoveEvent(e);
 
 		// TODO handle touches, modify pointer events to include the finger id(?)
@@ -70,9 +70,9 @@ class ListView extends Widget {
 		moveChildren(dy * pointerDeltaMultiplier);
 
 		return false;
-    }
+	}
 
-    override private function keyPressEvent(e:KeyEvent) {
+	override private function keyPressEvent(e:KeyEvent) {
 		// TODO use this for focusing child items/gamepad control...
 
 		if (e.keyCode == Keyboard.DOWN) {
@@ -82,11 +82,11 @@ class ListView extends Widget {
 		}
 
 		return false;
-    }
+	}
 
-    override private function keyReleaseEvent(e:KeyEvent) {
+	override private function keyReleaseEvent(e:KeyEvent) {
 		return false;
-    }
+	}
 
 	override private function childAddedEvent(e:ChildEvent) {
 		super.childAddedEvent(e);
@@ -105,10 +105,10 @@ class ListView extends Widget {
 
 	private function moveChildren(delta:Float):Void {
 		for (child in children) {
-            if (child.isWidgetType) {
-                var w:Widget = cast child;
-                w.y += Std.int(delta);
-            }
-        }
+			if (child.isWidgetType) {
+				var w:Widget = cast child;
+				w.y += Std.int(delta);
+			}
+		}
 	}
 }

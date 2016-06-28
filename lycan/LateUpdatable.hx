@@ -1,5 +1,5 @@
 package lycan;
 
 interface LateUpdatable {
-    public function lateUpdate(dt:Float):Void;
+	public function lateUpdate(dt:Float):Void;
 }

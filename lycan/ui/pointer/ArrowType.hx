@@ -1,9 +1,9 @@
 package lycan.ui.pointer;
 
 enum ArrowType {
-    NoArrow;
-    UpArrow;
-    DownArrow;
-    LeftArrow;
-    RightArrow;
+	NoArrow;
+	UpArrow;
+	DownArrow;
+	LeftArrow;
+	RightArrow;
 }
