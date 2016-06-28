@@ -1,5 +1,5 @@
 package;
 
 class LycanTest {
-    public function new() {}
+	public function new() {}
 }

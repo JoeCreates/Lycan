@@ -3,7 +3,7 @@
 // TODO manually import the stuff that needs documentation generating for it
 
 class Main {
-    public static function main() {
-        
-    }
+	public static function main() {
+		
+	}
 }
