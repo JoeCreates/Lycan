@@ -41,6 +41,7 @@ class AttachableComponent extends Component<Attachable> {
 		
 		updateAndDraw = true;
 		
+		// Todo use metadata instead!
 		requiresLateUpdate = true;
 		requiresUpdate = true;
 		requiresDraw = true;

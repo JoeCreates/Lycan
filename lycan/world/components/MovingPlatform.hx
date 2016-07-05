@@ -1,4 +1,4 @@
-package lycan.world.entities;
+package lycan.world.components;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;

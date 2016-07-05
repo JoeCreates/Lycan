@@ -12,8 +12,6 @@ class CenterPositionableComponent extends Component<CenterPositionable> {
 	public var x(get, set):Float;
 	public var y(get, set):Float;
 	
-	public var test:String;
-	
 	public function new(entity:CenterPositionable) {
 		super(entity);
 	}

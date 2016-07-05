@@ -160,7 +160,7 @@ class EntityBuilder {
 				
 				var dummySourceFieldName:String = dummyField.name.substring(7, dummyField.name.length);
 				if (!hasFieldIncludingBuildFields(dummySourceFieldName)) {
-					throw("Field " + dummySourceFieldName + " required by component interface is missing in " + classType.name);
+					throw("Field " + dummySourceFieldName + " ("+ dummyField.name+") required by component interface is missing in " + classType.name);
 				}
 				
 				// And create getter/setter
@@ -484,34 +484,34 @@ class EntityBuilder {
 	
 	public static function appendDraw(func:Function):Void {
 		func.expr = macro {
-			${func.expr};
 			for (component in components) {
 				if (component.requiresDraw) {
 					component.draw();
 				}
 			}
+			${func.expr};
 		}
 	}
 	
 	public static function appendUpdate(func:Function):Void {
 		func.expr = macro {
-			${func.expr};
 			for (component in components) {
 				if (component.requiresUpdate) {
 					component.update($i{func.args[0].name});
 				}
 			}
+			${func.expr};//TODO moved all this stuff to end up funcs. Change names accordingly.
 		}
 	}
 	
 	public static function appendLateUpdate(func:Function):Void {
 		func.expr = macro {
-			${func.expr};
 			for (component in components) {
 				if (component.requiresLateUpdate) {
 					component.lateUpdate($i{func.args[0].name});
 				}
 			}
+			${func.expr};
 		}
 	}
 	

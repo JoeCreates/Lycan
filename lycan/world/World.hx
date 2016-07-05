@@ -1,6 +1,6 @@
 package lycan.world;
 
-import flixel.addons.editors.tiled.TiledMap.FlxTiledAsset;
+import flixel.addons.editors.tiled.TiledMap.FlxTiledMapAsset;
 import flixel.addons.editors.tiled.TiledPropertySet;
 import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.addons.editors.tiled.TiledLayer;
@@ -82,7 +82,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledAsset, objectLoaders:StringMap<ObjectLoader>):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoaders:StringMap<ObjectLoader>):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
@@ -111,8 +111,8 @@ class World extends FlxGroup {
 	}
 	
 	public function loadTileLayer(tiledLayer:TiledTileLayer):ILayer {
-		var layer:TileLayer = cast new TileLayer(this).load(tiledLayer, new FlxTilemap());
-		add(layer.tilemap);
+		var layer:TileLayer = cast new TileLayer(this).load(tiledLayer);
+		add(layer);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
 	}
@@ -148,6 +148,8 @@ class World extends FlxGroup {
 		// Load tileset graphics
 		var tilesetBitmaps:Array<BitmapData> = new Array<BitmapData>();
 		for (tileset in tiledMap.tilesetArray) {
+			// TODO might require attention later
+			if (tileset.properties.contains("noload")) continue;
 			var imagePath = new Path(tileset.imageSource);
 			var processedPath = TILESET_PATH + imagePath.file + "." + imagePath.ext;
 			tilesetBitmaps.push(FlxAssets.getBitmapData(processedPath));
@@ -170,7 +172,6 @@ class World extends FlxGroup {
 	
 	private function updateCameraAndWorldBounds():Void {
 		// Camera scroll bounds
-		FlxG.camera.setScrollBoundsRect(0, 0, width * scale.x, width * scale.x, true);
-		FlxG.camera.maxScrollY += FlxG.height / 2;
+		FlxG.camera.setScrollBoundsRect(0, 0, width * scale.x, height * scale.y, true);
 	}
 }

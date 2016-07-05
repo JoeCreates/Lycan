@@ -15,5 +15,4 @@ interface ILayer {
 	public var layerType(default, null):LayerType;
 	public var world(default, null):World;
 	public var properties(default, null):TiledPropertySet;
-	public function getBasic():FlxBasic;//TODO remove this and just make layers not extend stuff
 }

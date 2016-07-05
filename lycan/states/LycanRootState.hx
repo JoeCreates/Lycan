@@ -26,7 +26,7 @@ class LycanRootState extends FlxState {
 	private function new() {
 		super();
 		
-		#if (debug && cpp)
+		#if (debug && cpp && enablesceenshots)
 		// Batch screenshots
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, function(evt:KeyboardEvent) {
 			if (evt.keyCode == 83) { // S to take screenshots

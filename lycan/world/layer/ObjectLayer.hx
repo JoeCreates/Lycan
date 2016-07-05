@@ -1,5 +1,6 @@
 package lycan.world.layer;
 import flixel.FlxBasic;
+import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.addons.editors.tiled.TiledPropertySet;
@@ -8,6 +9,7 @@ import flixel.addons.editors.tiled.TiledObject;
 import flixel.group.FlxGroup;
 import haxe.ds.StringMap;
 import lycan.world.World;
+import lycan.world.components.NapeComponent;
 import lycan.world.layer.ILayer.LayerType;
 import lycan.world.layer.TileLayer;
 
@@ -40,7 +42,8 @@ class ObjectLayer extends FlxGroup implements ILayer {
 	private function loadObjects(tiledLayer:TiledObjectLayer, objectLoaders:StringMap<ObjectLoader>):ObjectLayer {
 		for (o in tiledLayer.objects) {
 			if (!objectLoaders.exists(o.type)) {
-				throw ("Error loading world. Unknown object type: " + o.type);
+				FlxG.log.warn("Error loading world. Unknown object type: " + o.type);
+				continue;
 			}
 			
 			// Call the loader function for the given object
@@ -63,8 +66,12 @@ class ObjectLayer extends FlxGroup implements ILayer {
 		for (m in this) {
 			if (Std.is(m, FlxObject)) {
 				var o:FlxObject = cast m;
-				o.x *= world.scale.x;
-				o.y *= world.scale.y;
+				// TODO badness. uses setPosition because this is required for FlxNapeSprite
+				o.setPosition(o.x * world.scale.x, o.y * world.scale.y);
+				if (o.components.has("nape")) {
+					o.components.get("nape").setPosition(o.x, o.y);
+				}
+				
 			}
 		}
 		
