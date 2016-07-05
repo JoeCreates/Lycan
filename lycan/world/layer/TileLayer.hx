@@ -47,9 +47,9 @@ class TileLayer extends FlxTilemap implements ILayer {
 		
 		#if nape
 			nape = new NapeComponent(BodyType.KINEMATIC, false, false);
-			nape.entity = this;
 			napeTilemap = new NapeTilemapComponent();
-			napeTilemap.entity = this;
+			components.add(nape);
+			components.add(napeTilemap);
 		#end
 	}
 	

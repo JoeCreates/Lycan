@@ -6,7 +6,6 @@ import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 import flixel.FlxComponent;
-import lycan.components.Component;
 import nape.geom.Vec2;
 import nape.phys.Body;
 import nape.phys.BodyType;

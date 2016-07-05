@@ -40,7 +40,7 @@ class NapeTilemapComponent extends FlxComponent {
 	}
 	
 	public function onMapLoaded(tiledLayer:TiledTileLayer):Void {
-		var entity:NapeTilemap = cast entity;
+		var entity:TileLayer = cast entity;
 		
 		binaryData = new Array<Int>();
 		FlxArrayUtil.setLength(binaryData, entity.data.length);
@@ -61,7 +61,7 @@ class NapeTilemapComponent extends FlxComponent {
 	 * @param	mat		The material for the collider. Defaults to default nape material
 	 */
 	public function addSolidTile(X:Int, Y:Int, ?mat:Material) {
-		var entity:NapeTilemap = cast entity;
+		var entity:TileLayer = cast entity;
 		
 		body.space = null;
 		if (mat == null) {
@@ -82,6 +82,8 @@ class NapeTilemapComponent extends FlxComponent {
 	}
 	
 	public function placeCustomPolygon(tileIndices:Array<Int>, vertices:Array<Vec2>, ?mat:Material) {
+		var entity:TileLayer = cast entity;
+		
 		body.space = null;
 		var polygon:Polygon;
 		for (index in tileIndices) {
@@ -108,7 +110,7 @@ class NapeTilemapComponent extends FlxComponent {
 	 * @param	mat				The Nape physics material to use. Will use the default material if not specified
 	 */
 	public function setupCollideIndex(CollideIndex:Int = 1, ?mat:Material) {
-		var entity:FlxTilemap = cast entity;
+		var entity:TileLayer = cast entity;
 		if (entity.data == null) {
 			FlxG.log.error("loadMap has to be called first!");
 			return;
@@ -131,6 +133,8 @@ class NapeTilemapComponent extends FlxComponent {
 	 * @param	mat				The nape physics material applied to the collider. Defaults to nape default material
 	 */
 	public function setupTileIndices(tileIndices:Array<Int>, ?mat:Material) {
+		var entity:TileLayer = cast entity;
+		
 		if (entity.data == null) {
 			FlxG.log.error("loadMap has to be called first!");
 			return;
@@ -270,9 +274,15 @@ class NapeTilemapComponent extends FlxComponent {
 	}
 	
 	override private function set_entity(entity:FlxObject):FlxObject {
+		var entity:TileLayer = cast entity;
 		this.entity = entity;
 		autoSub(entity.loaded, onMapLoaded);
 		return entity;
+	}
+	
+	private function get_body():Body {
+		var nape:NapeComponent = cast entity.components.get("nape");
+		return nape.body;
 	}
 }
 #end

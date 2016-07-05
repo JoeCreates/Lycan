@@ -1,18 +1,13 @@
 package lycan.world.components;
 
+import flixel.FlxComponent;
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import lycan.components.Component;
-import lycan.components.Entity;
 
-interface Groundable extends Entity {
-	public var ground:GroundableComponent;
-}
-
-class GroundableComponent extends Component<Groundable> {
+class GroundableComponent extends FlxComponent {
 	private var currentGrounds:Map<FlxObject, Bool>;
 	private var currentGroundCount:Int;
-	private var grounded:Bool;//Hacked in for ludum dare
+	private var grounded:Bool; //Hacked in for ludum dare
 	private var queueGrounded:Bool;
 	
 	public var wasGrounded:Bool = false;
@@ -20,17 +15,15 @@ class GroundableComponent extends Component<Groundable> {
 	/** Whether to force grounded checks to return true */
 	public var forceGrounded:Bool;
 	
-	public function new(entity:Groundable) {
-		super(entity);
+	public function new() {
+		super("groundable");
 		currentGrounds = new Map<FlxObject, Bool>();
 		forceGrounded = false;
-		requiresUpdate = true;
 		queueGrounded = false;
 		grounded = false;
 	}
 	
-	override public function update(dt:Float):Void {
-		super.update(dt);
+	public function update(dt:Float):Void {
 		wasGrounded = grounded;
 		grounded = queueGrounded;
 		queueGrounded = false;

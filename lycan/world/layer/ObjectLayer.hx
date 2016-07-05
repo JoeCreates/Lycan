@@ -69,7 +69,8 @@ class ObjectLayer extends FlxGroup implements ILayer {
 				// TODO badness. uses setPosition because this is required for FlxNapeSprite
 				o.setPosition(o.x * world.scale.x, o.y * world.scale.y);
 				if (o.components.has("nape")) {
-					o.components.get("nape").setPosition(o.x, o.y);
+					var nape:NapeComponent = cast o.components.get("nape");
+					nape.setPosition(o.x, o.y);
 				}
 				
 			}
