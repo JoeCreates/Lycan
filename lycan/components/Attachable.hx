@@ -81,9 +81,9 @@ class AttachableComponent extends Component<Attachable> {
 	
 	/**
 	 * Attach a child to this object at the given position
-	 * @param	child The child to attach
-	 * @param	x The x position of the attachment
-	 * @param	y The y position of the attachment
+	 * @param   child The child to attach
+	 * @param   x The x position of the attachment
+	 * @param   y The y position of the attachment
 	 */
 	public function attach(child:Attachable, x:Float, y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
 		Sure.sure(child != null);
@@ -115,7 +115,7 @@ class AttachableComponent extends Component<Attachable> {
 	
 	/**
 	 * Remove a child of this attachable
-	 * @param	child The child to remove
+	 * @param   child The child to remove
 	 */
 	public function remove(child:Attachable):Void {
 		// Return if attachable is not a valid child
@@ -126,7 +126,7 @@ class AttachableComponent extends Component<Attachable> {
 	}
 	
 	@:access(AttachableComponent)
-	private function recursiveUpdate(dt:Float):Void {		
+	private function recursiveUpdate(dt:Float):Void {       
 		if (children == null) return;
 		// Recursively update children
 		for (child in children) {

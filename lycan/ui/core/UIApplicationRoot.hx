@@ -472,7 +472,7 @@ class UIApplicationRoot {
 		listenersAttached = true;
 	}
 	
-	private function removeEventListeners() {		
+	private function removeEventListeners() {       
 		Sure.sure(Lib.current.stage != null);
 		
 		// TODO possible to just clear all for this object? // Pass a list of methods/events
@@ -521,7 +521,7 @@ class UIApplicationRoot {
 	
 	// Puts event onto the event loop, to be processed on the next frame
 	private function postEvent(receiver:UIObject, event:UIEvent) {
-		Sure.sure(receiver != null && event != null);		
+		Sure.sure(receiver != null && event != null);       
 		eventLoop.add(receiver, event);
 	}
 	

@@ -109,7 +109,7 @@ class Carousel extends Widget {
 	private function dragEnterEvent(e:DragEnterEvent) {
 		#if debug
 		trace(name + " got drag enter");
-		#end	
+		#end    
 	}
 	
 	private function dragMoveEvent(e:DragMoveEvent) {

@@ -1,0 +1,1 @@
+zip -0r lycan.zip lycan haxelib.json include.xml README.md AUTHORS.md LICENSE CHANGELOG.md package_haxelib.bat

@@ -193,7 +193,7 @@ class EntityBuilder {
 					}),
 					pos: Context.currentPos()
 				});
-			}			
+			}           
 		}
 		
 		// Append component instantiation to constructor

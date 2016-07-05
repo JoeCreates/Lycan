@@ -82,7 +82,7 @@ class ThreadedLoader<T:(IPrioritizable, IRunnable, ILoadingSignalDispatcher, IDe
 					signal_task_failed.dispatch(spec.description, spec.error);
 					failed++;
 					break;
-			}			
+			}           
 			spec = Thread.readMessage(false);
 		}
 		

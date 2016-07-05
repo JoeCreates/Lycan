@@ -56,7 +56,7 @@ class ImageLoader {
 		return FlxGraphic.fromFrame(getFrame(assetPath));
 	}
 	
-	private static function getFrame(assetPath:String):FlxFrame {		
+	private static function getFrame(assetPath:String):FlxFrame {       
 		var i = assetPath.lastIndexOf("/");
 		var frame = null;
 		if (i > 0) {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+    <meta title="LycanUnitTests" version="1.0.0" />
+    <app file="TestMain" main="TestMain" />
+
+    <set name="SWF_VERSION" value="11.8" />
+    <source path="source" />
+
+    <set name="lycanunittest" />
+    <haxedef name="lycanunittest" />
+
+    <include path="../include.xml" />
+    <!-- <haxelib name="lycan" /> -->
+
+    <haxelib name="hamcrest" />
+    <haxelib name="munit" />
+</project>

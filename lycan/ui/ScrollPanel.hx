@@ -120,7 +120,7 @@ class ScrollPanel extends FlxSprite {
 			var yDiff:Float = touch.y - lastTouchPosition.y;
 			// Update scroll velocity
 			scrollVelocity.x = scrollHorizontally ? scrollVelocityChangeFactor * -xDiff + (1 - scrollVelocityChangeFactor) * scrollVelocity.x : 0;
-			scrollVelocity.y = scrollVertically ? scrollVelocityChangeFactor * -yDiff + (1 - scrollVelocityChangeFactor) * scrollVelocity.y : 0;		
+			scrollVelocity.y = scrollVertically ? scrollVelocityChangeFactor * -yDiff + (1 - scrollVelocityChangeFactor) * scrollVelocity.y : 0;        
 			// Touch released
 			if (touch.justReleased) {
 				touch = null;

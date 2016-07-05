@@ -1,0 +1,6 @@
+# Auto detect text files and set CRLF line endings
+* text eol=crlf
+
+# Specify line endings for scripts
+*.sh eol=lf
+*.bat eol=crlf

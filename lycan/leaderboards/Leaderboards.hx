@@ -31,7 +31,7 @@ class Leaderboards {
 	private function new() {
 	}
 	
-	public static function init():Void {		
+	public static function init():Void {        
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get;
 		#end

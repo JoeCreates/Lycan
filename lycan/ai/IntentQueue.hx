@@ -13,7 +13,7 @@ class IntentQueue<T> {
 	// TODO implement notion of disabling manual intent changes
 	// If busy, queue the intent, otherwise do it straight away
 	//if (!canChangeIntent) {
-	//	return nextIntent = intent;
+	//  return nextIntent = intent;
 	//}
 	
 	public inline function new() {

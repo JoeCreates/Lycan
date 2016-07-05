@@ -3,7 +3,7 @@ package lycan.util.algorithm;
 // Derived from http://deepnight.net/bresenham-magic-raycasting-line-of-sight-pathfinding/
 // Returns a raster representation of a line between two points. Lines can have narrow diagonals.
 class Bresenham {
-	public static function getLine(x0:Int, y0:Int, x1:Int, y1:Int): Array<{x:Int, y:Int}> {		
+	public static function getLine(x0:Int, y0:Int, x1:Int, y1:Int): Array<{x:Int, y:Int}> {     
 		Sure.sure(Math.abs(y1 - y0) <= Math.abs(x1 - x0));
 		
 		var points = [];

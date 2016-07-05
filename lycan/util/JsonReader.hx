@@ -7,13 +7,13 @@ using StringTools;
 using Lambda;
 
 class JsonReader {
-    macro public static function readFile(path:String):ExprOf<String> {
-        var content = loadFileAsString(path);
-        try Json.parse(content) catch (e:Dynamic) {
-            haxe.macro.Context.error('Json from $path failed to validate: $e', Context.currentPos());
-        }
-        return toExpr(content);
-    }
+	macro public static function readFile(path:String):ExprOf<String> {
+		var content = loadFileAsString(path);
+		try Json.parse(content) catch (e:Dynamic) {
+			haxe.macro.Context.error('Json from $path failed to validate: $e', Context.currentPos());
+		}
+		return toExpr(content);
+	}
 	
 	#if macro
 	static function toExpr(v:Dynamic) {

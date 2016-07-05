@@ -32,9 +32,9 @@ class GameCenterLeaderboards {
 		GameCenterManager.saveAndReportScore(id, score, sortOrder);
 	}
 
-    public function updateAchievementProgress(id:String, percent:Float, showBanner:Bool = true):Void {
+	public function updateAchievementProgress(id:String, percent:Float, showBanner:Bool = true):Void {
 		GameCenterManager.saveAndReportAchievement(id, percent, showBanner);
-    }
+	}
 }
 
 #end

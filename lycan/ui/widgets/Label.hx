@@ -11,7 +11,7 @@ class Label extends Widget {
 		super(parent, name);
 	}
 	
-	private function set_graphic(graphic:FlxText) {		
+	private function set_graphic(graphic:FlxText) {     
 		width = Std.int(graphic.width);
 		height = Std.int(graphic.height);
 		return this.graphic = graphic;
@@ -19,7 +19,7 @@ class Label extends Widget {
 	
 	override private function set_x(x:Int):Int {
 		if(graphic != null) {
-			graphic.x = x;	
+			graphic.x = x;  
 		}
 		return super.set_x(x);
 	}

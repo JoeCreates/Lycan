@@ -38,7 +38,6 @@ class World extends FlxGroup {
 	
 	public var updateSpeed:Float;
 	public var signal_loadingProgressed(default, null):Signal1<Float>;
-	
 	public var namedObjects(default, null):Map<String, FlxBasic>;
 	public var namedLayers(default, null):Map<String, ILayer>;
 	public var namedTilesets(default, null):Map<String, TiledTileSet>;
@@ -48,17 +47,15 @@ class World extends FlxGroup {
 	public var combinedTileset:FlxTileFrames;
 	
 	private static inline var TILESET_PATH = "assets/images/"; // TODO avoid explicit tileset path if possible
-	
 	public function new(?scale:FlxPoint) {
 		super();
-		
+
 		if (scale == null) {
 			scale = new FlxPoint(1, 1);
 		}
 		this.scale = scale;
 		name = "Unnamed World";
 		updateSpeed = 1;
-		
 		namedObjects = new Map<String, FlxBasic>();
 		namedLayers = new Map<String, ILayer>();
 		collidableTilemaps = new Array<FlxTilemap>();
@@ -78,7 +75,7 @@ class World extends FlxGroup {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 	
@@ -127,7 +124,7 @@ class World extends FlxGroup {
 	public function processProperties(tiledMap:TiledMap):World {
 		return this;
 	}
-	
+
 	override public function update(dt:Float):Void {
 		super.update(dt * updateSpeed);
 	}

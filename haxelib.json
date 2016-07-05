@@ -1,10 +1,10 @@
 {
-	"name": "lycan",
-	"url" : "",
-	"license": "",
-	"tags": ["game", "openfl", "flash", "neko", "cpp", "android", "ios", "cross"],
-	"description": "Useful code for Haxe/OpenFL game development.",
-	"version": "",
-	"releasenote": "",
-	"contributors": ["sam twidale,joe williamson"]
+    "name": "lycan",
+    "url" : "",
+    "license": "",
+    "tags": ["game", "openfl", "flash", "neko", "cpp", "android", "ios", "cross"],
+    "description": "Useful code for Haxe/OpenFL game development.",
+    "version": "",
+    "releasenote": "",
+    "contributors": ["sam twidale,joe williamson"]
 }
