@@ -164,12 +164,29 @@ class ScrollPanel extends FlxSprite {
 			}
 			
 			// Snap to nearest snap point if there is one
-			var closestDistanceSquared:Null<Float> = null;
-			for (p in snapPoints) {
-				var xDiff:Float = p.x != null ? p.x - scroll.x : 0;
-				var yDiff:Float = p.y != null ? p.y - scroll.y : 0;
-				// No need to sqrt because we can compare disnatance squared
-				var distanceSquared:Float = 
+			if (snapPoints.length > 0) {
+				// Function to calculate distance to snap point
+				var pointDistanceSquared:SnapPoint->Float  = function (p):Float {
+					var xDiff:Float = p.x != null ? p.x - scroll.x : 0;
+					var yDiff:Float = p.y != null ? p.y - scroll.y : 0;
+					// No need to sqrt because we can compare distance squared
+					return Math.pow(xDiff, 2) + Math.pow(yDiff, 2);
+				}
+				
+				// Find nearest snap point
+				var closestDistanceSquared:Float = pointDistanceSquared(snapPoints[0]);
+				var closestPoint:SnapPoint = snapPoints[0];
+				for (i in 1...snapPoints.length - 1) {
+					var distanceSquared:Float = pointDistanceSquared(snapPoints[i]);
+					if (distanceSquared < closestDistanceSquared) {
+						closestDistanceSquared = distanceSquared;
+						closestPoint = snapPoints[i];
+					}
+				}
+				
+				// Set snap coords to nearest point
+				snapX = closestPoint.x == null ? scroll.x : closestPoint.x;
+				snapY = closestPoint.y == null ? scroll.y : closestPoint.y;
 			}
 			
 			// Move toward snap position
@@ -182,6 +199,8 @@ class ScrollPanel extends FlxSprite {
 				scrollVelocity.y = 0;
 			}
 		}
+		
+		// TODO untested
 		
 	}
 	

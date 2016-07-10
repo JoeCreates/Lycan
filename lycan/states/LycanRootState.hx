@@ -15,6 +15,9 @@ import openfl.events.KeyboardEvent;
 import openfl.Lib;
 
 class LycanRootState extends FlxState {
+	
+	public static var get:LycanRootState;
+	
 	public var uiRoot(default, null) = new UIApplicationRoot();
 	
 	#if debug
@@ -63,6 +66,9 @@ class LycanRootState extends FlxState {
 		//
 		//FlxG.signals.postDraw.add(debugPostDraw);
 		#end
+		
+		// Set static reference to this root state
+		LycanRootState.get = this;
 	}
 
 	override public function destroy():Void {
@@ -70,12 +76,6 @@ class LycanRootState extends FlxState {
 		//FlxG.signals.postDraw.remove(debugPostDraw);
 		//#end
 		super.destroy();
-	}
-
-	public static function getInstance<T>():T {
-		var self = FlxG.game._state;
-		Sure.sure(self != null);
-		return cast self;
 	}
 	
 	//#if debug
@@ -104,8 +104,7 @@ class LycanRootState extends FlxState {
 	
 	// Returns the first state of type T in the state stack, throws if there isn't one of that type
 	public static function getFirstStateOfType<T>(type:Class<T>):T {
-		var self = LycanRootState.getInstance();
-		var child = self.subState;
+		var child = get.subState;
 
 		while (child != null) {
 			if (Std.is(child, type)) {
@@ -119,6 +118,7 @@ class LycanRootState extends FlxState {
 	}
 
 	#if debug
+	// TODO this is super slow, perhaps add another flag to enable?
 	//private function debugPostDraw():Void {
 		//debugUiRenderer.draw();
 		//updateStateVisualisation();

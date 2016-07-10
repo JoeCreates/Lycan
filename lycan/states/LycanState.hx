@@ -4,12 +4,15 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
+import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
+import flixel.util.FlxSignal;
 import lycan.util.MasterCamera;
 
 // Base state for all substates in a game
@@ -33,6 +36,14 @@ class LycanState extends FlxSubState {
 	public var overlay:FlxSprite;
 	public var overlayColor(default, set):FlxColor;
 	
+	// TODO use these
+	public var onEnter:FlxTypedSignal<LycanState->Void>;
+	public var onExit:FlxTypedSignal<LycanState->Void>;
+	
+	// TODO
+	public var rootState(get, never):LycanRootState;
+	public var parentState(get, never):LycanState;
+	
 	override public function create():Void {
 		super.create();
 		
@@ -53,7 +64,8 @@ class LycanState extends FlxSubState {
 
 		baseZoom = worldCamera.zoom;
 		worldZoom = 1;
-
+		
+		// UI
 		uiGroup = new FlxSpriteGroup();
 		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
@@ -63,26 +75,22 @@ class LycanState extends FlxSubState {
 		overlayColor = FlxColor.BLACK;
 		overlay.alpha = 0;
 		uiGroup.add(overlay);
+		
+		// Signals
+		onEnter = new FlxTypedSignal<LycanState->Void>();
+		onExit = new FlxTypedSignal<LycanState->Void>();
 	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
 		
-		//updatesWithoutLateUpdates++;
-		//if (updatesWithoutLateUpdates > 1) {
-			//throw("lateUpdate has not been called since last update");
-		//}
 	}
 	
-	public function lateUpdate(dt:Float):Void {
-		//updatesWithoutLateUpdates = 0;
-		
-		//forEach(function(o:FlxBasic) {
-			//if (Std.is(o, LateUpdatable)) {
-				//var u:LateUpdatable = cast o;
-				//u.lateUpdate(dt);
-			//}
-		//}, true);
+	override public function switchTo(state:FlxState):Bool {
+		if (Std.is(state, LycanState)) {
+			onExit.dispatch(cast state);
+		}
+		return super.switchTo(state);
 	}
 	
 	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {
@@ -110,11 +118,21 @@ class LycanState extends FlxSubState {
 		worldCamera.zoom = baseZoom * worldZoom;
 		return this.worldZoom = worldZoom;
 	}
+	
 	private function set_overlayColor(color:FlxColor):FlxColor {
 		overlayColor = color;
 		overlay.makeGraphic(FlxG.width, FlxG.height, color, true, "lycan.states.LycanState.overlay");
 		return color;
 	}
+	
+	private function get_parentState():LycanState {
+		return cast _parentState;
+	}
+	
+	private function get_rootState():LycanRootState {
+		return LycanRootState.get;
+	}
+	
 	// TODO autotweening
 	// TODO camera targeting
 	// TODO sound fading
