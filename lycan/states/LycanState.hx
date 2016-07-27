@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.group.FlxSpriteGroup;
+import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxTween.TweenOptions;
@@ -23,7 +24,7 @@ class LycanState extends FlxSubState {
 
 	public var uiGroup(default, null):FlxSpriteGroup;
 	public var uiCamera(default, null):FlxCamera;
-	public var worldCamera(default, null):FlxCamera;
+	public var worldCamera(default, null):MasterCamera;
 
 	public var worldZoom(default, set):Float;
 	public var baseZoom:Float;
@@ -91,6 +92,7 @@ class LycanState extends FlxSubState {
 			onExit.dispatch(cast state);
 		}
 		return super.switchTo(state);
+		// TODO figure out where in flixel we need to dispatch onEnter
 	}
 	
 	public function exclusiveTween(id:String, object:Dynamic, values:Dynamic, duration:Float = 1, ?options:TweenOptions):FlxTween {
@@ -116,6 +118,7 @@ class LycanState extends FlxSubState {
 	// Sets world and camera zoom
 	private function set_worldZoom(worldZoom:Float):Float {
 		worldCamera.zoom = baseZoom * worldZoom;
+		
 		return this.worldZoom = worldZoom;
 	}
 	

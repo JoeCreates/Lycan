@@ -1,8 +1,9 @@
 package lycan.util;
 
 import flixel.FlxCamera;
+import lycan.core.LycanCamera;
 
-class MasterCamera extends FlxCamera {
+class MasterCamera extends LycanCamera {
 	public var slaveCameras:Array<FlxCamera>;
 	
 	public function new(x:Int, y:Int, width:Int, height:Int, zoom:Float) {

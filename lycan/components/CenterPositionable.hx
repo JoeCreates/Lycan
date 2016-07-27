@@ -2,10 +2,10 @@ package lycan.components;
 
 interface CenterPositionable extends Entity {
 	public var center:CenterPositionableComponent;
-	public var x(get, set):Float;
-	public var y(get, set):Float;
-	public var width(get, set):Float;
-	public var height(get, set):Float;
+	@:relaxed public var x(get, set):Float;
+	@:relaxed public var y(get, set):Float;
+	@:relaxed public var width(get, set):Float;
+	@:relaxed public var height(get, set):Float;
 }
 
 class CenterPositionableComponent extends Component<CenterPositionable> {

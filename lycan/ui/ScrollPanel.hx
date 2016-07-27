@@ -52,6 +52,8 @@ class ScrollPanel extends FlxSprite {
 	
 	private var screenPosition:FlxPoint;
 	
+	// TODO use flxpointer? even though scrolling should probably only respond to touches
+	// TODO add a scrollbar for non-touch devices
 	private var touch:FlxTouch;
 	private var touchedPosition:FlxPoint;
 	private var lastTouchPosition:FlxPoint;

@@ -1,19 +1,14 @@
 package lycan.components;
 
-import lycan.LateUpdatable;
+import lycan.components.LateUpdatable;
 
 interface Attachable extends LateUpdatable extends Entity {
 	public var attachable:AttachableComponent;
-	public var x(get, set):Float;
-	public var y(get, set):Float;
-	
-	// TODO: decide if this is worthwhile after a bit of use
-	public var active(get, set):Bool;
-	public var visible(get, set):Bool;
-	public var exists(get, set):Bool;
-	
-	public function update(dt:Float):Void;
-	public function draw():Void;
+	@:relaxed public var x(get, set):Float;
+	@:relaxed public var y(get, set):Float;
+	// TODO could add optional requirements?
+	@:relaxed public var flipX(get, set):Bool;
+	@:relaxed public var flipY(get, set):Bool;
 }
 
 class AttachableComponent extends Component<Attachable> {
@@ -23,10 +18,16 @@ class AttachableComponent extends Component<Attachable> {
 	
 	public var x(default, set):Float;
 	public var y(default, set):Float;
+	public var moveFactorX(default, set):Float;
+	public var moveFactorY(default, set):Float;
 	public var originX(default, set):Float;
 	public var originY(default, set):Float;
-	// Whether this atachable should be updated and drawn by the attachable chain
-	public var updateAndDraw:Bool;
+	public var flipX(default, set):Bool;
+	public var flipY(default, set):Bool;
+	public var lastX:Float;
+	public var lastY:Float;
+	
+	// TODO x and y should also be dependent on flip
 	
 	// True if attached position or origin have changed since last update
 	private var dirty:Bool;
@@ -34,40 +35,16 @@ class AttachableComponent extends Component<Attachable> {
 	public function new(entity:Attachable) {
 		super(entity);
 		
+		requiresLateUpdate = true;
+		
 		x = 0;
 		y = 0;
+		moveFactorX = 1;
+		moveFactorY = 1;
 		originX = 0;
 		originY = 0;
-		
-		updateAndDraw = true;
-		
-		// Todo use metadata instead!
-		requiresLateUpdate = true;
-		requiresUpdate = true;
-		requiresDraw = true;
-	}
-	
-	override public function update(dt):Void {
-		super.update(dt);
-		if (children != null) {
-			for (child in children) {
-				if (child.entity_exists && child.entity_active && child.attachable.updateAndDraw) {
-					child.update(dt);
-				}
-				
-			}
-		}
-	}
-	
-	override public function draw():Void {
-		super.draw();
-		if (children != null) {
-			for (child in children) {
-				if (child.entity_exists && child.entity_visible && child.attachable.updateAndDraw) {
-					child.draw();
-				}
-			}
-		}
+		flipX = false;
+		flipY = false;
 	}
 	
 	override public function lateUpdate(dt:Float):Void {
@@ -85,24 +62,28 @@ class AttachableComponent extends Component<Attachable> {
 	 * @param   x The x position of the attachment
 	 * @param   y The y position of the attachment
 	 */
-	public function attach(child:Attachable, x:Float, y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
+	public function attach(child:Attachable, ?x:Float, ?y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
 		Sure.sure(child != null);
-		
-		if (updateAndDraw != null) {
-			child.attachable.updateAndDraw = updateAndDraw;
-		}
 		
 		// Detach child from current parent
 		if (child.attachable.parent != null) {
 			child.attachable.parent.attachable.remove(child);
 		}
 		
-		// satiate properties if necessary
+		// Instantiate properties if necessary
 		if (children == null) children = new Array<Attachable>();
 		
 		// Attach child to this attachable
 		children.push(child);
 		child.attachable.parent = entity;
+		
+		// Determine relative position if x/y are null
+		if (x == null) {
+			x = child.entity_x - entity.entity_x;
+		}
+		if (y == null) {
+			y = child.entity_y - entity.entity_y;
+		}
 		
 		// Set child's attached position
 		child.attachable.x = x;
@@ -111,6 +92,10 @@ class AttachableComponent extends Component<Attachable> {
 		// Set child's attachment origin if given
 		if (originX != null) { child.attachable.originX = originX; }
 		if (originY != null) { child.attachable.originY = originY; }
+		
+		child.attachable.lastX = child.entity_x;
+		child.attachable.lastY = child.entity_y;
+		dirty = true;
 	}
 	
 	/**
@@ -130,11 +115,22 @@ class AttachableComponent extends Component<Attachable> {
 		if (children == null) return;
 		// Recursively update children
 		for (child in children) {
+			// Update child's relative position based on how much flixel has moved it
+			child.attachable.x += child.entity_x - child.attachable.lastX;
+			child.attachable.y += child.entity_y - child.attachable.lastY;
 			// Update child's position
-			child.entity_x = entity.entity_x + child.attachable.x - child.attachable.originX;
-			child.entity_y = entity.entity_y + child.attachable.y - child.attachable.originY;
+			// TODO ive assumed parent will be using pixelPerfectPosition here. The floor therefore prevents jittering
+			// when the parent and children both have real positions
+			child.entity_x = Math.floor(entity.entity_x * child.attachable.moveFactorX) + child.attachable.x - child.attachable.originX;
+			child.entity_y = Math.floor(entity.entity_y * child.attachable.moveFactorY) + child.attachable.y - child.attachable.originY;
+			// Update child's flip
+			//child.entity_flipX = !child.attachable.flipX ? entity.entity_flipX : !entity.entity_flipX;
+			//child.entity_flipY = !child.attachable.flipY ? entity.entity_flipY : !entity.entity_flipY;
 			// Update child's children
 			child.attachable.recursiveUpdate(dt);
+			// Record current flixel position
+			child.attachable.lastX = child.entity_x;
+			child.attachable.lastY = child.entity_y;
 		}
 		dirty = false;
 	}
@@ -154,6 +150,17 @@ class AttachableComponent extends Component<Attachable> {
 		return y;
 	}
 	
+	private function set_moveFactorX(x:Float):Float {
+		this.moveFactorX = x;
+		dirty = true;
+		return x;
+	}
+	private function set_moveFactorY(y:Float):Float {
+		this.moveFactorY = y;
+		dirty = true;
+		return y;
+	}
+	
 	private function set_originX(x:Float):Float {
 		this.originX = x;
 		dirty = true;
@@ -163,5 +170,16 @@ class AttachableComponent extends Component<Attachable> {
 		this.originY = y;
 		dirty = true;
 		return y;
+	}
+	
+	private function set_flipX(flip:Bool):Bool {
+		this.flipX = flip;
+		dirty = true;
+		return flip;
+	}
+	private function set_flipY(flip:Bool):Bool {
+		this.flipY = flip;
+		dirty = true;
+		return flip;
 	}
 }
