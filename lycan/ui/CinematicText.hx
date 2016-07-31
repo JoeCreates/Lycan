@@ -3,7 +3,7 @@ package lycan.ui;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 
-class CinematicText extends FlxSpriteGroup {    
+class CinematicText extends FlxSpriteGroup {
 	public var letters:Array<CinematicLetter>;
 	public var fullText:FlxText;
 	public var minYMotion:Float = 10;
@@ -14,9 +14,15 @@ class CinematicText extends FlxSpriteGroup {
 	public var finishedHiding(default, set) = false;
 	public var onFinishedHiding:Void->Void;
 	
-	public function new(x:Float, y:Float, text:String, size:Int = 24, spacing:Float = 0,
-		font:String = "fairfax", autoHide:Bool = false) {
+	public function new(x:Float, y:Float, text:String, size:Int = 24, spacing:Float = 0, font:String = "fairfax", autoHide:Bool = false, ?letterCreator:String->Int->String->CinematicLetter) {
 		super();
+		
+		if (letterCreator == null) {
+			letterCreator = function(char:String, size:Int, font:String):CinematicLetter {
+				return new CinematicLetter(char, size, font);
+			};
+		}
+		
 		letters = new Array<CinematicLetter>();
 		this.autoHide = autoHide;
 		
@@ -29,7 +35,7 @@ class CinematicText extends FlxSpriteGroup {
 			fullText.text += text.charAt(i);
 			fullText.calcFrame();
 			fullText.updateHitbox();
-			var letter:CinematicLetter = new CinematicLetter(text.charAt(i), size, font);
+			var letter:CinematicLetter = letterCreator(text.charAt(i), size, font);
 			letter.setPosition(x + cumulativeWidth + i * spacing, y);
 			cumulativeWidth = fullText.width;
 			letters.push(letter);
