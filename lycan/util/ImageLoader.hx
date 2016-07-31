@@ -54,7 +54,7 @@ class ImageLoader {
 	 * Gets a new FlxSprite, sourcing the image data from an image atlas (unless the texture packer is disabled).
 	 * @param	x	The initial x-coordinate of the sprite.
 	 * @param	y	The initial y-coordinate of the sprite.
-	 * @param	fileName	The image filename, without file extension e.g. "clocktower".
+	 * @param	fileName	The image filename, with file extension e.g. "clocktower.png".
 	 * @param	looseImagePath	Optional file path to the loose image, overriding the default loose image path, with trailing slash e.g. "assets/images/preloader/".
 	 * @return	A new FlxSprite for the given parameters.
 	 */
@@ -77,7 +77,7 @@ class ImageLoader {
 	
 	/**
 	 * Gets a new FlxGraphicAsset, returning a FlxGraphic for an image atlas, or a path to a loose image if the texture packer is disabled.
-	 * @param	fileName	The image filename, without file extension e.g. "clocktower"
+	 * @param	fileName	The image filename, without file extension e.g. "clocktower.png".
 	 * @param	looseImagePath	Optional file path to the loose image, overriding the default loose image path e.g. "assets/images/preloader/".
 	 * @return	A new FlxGraphicAsset for the given parameters.
 	 */
