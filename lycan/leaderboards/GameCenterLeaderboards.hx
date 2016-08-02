@@ -2,38 +2,38 @@ package lycan.leaderboards;
 
 #if gamecenterleaderboards
 
-import extension.gamecentermanager.GameCenterManager;
-import extension.gamecentermanager.GameCenterManager.GameCenterSortOrder;
+import extension.gamecenter.GameCenter;
+import extension.gamecenter.GameCenterEvent;
 
 class GameCenterLeaderboards {
 	public static var get(default, never):GameCenterLeaderboards = new GameCenterLeaderboards();
 	
 	private function new() {
-		GameCenterManager.setupManager();
+		// No explicit initialize necessary
 	}
 	
 	public function openLeaderboard(id:String):Void {
-		GameCenterManager.presentLeaderboards();
+		GameCenter.showLeaderboard(id);
 	}
 	
 	public function openAchievements():Void {
-		GameCenterManager.presentAchievements();
+		GameCenter.showAchievements();
 	}
 	
 	public function isSignedIn():Bool {
-		return GameCenterManager.isGameCenterAvailable(); // Really means whether the service is available at all, not simply whether you are signed in or not
+		return GameCenter.available; // Really means whether the service is available at all, not simply whether you are signed in or not
 	}
 	
 	public function signIn():Void {
-		GameCenterManager.authenticateUser();
+		GameCenter.authenticate();
 	}
 	
-	public function submitScore(id:String, score:Int, sortOrder:GameCenterSortOrder = GameCenterSortOrder.HighToLow):Void {
-		GameCenterManager.saveAndReportScore(id, score, sortOrder);
+	public function submitScore(id:String, score:Int):Void {
+		GameCenter.reportScore(id, score);
 	}
 
 	public function updateAchievementProgress(id:String, percent:Float, showBanner:Bool = true):Void {
-		GameCenterManager.saveAndReportAchievement(id, percent, showBanner);
+		GameCenter.reportAchievement(id, percent, showBanner);
 	}
 }
 
