@@ -11,6 +11,7 @@ class Analytics {
 	public static function init(appId:String, appVersion:String) {
 		#if flurryanalytics
 		Flurry.setVersionName(appVersion);
+		Flurry.setUseHttps(true);
 		
 		Flurry.onStartSession(appId);
 		
