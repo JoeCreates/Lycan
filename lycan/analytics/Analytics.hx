@@ -12,10 +12,6 @@ class Analytics {
 		#if flurryanalytics
 		Flurry.setVersionName(appVersion);
 		
-		#if android
-		Flurry.setUseHttps(true);
-		#end
-		
 		Flurry.onStartSession(appId);
 		
 		Flurry.setReportLocation(false);

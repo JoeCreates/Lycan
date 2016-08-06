@@ -17,6 +17,7 @@ import lycan.leaderboards.KongregateFacade;
 #end
 
 #if gamejoltleaderboards
+import flixel.util.FlxTimer; // For pinging the GameJolt session
 import lycan.leaderboards.GameJoltFacade;
 #end
 
@@ -31,7 +32,7 @@ class Leaderboards {
 	private function new() {
 	}
 	
-	public static function init():Void {        
+	public static function init():Void {
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get;
 		#end
@@ -49,17 +50,17 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
-		if (gameId == 0 || privateKey == null) {
-			throw "Set the GameJolt gameId and privateKey before initializing leaderboards";
+		if (gameJoltGameId == 0 || gameJoltPrivateKey == null) {
+			throw "Set (at minimum) the GameJolt gameId and privateKey before initializing leaderboards";
 		}
-		GameJoltFacade.init(gameId, privateKey, autoAuth, userName, onGameJoltLoaded);
+		GameJoltFacade.init(gameJoltGameId, gameJoltPrivateKey, gameJoltAutoAuth, gameJoltUserName, gameJoltUserToken, onGameJoltLoaded);
 		#end
 		
 		#if steamworksleaderboards
-		if (gameId == 0) {
+		if (steamGameId == 0) {
 			throw "Set the Steamworks gameId before initializing leaderboards";
 		}
-		SteamworksFacade.init(gameId);
+		SteamworksFacade.init(steamGameId);
 		#end
 	}
 	
@@ -152,7 +153,7 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
-		GameJoltFacade.addScore(Std.string(score), score);
+		GameJoltFacade.addScore(Std.string(score), score, leaderboardId);
 		#end
 		
 		#if steamworksleaderboards
@@ -167,27 +168,36 @@ class Leaderboards {
 	#end
 	
 	#if gamejoltleaderboards
-	public static var gameId:Int = 0;
-	public static var privateKey:String = null;
-	public static var autoAuth:Bool = false;
-	public static var userName:String = null;
-	public static var userToken:String = null;
+	public static var gameJoltGameId:Int = 0;
+	public static var gameJoltPrivateKey:String = null;
+	public static var gameJoltAutoAuth:Bool = false;
+	public static var gameJoltUserName:String = null;
+	public static var gameJoltUserToken:String = null;
 	
-	private static function onGameJoltLoaded():Void {
-		GameJoltFacade.authUser(null, null, onGameJoltAuthorized);
+	private static function onGameJoltLoaded(success:Bool):Void {
+		GameJoltFacade.authUser(gameJoltUserName, gameJoltUserToken, onGameJoltAuthorized);
 	}
 	
-	private static function onGameJoltAuthorized():Void {
-		GameJoltFacade.openSession(onGameJoltSessionOpened);
+	private static function onGameJoltAuthorized(success:Bool):Void {
+		if (success) {
+			#if debug
+			trace("Authorized GameJolt session");
+			#end
+			GameJoltFacade.openSession(onGameJoltSessionOpened);
+		} else {
+			#if debug
+			trace("Failed to authorize GameJolt session");
+			#end
+		}
 	}
 	
-	private static function onGameJoltSessionOpened():Void {
-		new FlxTimer(30, function(t:FlxTimer):Void {
+	private static function onGameJoltSessionOpened(kvs:Dynamic):Void {
+		new FlxTimer().start(30, function(t:FlxTimer):Void {
 			GameJoltFacade.pingSession(true, onGameJoltPingedSession);
 		}, 0);
 	}
 	
-	private static function onGameJoltPingedSession():Void {
+	private static function onGameJoltPingedSession(kvs:Dynamic):Void {
 		#if debug
 		trace("Pinged GameJolt session");
 		#end
@@ -195,6 +205,6 @@ class Leaderboards {
 	#end
 	
 	#if steamworksleaderboards
-	public static var gameId:Int = 0;
+	public static var steamGameId:Int = 0;
 	#end
 }

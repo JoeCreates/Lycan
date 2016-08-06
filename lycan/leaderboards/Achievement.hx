@@ -27,9 +27,9 @@ import lycan.leaderboards.SteamworksFacade;
 class Achievement {
 	public var id(default, null):AchievementId;
 	public var unlocked(default, null):Bool = false;
-	public var targetValue(default, null):Float = 0;
+	public var targetValue(default, null):Null<Float> = 0;
 	
-	public function new(id:AchievementId, ?targetValue:Float):Void {
+	public function new(id:AchievementId, ?targetValue:Null<Float>):Void {
 		this.id = id;
 		unlocked = false;
 		if(targetValue != null) {
