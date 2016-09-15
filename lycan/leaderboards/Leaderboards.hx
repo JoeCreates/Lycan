@@ -135,6 +135,33 @@ class Leaderboards {
 		#end
 	}
 	
+	public static function isSignedIn():Bool {
+		#if gamecenterleaderboards
+		return GameCenterLeaderboards.get.isSignedIn();
+		#end
+		
+		#if googleplayleaderboards
+		trace("Note, GooglePlayLeaderboards isSignedIn is unimplemented");
+		return true; // Unimplemented
+		#end
+		
+		#if gamecircleleaderboards
+		return GameCircleLeaderboards.get.isSignedIn();
+		#end
+		
+		#if kongregateleaderboards
+		#end
+		
+		#if gamejoltleaderboards
+		#end
+		
+		#if steamworksleaderboards
+		#end
+		
+		trace("Defaulting to signed in == true for unimplemented leaderboards signed in check");
+		return true;
+	}
+	
 	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get.submitScore(leaderboardId, score);
