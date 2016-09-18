@@ -111,7 +111,6 @@ class ImageLoader {
 		
 		for (searchPath in searchPaths) {
 			if (!useTexturePacker) {
-				trace(looseBasePath + searchPath + fileName);
 				if (!Assets.exists(looseBasePath + searchPath + fileName)) {
 					continue;
 				}
