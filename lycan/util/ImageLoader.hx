@@ -5,34 +5,52 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import msignal.Signal.Signal1;
 import openfl.Assets;
 
-// TODO asset paths will need substituting for localization at some point, maybe (full event-based reloading would be better though). Could do that here or elsewhere...
 // TODO no need for this to be static, could pass params via c'tor - can always stick it on a singleton anyway...
+// TODO should separate the loose asset loading from the packed loading
+// TODO should add way for preloader/non-packed assets via a loadLoose-type method (to take advantage of search paths etc)
 
 /**
- * Provides an abstraction for switching between loading of loose image assets and packed images.
+ * Provides an abstraction for image loading, such as loading of loose image assets and packed images.
  * Useful when using loose images during development, and packed images for test and release builds.
+ * Asset search paths are useful for conditional loading of images, or for localization or seasonal events.
  */
 class ImageLoader {
 	/**
-	 * Whether to use packed textures.
+	 * Base path for searching for loose assets.
 	 */
-	#if texturepacker
-	private static var useTexturePacker:Bool = true;
-	#else
-	private static var useTexturePacker:Bool = false;
-	#end
+	public static var looseBasePath:String = "";
 	
 	/**
-	 * Loose image path that needs to be set to use the ImageLoader when the texture packer is disabled. Requires trailing slash, no leading slash.
+	 * Fires when a search path is added.
 	 */
-	public static var defaultLooseImagePath(default, set):String = null;
+	public static var signal_searchPathAdded(default, null) = new Signal1<String>();
+	
+	/**
+	 * Whether to use packed textures.
+	 */
+	private static var useTexturePacker:Bool = #if texturepacker true #else false #end;
+	
+	/**
+	 * Paths to search for assets.
+	 */
+	private static var searchPaths(default, null):Array<String> = [];
 	
 	/**
 	 * Loaded atlas textures.
 	 */
 	private static var atlases:Array<FlxAtlasFrames> = new Array<FlxAtlasFrames>();
+	
+	/**
+	 * Add an image search path.
+	 * @param	path	The path that will be scanned for assets.
+	 */
+	public static function addSearchPath(path:String):Void {
+		searchPaths.insert(0, path);
+		signal_searchPathAdded.dispatch(path);
+	}
 	
 	/**
 	 * Loads an image atlas.
@@ -43,7 +61,7 @@ class ImageLoader {
 	 * @param	sheetDataFileExt	Optional file extension of the sheet data file e.g. ".json"
 	 * @return	Atlas frames for the given parameters.
 	 */
-	public static function loadAtlas(fileName:String, atlasPath:String = "assets/images/texturepacker/", atlasFileExt:String = ".png", sheetDataPath:String = "assets/data/texturepacker/", sheetDataFileExt:String = ".json"):FlxAtlasFrames {
+	public static function loadAtlas(fileName:String, atlasPath:String, atlasFileExt:String, sheetDataPath:String, sheetDataFileExt:String):FlxAtlasFrames {
 		var frames = FlxAtlasFrames.fromTexturePackerJson(atlasPath + fileName + atlasFileExt, Assets.getText(sheetDataPath + fileName + sheetDataFileExt));
 		Sure.sure(frames != null);
 		atlases.push(frames);
@@ -58,21 +76,28 @@ class ImageLoader {
 	 * @param	looseImagePath	Optional file path to the loose image, overriding the default loose image path, with trailing slash e.g. "assets/images/preloader/".
 	 * @return	A new FlxSprite for the given parameters.
 	 */
-	public static function getSprite(x:Null<Float> = 0.0, y:Null<Float> = 0.0, fileName:String, ?looseImagePath:String):FlxSprite {
+	public static function getSprite(x:Null<Float> = 0.0, y:Null<Float> = 0.0, fileName:String):FlxSprite {
 		Sure.sure(fileName != null && fileName.length > 0);
 		
-		if (!useTexturePacker) {
-			if (looseImagePath == null) {
-				looseImagePath = ImageLoader.defaultLooseImagePath;
+		for (searchPath in searchPaths) {
+			if (!useTexturePacker) {
+				
+				if (!Assets.exists(looseBasePath + searchPath + fileName)) {
+					continue;
+				}
+				return new FlxSprite(x, y, looseBasePath + searchPath + fileName);
 			}
-			Sure.sure(looseImagePath != null && looseImagePath.length > 0);
-			return new FlxSprite(x, y, looseImagePath + fileName);
+			var frame = getFrame(searchPath, fileName);
+			if (frame == null) {
+				continue;
+			}
+			var sprite = new FlxSprite(x, y);
+			sprite.frame = frame;
+			sprite.updateHitbox();
+			return sprite;
 		}
-		var frame = getFrame(fileName);
-		var sprite = new FlxSprite(x, y);
-		sprite.frame = frame;
-		sprite.updateHitbox();
-		return sprite;
+		
+		return null;
 	}
 	
 	/**
@@ -81,35 +106,35 @@ class ImageLoader {
 	 * @param	looseImagePath	Optional file path to the loose image, overriding the default loose image path e.g. "assets/images/preloader/".
 	 * @return	A new FlxGraphicAsset for the given parameters.
 	 */
-	public static function getGraphicAsset(fileName:String, ?looseImagePath:String):FlxGraphicAsset {
+	public static function getGraphicAsset(fileName:String):FlxGraphicAsset {
 		Sure.sure(fileName != null && fileName.length > 0);
 		
-		if (!useTexturePacker) {
-			if (looseImagePath == null) {
-				looseImagePath = ImageLoader.defaultLooseImagePath;
+		for (searchPath in searchPaths) {
+			if (!useTexturePacker) {
+				trace(looseBasePath + searchPath + fileName);
+				if (!Assets.exists(looseBasePath + searchPath + fileName)) {
+					continue;
+				}
+				return looseBasePath + searchPath + fileName;
 			}
-			Sure.sure(looseImagePath != null && looseImagePath.length > 0);
-			return looseImagePath + fileName;
+			var frame = getFrame(searchPath, fileName);
+			if (frame == null) {
+				continue;
+			}
+			return FlxGraphic.fromFrame(frame);
 		}
-		return FlxGraphic.fromFrame(getFrame(fileName));
+		
+		return null;
 	}
 	
-	private static inline function getFrame(fileName:String):FlxFrame {
-		Sure.sure(fileName != null && fileName.length > 0);
-		
+	private static inline function getFrame(searchPath:String, fileName:String):FlxFrame {
 		var frame = null;
 		for (atlas in atlases) {
-			if (atlas.framesHash.exists(fileName)) {
-				frame = atlas.getByName(fileName);
+			if (atlas.framesHash.exists(searchPath + fileName)) {
+				frame = atlas.getByName(searchPath + fileName);
 				break;
 			}
 		}
-		Sure.sure(frame != null);
 		return frame;
-	}
-	
-	private static function set_defaultLooseImagePath(path:String):String {
-		Sure.sure(path != null && path.length > 0 && path.charAt(path.length - 1) == "/");
-		return ImageLoader.defaultLooseImagePath = path;
 	}
 }
