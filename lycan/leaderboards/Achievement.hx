@@ -20,6 +20,10 @@ import lycan.leaderboards.KongregateFacade;
 import lycan.leaderboards.GameJoltFacade;
 #end
 
+#if newgroundsleaderboards
+import lycan.leaderboards.NewgroundsFacade;
+#end
+
 #if steamworksleaderboards
 import lycan.leaderboards.SteamworksFacade;
 #end
@@ -73,6 +77,10 @@ class Achievement {
 			KongregateFacade.submitStat(id.kongregateId, 1);
 		}
 		#end
+		
+		#if newgroundsleaderboards
+		NewgroundsFacade.addMedal(id.newgroundsId);
+		#end
 	}
 	
 	public function updateProgress(currentValue:Float):Void {
@@ -107,6 +115,12 @@ class Achievement {
 		#if kongregateleaderboards
 		KongregateFacade.submitStat(id.kongregateId, currentValue);
 		#end
+		
+		#if newgroundsleaderboards
+		if (progressPercent >= 100) {
+			NewgroundsFacade.addMedal(id.newgroundsId);
+		}
+		#end
 	}
 }
 
@@ -114,6 +128,7 @@ typedef AchievementId = {
 	googlePlayId:String,
 	gameCenterId:String,
 	kongregateId:String,
+	newgroundsId:String,
 	gameJoltId:Int,
 	amazonId:String,
 	steamworksId:String

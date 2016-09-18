@@ -21,6 +21,10 @@ import flixel.util.FlxTimer; // For pinging the GameJolt session
 import lycan.leaderboards.GameJoltFacade;
 #end
 
+#if newgroundsleaderboards
+import lycan.leaderboards.NewgroundsFacade;
+#end
+
 #if steamworksleaderboards
 import lycan.leaderboards.SteamworksFacade;
 import lycan.leaderboards.SteamworksFacade.DialogName;
@@ -56,6 +60,13 @@ class Leaderboards {
 		GameJoltFacade.init(gameJoltGameId, gameJoltPrivateKey, gameJoltAutoAuth, gameJoltUserName, gameJoltUserToken, onGameJoltLoaded);
 		#end
 		
+		#if newgroundsleaderboards
+		if (newgroundsGameId == null) {
+			throw "Set (at minimum) the Newgrounds gameId and privateKey before initializing leaderboards";
+		}
+		NewgroundsFacade.init(newgroundsGameId, newgroundsPrivateKey, newgroundsShowPopUp, onNewgroundsConnected);
+		#end
+		
 		#if steamworksleaderboards
 		if (steamGameId == 0) {
 			throw "Set the Steamworks gameId before initializing leaderboards";
@@ -83,6 +94,9 @@ class Leaderboards {
 		#if gamejoltleaderboards
 		#end
 		
+		#if newgroundsleaderboards
+		#end
+		
 		#if steamworksleaderboards
 		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS); // TODO how to open leaderboards tab?
 		#end
@@ -105,6 +119,9 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
+		#end
+		
+		#if newgroundsleaderboards
 		#end
 		
 		#if steamworksleaderboards
@@ -131,6 +148,9 @@ class Leaderboards {
 		#if gamejoltleaderboards
 		#end
 		
+		#if newgroundsleaderboards
+		#end
+		
 		#if steamworksleaderboards
 		#end
 	}
@@ -153,6 +173,9 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
+		#end
+		
+		#if newgroundsleaderboards
 		#end
 		
 		#if steamworksleaderboards
@@ -181,6 +204,10 @@ class Leaderboards {
 		
 		#if gamejoltleaderboards
 		GameJoltFacade.addScore(Std.string(score), score, leaderboardId);
+		#end
+		
+		#if newgroundsleaderboards
+		NewgroundsFacade.submitScore(leaderboardId, score);
 		#end
 		
 		#if steamworksleaderboards
@@ -229,6 +256,13 @@ class Leaderboards {
 		trace("Pinged GameJolt session");
 		#end
 	}
+	#end
+	
+	#if newgroundsleaderboards
+	public static var newgroundsPrivateKey:String = null;
+	public static var newgroundsGameId:String = null;
+	public static var newgroundsShowPopUp:Bool = false;
+	public static dynamic function onNewgroundsConnected(result:Bool):Void {};
 	#end
 	
 	#if steamworksleaderboards
