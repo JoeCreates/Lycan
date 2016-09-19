@@ -6,7 +6,7 @@ using lycan.core.ArrayExtensions;
 using lycan.core.IntExtensions;
 
 interface Threshold {
-	public var threshold(default, null):Float;
+	public var threshold(default, set):Float;
 	public var signal_crossed(default, null):Signal2<Float, Float>;
 	public function precondition(before:Float, after:Float):Bool;
 }
@@ -14,7 +14,7 @@ interface Threshold {
 // Threshold that always triggers whenever it is crossed
 class SimpleThreshold implements Threshold {
 	public var signal_crossed(default, null) = new Signal2<Float, Float>();
-	public var threshold(default, null):Float;
+	public var threshold(default, set):Float;
 
 	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>) {
 		this.threshold = threshold;
@@ -29,12 +29,42 @@ class SimpleThreshold implements Threshold {
 	public function precondition(before:Float, after:Float):Bool {
 		return true;
 	}
+	
+	public function set_threshold(threshold:Float):Float {
+		return this.threshold = threshold;
+	}
+}
+
+// Threshold that always triggers whenever it is crossed, and also notifies whenever its value changes
+class ChangeWatchThreshold implements Threshold {
+	public var signal_crossed(default, null) = new Signal2<Float, Float>();
+	public var signal_changed(default, null) = new Signal2<Float, Float>();
+	public var threshold(default, set):Float;
+	
+	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>) {
+		this.threshold = threshold;
+
+		if (cbs != null) {
+			for (cb in cbs) {
+				signal_crossed.add(cb);
+			}
+		}
+	}
+	
+	public function precondition(before:Float, after:Float):Bool {
+		return true;
+	}
+	
+	public function set_threshold(threshold:Float):Float {
+		signal_changed.dispatch(this.threshold, threshold);
+		return this.threshold = threshold;
+	}
 }
 
 // Threshold that triggers up to n times when it is crossed below or above the threshold
 class CountedBidirectionalThreshold implements Threshold {
 	public var signal_crossed(default, null) = new Signal2<Float, Float>();
-	public var threshold(default, null):Float;
+	public var threshold(default, set):Float;
 	public var belowTriggerCountdown(default, null):Int;
 	public var aboveTriggerCountdown(default, null):Int;
 	
@@ -63,6 +93,10 @@ class CountedBidirectionalThreshold implements Threshold {
 			}
 		}
 		return false;
+	}
+	
+	public function set_threshold(threshold:Float):Float {
+		return this.threshold = threshold;
 	}
 }
 
