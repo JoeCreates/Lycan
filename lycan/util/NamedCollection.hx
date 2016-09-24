@@ -6,7 +6,7 @@ interface Named {
 	public var name:String;
 }
 
-@:autoBuild(game.NamedCollectionBuilder.build())
+@:autoBuild(lycan.util.NamedCollectionBuilder.build())
 class NamedCollection<T:Named> {
 	public var list:Array<T>;
 	public var map:StringMap<T>;
