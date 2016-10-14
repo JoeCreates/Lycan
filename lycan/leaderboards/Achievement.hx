@@ -41,6 +41,12 @@ class Achievement {
 		}
 	}
 	
+	public function reveal():Void {
+		#if googleplayleaderboards
+		GooglePlayLeaderboards.get.revealAchievement(id.googlePlayId);
+		#end
+	}
+	
 	public function unlock():Void {
 		if (unlocked) {
 			return;
