@@ -1,5 +1,7 @@
 package lycan.leaderboards;
 
+import extension.GooglePlayListener;
+
 #if googleplayleaderboards
 
 import extension.GooglePlayGames;
@@ -11,6 +13,10 @@ class GooglePlayLeaderboards {
 	
 	private function new() {
 		GooglePlayGames.init();
+	}
+	
+	public function setListener(listener:GooglePlayListener):Void {
+		
 	}
 	
 	public function signIn():Void {
