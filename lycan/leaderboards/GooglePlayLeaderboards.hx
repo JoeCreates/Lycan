@@ -1,12 +1,11 @@
 package lycan.leaderboards;
 
-import extension.GooglePlayListener;
-
 #if googleplayleaderboards
 
-import extension.GooglePlayGames;
-import extension.GooglePlayGravity;
-import extension.GooglePlayLeaderboardTimespan.LeaderboardTimespan;
+import extension.googleplaygames.GooglePlayGames;
+import extension.googleplaygames.GooglePlayGravity;
+import extension.googleplaygames.GooglePlayLeaderboardTimespan;
+import extension.googleplaygames.GooglePlayListener;
 
 class GooglePlayLeaderboards {
 	public static var get(default, never):GooglePlayLeaderboards = new GooglePlayLeaderboards();
@@ -16,7 +15,7 @@ class GooglePlayLeaderboards {
 	}
 	
 	public function setListener(listener:GooglePlayListener):Void {
-		
+		GooglePlayGames.setListener(listener);
 	}
 	
 	public function signIn():Void {
