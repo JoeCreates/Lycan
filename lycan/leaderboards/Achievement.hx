@@ -43,7 +43,7 @@ class Achievement {
 	
 	public function reveal():Void {
 		#if googleplayleaderboards
-		GooglePlayLeaderboards.get.revealAchievement(id.googlePlayId);
+		GooglePlayLeaderboards.get.revealAchievementImmediate(id.googlePlayId);
 		#end
 	}
 	

@@ -50,6 +50,10 @@ class GooglePlayLeaderboards {
 		GooglePlayGames.revealAchievement(id);
 	}
 	
+	public function revealAchievementImmediate(id:String):Void {
+		GooglePlayGames.revealAchievementImmediate(id);
+	}
+	
 	public function setAchievementSteps(id:String, numSteps:Int):Void {
 		GooglePlayGames.setAchievementSteps(id, numSteps);
 	}
