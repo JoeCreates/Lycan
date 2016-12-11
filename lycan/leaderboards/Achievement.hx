@@ -4,7 +4,7 @@ package lycan.leaderboards;
 import lycan.leaderboards.GooglePlayLeaderboards;
 #end
 
-#if amazonkindleleaderboards
+#if gamecircleleaderboards
 import lycan.leaderboards.GameCircleLeaderboards;
 #end
 
@@ -66,7 +66,7 @@ class Achievement {
 		GooglePlayLeaderboards.get.unlockAchievement(id.googlePlayId);
 		#end
 		
-		#if amazonkindleleaderboards
+		#if gamecircleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, 100);
 		#end
 		
@@ -104,7 +104,7 @@ class Achievement {
 		GooglePlayLeaderboards.get.setAchievementSteps(id.googlePlayId, Std.int(currentValue));
 		#end
 		
-		#if amazonkindleleaderboards
+		#if gamecircleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, progressPercent);
 		#end
 		
