@@ -1,8 +1,6 @@
 package lycan.components;
 
-import lycan.components.LateUpdatable;
-
-interface Attachable extends LateUpdatable extends Entity {
+interface Attachable extends Entity {
 	public var attachable:AttachableComponent;
 	@:relaxed public var x(get, set):Float;
 	@:relaxed public var y(get, set):Float;
@@ -34,8 +32,6 @@ class AttachableComponent extends Component<Attachable> {
 	
 	public function new(entity:Attachable) {
 		super(entity);
-		
-		requiresLateUpdate = true;
 		
 		x = 0;
 		y = 0;

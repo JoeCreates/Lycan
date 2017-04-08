@@ -9,47 +9,48 @@ import tink.macro.Exprs;
 import tink.macro.Types;
 
 import lycan.components.Component;
-//TODO handle detroying
+
 class EntityBuilder {
 	
-	public static var entityPath:TypePath = {pack: ["lycan", "components"], name: "Entity"};
+	public static var packagePath:Array<String> = ["lycan", "components"];
+	public static var entityPath:TypePath = {pack: packagePath, name: "Entity"};
+	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
+	
+	public static var componentInterfaces:Array<ClassType>;
 	
 	public static function build():Array<Field> {
 		var fields:Array<Field> = Context.getBuildFields();
 		
-		//TODO possibly not needed
-		//for (field in fields) {
-			//if (field.name == "components") {
-				//return fields;
-			//}
-		//}
+		componentInterfaces = getComponentInterfaces();
 		
 		// Get local type as ClassType
-		var classType:ClassType;
-		switch (Context.getLocalType()) {
-			case TInst(r, _):
-				classType = r.get();
-			case _:
-		}
+		var classType:ClassType = TypeTools.getClass(Context.getLocalType());
+		
+		trace(":: TRY " + classType.name);
 		
 		// Prevent a type from being built twice
 		if (classType.meta.has("EntityBuilderBuilt")) {
+			trace("::METAMETAMETAMETAMETAMETA ");
 			return fields;
 		}
 		classType.meta.add("EntityBuilderBuilt", [], Context.currentPos());
 		
+		trace(":: Building " + classType.name);
+		
+		trace("A0");
+		
 		// Add components field
-		if (!hasFieldIncludingBuildFields("components")) {
-			fields.push({
-				name: "components",
-				doc: null,
-				meta: [],
-				access: [APublic],
-				kind: FVar(macro :Array<lycan.components.Component<Dynamic>>,
-					macro new Array<lycan.components.Component<Dynamic>>() ),
-				pos: Context.currentPos()
-			});
+		if (!hasField("components", fields, classType)) {
+			trace("A1.5" + classType.name);
+			var c = macro class {
+				// TODO make it possible to customise this name
+				public var components:Array<lycan.components.Component<Dynamic>> = [];
+			}
+			trace("A1.75");
+			fields.push(c.fields[0]);
 		}
+		
+		trace("A1");
 		
 		// We do something different if the local type is an interface
 		switch(Context.getLocalType()) {
@@ -59,88 +60,14 @@ class EntityBuilder {
 				return fields;
 		}
 		
-		var addedDraw:Bool = false;
-		var addedUpdate:Bool = false;
-		var addedLateUpdate:Bool = false;
-		
-		// Add component drawing
-		for (field in fields) {
-			switch (field.kind) {
-				case FFun(func):
-					if (field.name == "draw") {
-						appendDraw(func);
-						addedDraw = true;
-					}
-					if (field.name == "update") {
-						appendUpdate(func);
-						addedUpdate = true;
-					}
-					if (field.name == "lateUpdate") {
-						appendLateUpdate(func);
-						addedLateUpdate = true;
-					}
-				case _:
-			}
-		}
-		
-		if (!addedDraw) {
-			var f:Bool = hasInheritedFunction(TypeTools.getClass(Context.getLocalType()), "draw");
-			// If we find the function in a superclass, override it
-			if (f) {
-				appendDraw(overrideFunction("draw", { args: [], ret: null, expr: macro { super.draw(); }}, fields ));
-			}
-			// Otherwise, create it
-			else {
-				appendDraw(addFunction("draw", {args: [], ret: null, expr: macro {}}, fields));
-			}
-		}
-		
-		if (!addedUpdate) {
-			var f:Bool = hasInheritedFunction(TypeTools.getClass(Context.getLocalType()), "update");
-			// If we find the function in a superclass, override it
-			if (f) {
-				appendUpdate(overrideFunction("update", {
-					args: [{ name: "dt", type: TPath( { pack: [], name: "Float" } )}],
-					ret: null,
-					expr: macro super.update(dt)
-				}, fields));
-			}
-			// Otherwise, create it
-			else {
-				appendUpdate(addFunction("update", {
-					args: [{ name: "dt", type: TPath( { pack: [], name: "Float" } )}],
-					ret: null,
-					expr: macro {}
-				}, fields));
-			}
-		}
-		
-		if (!addedLateUpdate) {
-			var f:Bool = hasInheritedFunction(TypeTools.getClass(Context.getLocalType()), "lateUpdate");
-			// If we find the function in a superclass, override it
-			if (f) {
-				appendLateUpdate(overrideFunction("lateUpdate", {
-					args: [{ name: "dt", type: TPath( { pack: [], name: "Float" } )}],
-					ret: null,
-					expr: macro super.lateUpdate(dt)
-				}, fields));
-			}
-			// Otherwise, create it
-			else {
-				appendLateUpdate(addFunction("lateUpdate", {
-					args: [{ name: "dt", type: TPath( { pack: [], name: "Float" } )}],
-					ret: null,
-					expr: macro {}
-				}, fields));
-			}
-		}
+		trace("A2");
 		
 		// Add getters and setters for entity_ properties
 		// for each field that isn't the component field
 		for (dummyField in getDummyPropertyFields()) {
 			// Check if the entity_ property already exists
 			var found:Bool = false;
-			if (hasFieldIncludingBuildFields(dummyField.name)) {
+			if (hasField(dummyField.name, fields, classType)) {
 				found = true;
 				continue;
 			}
@@ -159,7 +86,7 @@ class EntityBuilder {
 				});
 				
 				var dummySourceFieldName:String = dummyField.name.substring(7, dummyField.name.length);
-				if (!hasFieldIncludingBuildFields(dummySourceFieldName)) {
+				if (!hasField(dummySourceFieldName, fields, classType)) {
 					throw("Field " + dummySourceFieldName + " ("+ dummyField.name+") required by component interface is missing in " + classType.name);
 				}
 				
@@ -196,47 +123,73 @@ class EntityBuilder {
 			}           
 		}
 		
+		trace("A3");
+		
 		// Append component instantiation to constructor
-		var componentFields:Map<String, ClassField> = getComponentFields();
-		var appendComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
+		var componentFields:Map<String, {field:ClassField, componentInterface:ClassType}> = getComponentFields();
+		var prependComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
+			var field = componentFields.get(c.name).field;
 			var found:Bool = false;
-			if (hasFieldIncludingBuildFields(componentFields.get(c.name).name)) {
-				throw("Class " + classType.name + " has field " +
-					componentFields.get(c.name).name + ", which must not be declared as it is required by " + c.name);
+			if (hasField(field.name, fields, classType)) {
+				throw("Class " + classType.pack + "." + classType.name + " has field " +
+					field.name + ", which must not be declared as it is required by " + c.name);
 				found = true;
 			}
+			var ct = ComplexType.TPath(c);
 			// If we do not have a field for the component, create one
 			if (!found) {
-				fields.push({
-					name: componentFields.get(c.name).name,
-					doc: null,
-					meta: [],
-					access: [APublic],
-					kind: FVar(TPath(c), null),
-					pos: Context.currentPos()
-				});
+				var name = field.name;
+				var myClass = macro class {
+					public var $name:$ct;
+				}
+				fields.push(myClass.fields[0]);
+				trace("Added field " + name);
 			}
 			return macro {
-				$i{componentFields.get(c.name).name} = new $c(this);
-				components.push($i{componentFields.get(c.name).name});
-				$ { e };
+				$i{field.name} = new $c(this);
+				components.push($i{field.name});
+				${e};
 			}
 		}
+		
+		var fs = "";
+		for (field in fields) {fs += field.name + ", "; }
+		trace(fs);
 		for (field in fields) {
 			switch (field.kind) {
 				case FFun(func) if (field.name == "new"):
-					for (componentInterface in getComponentInterfaces()) {
+					// For each component field, add if it hasn't been added by a superclass
+					for (componentField in componentFields) {
 						if (classType.superClass != null) {
 							// Do not re-add components that have already been added by a superclass
-							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentInterface))) {
+							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
 								continue;
 							}
 						}
 						// Finally, add the component instantation
-						func.expr = appendComponentInstantiation(func.expr,
-							{pack: componentInterface.pack, name: componentInterface.name + "Component" } );
+						func.expr = prependComponentInstantiation(func.expr,
+							{pack: componentField.componentInterface.pack, name: TypeTools.getClass(componentField.field.type).name} );
 					}
 				case _:
+			}
+		}
+		
+		// Handle :append and :prepend metadata
+		//TODO
+		// Once we've found the "component field", for each of its fields look for the :prepend and :append metadata then handle them
+		// For the mofidied field, use findField to see if it already exists
+		// If it does exist, check if it is in the current class in order to determine if override should be marked
+		// Check the metadata for arguments(
+		// For each component
+		for (componentField in componentFields) {
+			var componentClass:ClassType = TypeTools.getClass(componentField.field.type);
+			// For each field in the component, look for the metadata
+			for (field in componentClass.fields.get()) {
+				if (field.meta.has(":prepend")) {
+					//TODO apparently
+				} else if (field.meta.has(":append")) {
+					//TODO
+				}
 			}
 		}
 		
@@ -244,7 +197,18 @@ class EntityBuilder {
 	}
 	
 	/**
-	 * Checks if a ClassType should have added a component already
+	 * Whether this class currently has a field of the given name
+	 * Checks both build fields of this type and fields of all super classes
+	 */
+	public static function hasField(name:String, fields:Array<Field>, classType:ClassType):Bool {
+		for (f in fields) {
+			if (f.name == name) return true;
+		}
+		return classType.superClass != null && TypeTools.findField(classType.superClass.t.get(), name) != null;
+	}
+	
+	/**
+	 * Checks if a ClassType has added a required component already
 	 */
 	public static function hasAddedComponent(type:ClassType, componentInterfacePath:TypePath):Bool {
 		// Only classes can have components added, so return false if type is an interface
@@ -293,7 +257,7 @@ class EntityBuilder {
 	public static function getDummyPropertyFields():Array<ClassField> {
 		var fields:Array<ClassField> = new Array<ClassField>();
 		var fieldNameMap:Map<String, ClassField> = new Map<String, ClassField>();
-		for (componentInterface in getComponentInterfaces()) {
+		for (componentInterface in componentInterfaces) {
 			for (field in getDummyPropertyFieldsFromInterface(componentInterface)) {
 				// If field not yet in array, add it
 				if (!fieldNameMap.exists(field.name)) {
@@ -305,22 +269,13 @@ class EntityBuilder {
 		return fields;
 	}
 	
-	// TODO poorly named now, seeing as this actually gets all fields, not just the dummy property fields?
-	// Perhaps the component field stuff should be removed seeing as it no longers needs to be made an exception
-	// first we must check if that is not used elsewhere, though
+	/** Return an fields from interface that need to have dummy fields generated due to the :relaxed metadata */
 	public static function getDummyPropertyFieldsFromInterface(componentInterface:ClassType):Array<ClassField> {
 		var fields:Array<ClassField> = new Array<ClassField>();
 		for (field in componentInterface.fields.get()) {
 			// Only substitute fields explicitly marked with @:relaxed metadata
 			if (field.meta != null && field.meta.has(":relaxed")) {
-				switch(field.type) {
-					case TInst(t, _)://Todo this bit probably isnt necessary anymore
-						if (t.get().name != componentInterface.name + "Component") {
-							fields.push(field);
-						}
-					case _:
-						fields.push(field);
-				}
+				fields.push(field);
 			}
 		}
 		return fields;
@@ -328,17 +283,18 @@ class EntityBuilder {
 	
 	/** Create map of component field type names to their corresponding ClassFields */
 	public static function getComponentFields() {
-		var componentFields:Map<String, ClassField> = new Map<String, ClassField>();
-		for (i in getComponentInterfaces()) {
+		var componentFields:Map<String, {field:ClassField, componentInterface:ClassType}>
+			= new Map<String, {field:ClassField, componentInterface:ClassType}>();
+		for (i in componentInterfaces) {
 			var componentField:ClassField = getComponentField(i);
 			if (componentField != null) {
 				switch (componentField.type) {
 					case TInst(t, _):
-						componentFields.set(t.get().name, getComponentField(i));
+						componentFields.set(t.get().name, {field: getComponentField(i), componentInterface: i});
 					case _:
 				}
 			} else {
-				throw("Component interface is missing a field for the component");
+				throw("Component interface " + i.name + " is missing a field for the component");
 			}
 		}
 		return componentFields;
@@ -346,53 +302,21 @@ class EntityBuilder {
 	
 	public static function getComponentField(componentInterface:ClassType):ClassField {
 		for (field in componentInterface.fields.get()) {
-			switch(field.type) {
+			switch (field.type) {
 				case TInst(t, _):
-					if (t.get().name == componentInterface.name + "Component") {
+					var fieldClass:ClassType = t.get();
+					if (typePathEq(getTypePath(fieldClass.superClass.t.get()), componentPath) &&
+						classTypeEq(TypeTools.getClass(fieldClass.superClass.params[0]), componentInterface)) {
 						return field;
 					}
+					
 				case _:
 			}
 		}
 		return null;
 	}
 	
-	/** Recursively check if build field or inherited field */
-	public static function hasFieldIncludingBuildFields(fieldName:String):Bool {
-		var classType:ClassType;
-		switch (Context.getLocalType()) {
-			case TInst(r, _):
-				classType = r.get();
-			case _:
-		}
-		for (field in Context.getBuildFields()) {
-			// Check if this Field is the required field
-			if (field.name == fieldName) {
-				return true;
-			}
-		}
-		// If not, check the super class if there is one
-		if (classType.superClass != null) {
-			return hasField(classType.superClass.t.get(), fieldName);
-		}
-		return false;
-	}
-	
-	/** Recursively check if given ClassType has a field */
-	public static function hasField(type:ClassType, fieldName:String):Bool {
-		for (field in type.fields.get()) {
-			// Check if this Field is the required field
-			if (field.name == fieldName) {
-				return true;
-			}
-		}
-		// If not, check the super class if there is one
-		if (type.superClass != null) {
-			return hasField(type.superClass.t.get(), fieldName);
-		}
-		return false;
-	}
-	
+	// TODO possibly don;t need this anymore (could use TypeTools.findField()?)
 	public static function interfaceHasField(i:ClassType, fieldName:String):Bool {
 		if (!i.isInterface) {
 			return false;
@@ -403,7 +327,7 @@ class EntityBuilder {
 			}
 		}
 		for (i2 in i.interfaces) {
-			if (interfaceHasField(i2.t.get(), fieldName)) {
+			if (TypeTools.findField(i2.t.get(), fieldName) != null) {
 				return true;
 			}
 		}
@@ -426,7 +350,7 @@ class EntityBuilder {
 	}
 	
 	public static function getComponentInterfaces():Array<ClassType> {
-		var out:Array<ClassType> = new Array <ClassType>();
+		var out:Array<ClassType> = new Array<ClassType>();
 		switch(Context.getLocalType()) {
 			case TInst(r, _):
 				for (i in r.get().interfaces) {
@@ -440,87 +364,6 @@ class EntityBuilder {
 			case _:
 		}
 		return out;
-	}
-	
-	public static function overrideFunction(name:String, func:Function, fields: Array<Field>):Function {
-		fields.push({
-			name: name,
-			doc: null,
-			meta: [],
-			access: [AOverride, APublic],
-			kind: FFun(func),
-			pos: Context.currentPos()
-		});
-		return func;
-	}
-	
-	public static function addFunction(name:String, func:Function, fields: Array<Field>):Function {
-		fields.push({
-			name: name,
-			doc: null,
-			meta: [],
-			access: [APublic],
-			kind: FFun(func),
-			pos: Context.currentPos()
-		});
-		return func;
-	}
-	
-	/** Attempt to get a function from a given class, excluding inherited functions */
-	public static function hasFunction(classType:ClassType, name:String):Bool {
-		for (field in classType.fields.get()) {
-			switch (field.kind) {
-				case FMethod(_) if (field.name == name):
-					return true;
-				case _:
-			}
-		}
-		return false;
-	}
-	
-	/** Attempt to get a function from a given class, including inherited functions */
-	public static function hasInheritedFunction(superClass:ClassType, name:String):Bool {
-		if (hasFunction(superClass, name)) return true;
-		
-		// If no superclass, return false
-		if (superClass.superClass == null) return false;
-		// Otherwise recursively check superclasses
-		return hasInheritedFunction(superClass.superClass.t.get(), name);
-	}
-	
-	public static function appendDraw(func:Function):Void {
-		func.expr = macro {
-			for (component in components) {
-				if (component.requiresDraw) {
-					component.draw();
-				}
-			}
-			${func.expr};
-		}
-	}
-	
-	public static function appendUpdate(func:Function):Void {
-		func.expr = macro {
-			for (component in components) {
-				if (component.requiresUpdate) {
-					component.update($i{func.args[0].name});
-				}
-			}
-			${func.expr};//TODO moved all this stuff to end up funcs. Change names accordingly.
-		}
-	}
-	
-	
-	//TODO there are apparently no checks/warnings about when these functions already exist
-	public static function appendLateUpdate(func:Function):Void {
-		func.expr = macro {
-			for (component in components) {
-				if (component.requiresLateUpdate) {
-					component.lateUpdate($i{func.args[0].name});
-				}
-			}
-			${func.expr};
-		}
 	}
 	
 	public static function buildComponentInterface():Array<Field> {
@@ -546,7 +389,7 @@ class EntityBuilder {
 							if (field.name.substr(0, 7) == "entity_") {
 								continue;
 							}
-							if (hasFieldIncludingBuildFields("entity_" + field.name)) {
+							if (interfaceHasField(classType, "entity_" + field.name)) {
 								continue;
 							}
 							// Only substitute fields explicitly marked with @:relaxed metadata
@@ -565,6 +408,10 @@ class EntityBuilder {
 		
 		return fields;
 		
+	}
+	
+	public static function classTypeEq(c1:ClassType, c2:ClassType):Bool {
+		return c1.pack.toString() == c2.pack.toString() && c1.name == c2.name;
 	}
 	
 	public static function typePathEq(path1:TypePath, path2:TypePath):Bool {
