@@ -63,16 +63,16 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 		switch(e) {
 			case EditOperation.DELETE(s, idx):
 				Sure.sure(idx >= 0 && idx < letters.length);
-				delete(s, idx);
+				deleteLetter(s, idx);
 			case EditOperation.INSERT(s, src, target):
 				Sure.sure(target >= 0 && target < letters.length);
-				insert(s, src, target);
+				insertLetter(s, src, target);
 			case EditOperation.KEEP(s, idx):
 				Sure.sure(idx >= 0 && idx < letters.length);
-				keep(s, idx);
+				keepLetter(s, idx);
 			case EditOperation.SUBSTITUTE(r, i, idx):
 				Sure.sure(idx >= 0 && idx < letters.length);
-				substitute(r, i, idx);
+				substituteLetter(r, i, idx);
 			default:
 				throw "Unhandled string edit operation encountered";
 				return;
@@ -82,22 +82,22 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 		layoutLetters();
 	}
 
-	private function keep(s:String, idx:Int):Void {
+	private function keepLetter(s:String, idx:Int):Void {
 		//trace("Keep element " + s + " at index " + idx);
 	}
 
-	private function insert(s:String, src:Int, target:Int):Void {
+	private function insertLetter(s:String, src:Int, target:Int):Void {
 		//trace("Insert element " + s + " at index " + target + " from " + src);
 		letters.insert(target + 1, getLetter(s));
 	}
 
-	private function delete(s:String, idx:Int):Void {
+	private function deleteLetter(s:String, idx:Int):Void {
 		//trace("Delete element " + s + " at index " + idx);
 		var letter = letters.splice(idx, 1);
 		remove(letter[0], true);
 	}
 
-	private function substitute(r:String, i:String, idx:Int):Void {
+	private function substituteLetter(r:String, i:String, idx:Int):Void {
 		//trace("Remove element " + r + " and replace it with " + i + " at index " + idx);
 		remove(letters[idx], true);
 		//trace("Num letters: " + letters.length);
