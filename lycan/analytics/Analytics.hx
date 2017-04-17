@@ -42,7 +42,7 @@ class Analytics {
 	
 	public static function startTimedEvent(id:String, ?params:Dynamic = null):Void {
 		#if flurryanalytics
-		Flurry.logEvent(id, params, true);
+		Flurry.startTimedEvent(id, params, true);
 		#end
 	}
 	

@@ -1,10 +1,18 @@
 package lycan.core;
-import haxe.ds.IntMap;
+
 import haxe.ds.StringMap;
 
 using StringTools;
 
 class StringExtensions {
+	public static inline function random(length:Int, alphabet:String):String {
+		var s:String = "";
+		for (i in 0...length) {
+			s += alphabet.charAt(Std.random(alphabet.length));
+		}
+		return s;
+	}
+	
 	// NOTE this will be slow
 	public static inline function reverse(s:String):String {
 		Sure.sure(s != null);

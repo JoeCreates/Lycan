@@ -6,13 +6,15 @@ using lycan.core.ArrayExtensions;
 using lycan.core.IntExtensions;
 
 interface Threshold {
-	public var threshold(default, null):Float;
+	public var threshold(default, set):Float;
 	public var signal_crossed(default, null):Signal2<Float, Float>;
+	public function precondition(before:Float, after:Float):Bool;
 }
 
+// Threshold that always triggers whenever it is crossed
 class SimpleThreshold implements Threshold {
 	public var signal_crossed(default, null) = new Signal2<Float, Float>();
-	public var threshold(default, null):Float;
+	public var threshold(default, set):Float;
 
 	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>) {
 		this.threshold = threshold;
@@ -22,6 +24,79 @@ class SimpleThreshold implements Threshold {
 				signal_crossed.add(cb);
 			}
 		}
+	}
+	
+	public function precondition(before:Float, after:Float):Bool {
+		return true;
+	}
+	
+	public function set_threshold(threshold:Float):Float {
+		return this.threshold = threshold;
+	}
+}
+
+// Threshold that always triggers whenever it is crossed, and also notifies whenever its value changes
+class ChangeWatchThreshold implements Threshold {
+	public var signal_crossed(default, null) = new Signal2<Float, Float>();
+	public var signal_changed(default, null) = new Signal2<Float, Float>();
+	public var threshold(default, set):Float;
+	
+	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>) {
+		this.threshold = threshold;
+
+		if (cbs != null) {
+			for (cb in cbs) {
+				signal_crossed.add(cb);
+			}
+		}
+	}
+	
+	public function precondition(before:Float, after:Float):Bool {
+		return true;
+	}
+	
+	public function set_threshold(threshold:Float):Float {
+		signal_changed.dispatch(this.threshold, threshold);
+		return this.threshold = threshold;
+	}
+}
+
+// Threshold that triggers up to n times when it is crossed below or above the threshold
+class CountedBidirectionalThreshold implements Threshold {
+	public var signal_crossed(default, null) = new Signal2<Float, Float>();
+	public var threshold(default, set):Float;
+	public var belowTriggerCountdown(default, null):Int;
+	public var aboveTriggerCountdown(default, null):Int;
+	
+	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>, belowTriggerCountdown:Int = 1, aboveTriggerCountdown:Int = 1) {
+		this.threshold = threshold;
+		if (cbs != null) {
+			for (cb in cbs) {
+				signal_crossed.add(cb);
+			}
+		}
+	}
+	
+	public function reset(downs:Int = 1, ups:Int = 1) {
+		this.belowTriggerCountdown = downs;
+		this.aboveTriggerCountdown = ups;
+	}
+	
+	public function precondition(before:Float, after:Float):Bool {
+		if (after < before) {
+			if (belowTriggerCountdown-- >= 0) {
+				return true;
+			}
+		} else {
+			if (aboveTriggerCountdown-- >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public function set_threshold(threshold:Float):Float {
+		return this.threshold = threshold;
 	}
 }
 
@@ -77,7 +152,9 @@ class ThresholdTrigger<T:Threshold> {
 		}
 
 		for (i in lower...upper) {
-			thresholds[i].signal_crossed.dispatch(this.value, v);
+			if(thresholds[i].precondition(this.value, v)) {
+				thresholds[i].signal_crossed.dispatch(this.value, v);
+			}
 		}
 
 		return this.value = v;

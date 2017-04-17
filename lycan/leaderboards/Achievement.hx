@@ -4,7 +4,7 @@ package lycan.leaderboards;
 import lycan.leaderboards.GooglePlayLeaderboards;
 #end
 
-#if amazonkindleleaderboards
+#if gamecircleleaderboards
 import lycan.leaderboards.GameCircleLeaderboards;
 #end
 
@@ -20,6 +20,10 @@ import lycan.leaderboards.KongregateFacade;
 import lycan.leaderboards.GameJoltFacade;
 #end
 
+#if newgroundsleaderboards
+import lycan.leaderboards.NewgroundsFacade;
+#end
+
 #if steamworksleaderboards
 import lycan.leaderboards.SteamworksFacade;
 #end
@@ -27,14 +31,20 @@ import lycan.leaderboards.SteamworksFacade;
 class Achievement {
 	public var id(default, null):AchievementId;
 	public var unlocked(default, null):Bool = false;
-	public var targetValue(default, null):Float = 0;
+	public var targetValue(default, null):Null<Float> = 0;
 	
-	public function new(id:AchievementId, ?targetValue:Float):Void {
+	public function new(id:AchievementId, ?targetValue:Null<Float>):Void {
 		this.id = id;
 		unlocked = false;
 		if(targetValue != null) {
 			this.targetValue = targetValue;
 		}
+	}
+	
+	public function reveal():Void {
+		#if googleplayleaderboards
+		GooglePlayLeaderboards.get.revealAchievementImmediate(id.googlePlayId);
+		#end
 	}
 	
 	public function unlock():Void {
@@ -56,7 +66,7 @@ class Achievement {
 		GooglePlayLeaderboards.get.unlockAchievement(id.googlePlayId);
 		#end
 		
-		#if amazonkindleleaderboards
+		#if gamecircleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, 100);
 		#end
 		
@@ -72,6 +82,10 @@ class Achievement {
 		if (targetValue == null) {
 			KongregateFacade.submitStat(id.kongregateId, 1);
 		}
+		#end
+		
+		#if newgroundsleaderboards
+		NewgroundsFacade.addMedal(id.newgroundsId);
 		#end
 	}
 	
@@ -90,7 +104,7 @@ class Achievement {
 		GooglePlayLeaderboards.get.setAchievementSteps(id.googlePlayId, Std.int(currentValue));
 		#end
 		
-		#if amazonkindleleaderboards
+		#if gamecircleleaderboards
 		GameCircleLeaderboards.get.updateAchievementProgress(id.amazonId, progressPercent);
 		#end
 		
@@ -107,6 +121,12 @@ class Achievement {
 		#if kongregateleaderboards
 		KongregateFacade.submitStat(id.kongregateId, currentValue);
 		#end
+		
+		#if newgroundsleaderboards
+		if (progressPercent >= 100) {
+			NewgroundsFacade.addMedal(id.newgroundsId);
+		}
+		#end
 	}
 }
 
@@ -114,6 +134,7 @@ typedef AchievementId = {
 	googlePlayId:String,
 	gameCenterId:String,
 	kongregateId:String,
+	newgroundsId:String,
 	gameJoltId:Int,
 	amazonId:String,
 	steamworksId:String

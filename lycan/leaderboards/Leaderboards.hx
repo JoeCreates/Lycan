@@ -17,7 +17,12 @@ import lycan.leaderboards.KongregateFacade;
 #end
 
 #if gamejoltleaderboards
+import flixel.util.FlxTimer; // For pinging the GameJolt session
 import lycan.leaderboards.GameJoltFacade;
+#end
+
+#if newgroundsleaderboards
+import lycan.leaderboards.NewgroundsFacade;
 #end
 
 #if steamworksleaderboards
@@ -31,7 +36,7 @@ class Leaderboards {
 	private function new() {
 	}
 	
-	public static function init():Void {        
+	public static function init():Void {
 		#if gamecenterleaderboards
 		GameCenterLeaderboards.get;
 		#end
@@ -49,17 +54,24 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
-		if (gameId == 0 || privateKey == null) {
-			throw "Set the GameJolt gameId and privateKey before initializing leaderboards";
+		if (gameJoltGameId == 0 || gameJoltPrivateKey == null) {
+			throw "Set (at minimum) the GameJolt gameId and privateKey before initializing leaderboards";
 		}
-		GameJoltFacade.init(gameId, privateKey, autoAuth, userName, onGameJoltLoaded);
+		GameJoltFacade.init(gameJoltGameId, gameJoltPrivateKey, gameJoltAutoAuth, gameJoltUserName, gameJoltUserToken, onGameJoltLoaded);
+		#end
+		
+		#if newgroundsleaderboards
+		if (newgroundsGameId == null) {
+			throw "Set (at minimum) the Newgrounds gameId and privateKey before initializing leaderboards";
+		}
+		NewgroundsFacade.init(newgroundsGameId, newgroundsPrivateKey, newgroundsShowPopUp, onNewgroundsConnected);
 		#end
 		
 		#if steamworksleaderboards
-		if (gameId == 0) {
+		if (steamGameId == 0) {
 			throw "Set the Steamworks gameId before initializing leaderboards";
 		}
-		SteamworksFacade.init(gameId);
+		SteamworksFacade.init(steamGameId);
 		#end
 	}
 	
@@ -80,6 +92,9 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
+		#end
+		
+		#if newgroundsleaderboards
 		#end
 		
 		#if steamworksleaderboards
@@ -106,6 +121,9 @@ class Leaderboards {
 		#if gamejoltleaderboards
 		#end
 		
+		#if newgroundsleaderboards
+		#end
+		
 		#if steamworksleaderboards
 		SteamworksFacade.openOverlayToDialog(DialogName.ACHIEVEMENTS);
 		#end
@@ -130,8 +148,41 @@ class Leaderboards {
 		#if gamejoltleaderboards
 		#end
 		
+		#if newgroundsleaderboards
+		#end
+		
 		#if steamworksleaderboards
 		#end
+	}
+	
+	public static function isSignedIn():Bool {
+		#if gamecenterleaderboards
+		return GameCenterLeaderboards.get.isSignedIn();
+		#end
+		
+		#if googleplayleaderboards
+		trace("Note, GooglePlayLeaderboards isSignedIn is unimplemented");
+		return true; // Unimplemented
+		#end
+		
+		#if gamecircleleaderboards
+		return GameCircleLeaderboards.get.isSignedIn();
+		#end
+		
+		#if kongregateleaderboards
+		#end
+		
+		#if gamejoltleaderboards
+		#end
+		
+		#if newgroundsleaderboards
+		#end
+		
+		#if steamworksleaderboards
+		#end
+		
+		trace("Defaulting to signed in == true for unimplemented leaderboards signed in check");
+		return true;
 	}
 	
 	public static function submitScore(score:Int, ?leaderboardId:Dynamic):Void {
@@ -152,7 +203,11 @@ class Leaderboards {
 		#end
 		
 		#if gamejoltleaderboards
-		GameJoltFacade.addScore(Std.string(score), score);
+		GameJoltFacade.addScore(Std.string(score), score, leaderboardId);
+		#end
+		
+		#if newgroundsleaderboards
+		NewgroundsFacade.submitScore(leaderboardId, score);
 		#end
 		
 		#if steamworksleaderboards
@@ -167,34 +222,50 @@ class Leaderboards {
 	#end
 	
 	#if gamejoltleaderboards
-	public static var gameId:Int = 0;
-	public static var privateKey:String = null;
-	public static var autoAuth:Bool = false;
-	public static var userName:String = null;
-	public static var userToken:String = null;
+	public static var gameJoltGameId:Int = 0;
+	public static var gameJoltPrivateKey:String = null;
+	public static var gameJoltAutoAuth:Bool = false;
+	public static var gameJoltUserName:String = null;
+	public static var gameJoltUserToken:String = null;
 	
-	private static function onGameJoltLoaded():Void {
-		GameJoltFacade.authUser(null, null, onGameJoltAuthorized);
+	private static function onGameJoltLoaded(success:Bool):Void {
+		GameJoltFacade.authUser(gameJoltUserName, gameJoltUserToken, onGameJoltAuthorized);
 	}
 	
-	private static function onGameJoltAuthorized():Void {
-		GameJoltFacade.openSession(onGameJoltSessionOpened);
+	private static function onGameJoltAuthorized(success:Bool):Void {
+		if (success) {
+			#if debug
+			trace("Authorized GameJolt session");
+			#end
+			GameJoltFacade.openSession(onGameJoltSessionOpened);
+		} else {
+			#if debug
+			trace("Failed to authorize GameJolt session");
+			#end
+		}
 	}
 	
-	private static function onGameJoltSessionOpened():Void {
-		new FlxTimer(30, function(t:FlxTimer):Void {
+	private static function onGameJoltSessionOpened(kvs:Dynamic):Void {
+		new FlxTimer().start(30, function(t:FlxTimer):Void {
 			GameJoltFacade.pingSession(true, onGameJoltPingedSession);
 		}, 0);
 	}
 	
-	private static function onGameJoltPingedSession():Void {
+	private static function onGameJoltPingedSession(kvs:Dynamic):Void {
 		#if debug
 		trace("Pinged GameJolt session");
 		#end
 	}
 	#end
 	
+	#if newgroundsleaderboards
+	public static var newgroundsPrivateKey:String = null;
+	public static var newgroundsGameId:String = null;
+	public static var newgroundsShowPopUp:Bool = false;
+	public static dynamic function onNewgroundsConnected(result:Bool):Void {};
+	#end
+	
 	#if steamworksleaderboards
-	public static var gameId:Int = 0;
+	public static var steamGameId:Int = 0;
 	#end
 }
