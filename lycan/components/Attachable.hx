@@ -1,4 +1,4 @@
-package lycan.components;
+package components;
 
 interface Attachable extends Entity {
 	public var attachable:AttachableComponent;
@@ -43,7 +43,7 @@ class AttachableComponent extends Component<Attachable> {
 		flipY = false;
 	}
 	
-	override public function lateUpdate(dt:Float):Void {
+	public function lateUpdate(dt:Float):Void {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
@@ -59,8 +59,6 @@ class AttachableComponent extends Component<Attachable> {
 	 * @param   y The y position of the attachment
 	 */
 	public function attach(child:Attachable, ?x:Float, ?y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
-		Sure.sure(child != null);
-		
 		// Detach child from current parent
 		if (child.attachable.parent != null) {
 			child.attachable.parent.attachable.remove(child);
@@ -107,7 +105,7 @@ class AttachableComponent extends Component<Attachable> {
 	}
 	
 	@:access(AttachableComponent)
-	private function recursiveUpdate(dt:Float):Void {       
+	private function recursiveUpdate(dt:Float):Void {
 		if (children == null) return;
 		// Recursively update children
 		for (child in children) {

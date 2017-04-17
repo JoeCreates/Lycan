@@ -1,4 +1,4 @@
-package lycan.components;
+package components;
 
-@:autoBuild(lycan.components.EntityBuilder.build())
+@:autoBuild(components.EntityBuilder.build())
 interface Entity { }
