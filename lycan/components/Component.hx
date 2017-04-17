@@ -1,4 +1,4 @@
-package components;
+package lycan.components;
 
 class Component<T:Entity> {
 	public var entity:T;
