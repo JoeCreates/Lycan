@@ -1,4 +1,4 @@
-package components;
+package lycan.components;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -8,8 +8,6 @@ import haxe.macro.TypeTools;
 import tink.macro.ClassBuilder;
 import tink.macro.Exprs;
 import tink.macro.Types;
-
-import components.Component;
 
 /**
  * TODO
@@ -25,7 +23,7 @@ import components.Component;
 
 class EntityBuilder {
 	
-	public static var packagePath:Array<String> = ["components"];
+	public static var packagePath:Array<String> = ["lycan.components"];
 	public static var entityPath:TypePath = {pack: packagePath, name: "Entity"};
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
@@ -360,7 +358,7 @@ class EntityBuilder {
 					case _:
 				}
 			} else {
-				throw("Component interface " + i.name + " is missing a field for the component");
+				throw("Component interface " + i.name + " is missing field for the component");
 			}
 		}
 		return componentFields;

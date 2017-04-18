@@ -1,4 +1,4 @@
-package components;
+package lycan.components;
 
 interface Attachable extends Entity {
 	public var attachable:AttachableComponent;
