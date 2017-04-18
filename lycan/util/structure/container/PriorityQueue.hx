@@ -1,4 +1,4 @@
-package lycan.util.queue;
+package lycan.util.structure.container;
 
 interface Queue<T> {
 	function empty():Bool;
@@ -15,7 +15,7 @@ interface Queue<T> {
 
 // Priority queue. The higher the number, the higher the priority.
 @:allow(util.PriorityQueueIterator)
-class PriorityQueue<T:(IPrioritizable)> implements Queue<T> {   
+class PriorityQueue<T:(IPrioritizable)> implements Queue<T> {
 	private var array:Array<T>;
 	public var size(get, null):Int = 0;
 	
@@ -181,7 +181,7 @@ class PriorityQueue<T:(IPrioritizable)> implements Queue<T> {
 		tmp.position = index;
 	}
 	
-	inline private static function alloc<T>(x:Int):Array<T> {       
+	inline private static function alloc<T>(x:Int):Array<T> {
 		var a:Array<T>;
 		#if (flash || js)
 		a = untyped __new__(Array, x);
@@ -202,7 +202,7 @@ interface ForwardIterator<T> {
 	function remove():Void;
 }
 
-class PriorityQueueIterator<T:(IPrioritizable)> implements ForwardIterator<T> { 
+class PriorityQueueIterator<T:(IPrioritizable)> implements ForwardIterator<T> {
 	private var queue:PriorityQueue<T>;
 	private var array:Array<T>;
 	private var index:Int = 1;

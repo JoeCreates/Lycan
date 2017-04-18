@@ -3,9 +3,9 @@ package lycan.loading.loaders;
 import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;
 import lycan.loading.tasks.IRunnable;
-import lycan.util.queue.IPrioritizable;
-import openfl.events.Event;
+import lycan.util.structure.container.IPrioritizable;
 import openfl.Lib;
+import openfl.events.Event;
 
 #if neko
 import neko.vm.Thread;
@@ -82,7 +82,7 @@ class ThreadedLoader<T:(IPrioritizable, IRunnable, ILoadingSignalDispatcher, IDe
 					signal_task_failed.dispatch(spec.description, spec.error);
 					failed++;
 					break;
-			}           
+			}
 			spec = Thread.readMessage(false);
 		}
 		

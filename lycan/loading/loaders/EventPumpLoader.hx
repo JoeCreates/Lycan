@@ -5,9 +5,9 @@ import haxe.Timer;
 import lycan.loading.tasks.IDescribable;
 import lycan.loading.tasks.ILoadingSignalDispatcher;
 import lycan.loading.tasks.IRunnable;
-import lycan.util.queue.IPrioritizable;
-import openfl.events.Event;
+import lycan.util.structure.container.IPrioritizable;
 import openfl.Lib;
+import openfl.events.Event;
 
 // Loader that runs on the main thread but timeshares, so it does not block the game loop
 class EventPumpLoader<T:(IPrioritizable, IRunnable, ILoadingSignalDispatcher, IDescribable)> extends Loader<T> {
