@@ -1,6 +1,6 @@
 package lycan.loading.tasks;
 
-import lycan.util.queue.IPrioritizable;
+import lycan.util.structure.container.IPrioritizable;
 
 class PriorityTask extends Task implements IPrioritizable {
 	public var position:Int = 0;
