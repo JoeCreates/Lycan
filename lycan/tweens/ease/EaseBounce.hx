@@ -1,4 +1,4 @@
-package lycan.tween.ease;
+package lycan.tweens.ease;
 
 /**
  * Bounce (exponentially decaying parabolic bounce) easing equations.

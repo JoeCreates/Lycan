@@ -1,4 +1,4 @@
-package lycan.tween.ease;
+package lycan.tweens.ease;
 
 /**
  * Quintic easing equations.

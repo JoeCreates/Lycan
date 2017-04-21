@@ -29,7 +29,6 @@ import msignal.Signal.Signal1;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
-@:allow(lycan.world.WorldLoader)
 class World extends FlxGroup {
 	public var name:String;
 	public var width(default, null):Int;
@@ -37,7 +36,6 @@ class World extends FlxGroup {
 	public var scale(default, null):FlxPoint;
 	
 	public var updateSpeed:Float;
-	public var signal_loadingProgressed(default, null):Signal1<Float>;
 	public var namedObjects(default, null):Map<String, FlxBasic>;
 	public var namedLayers(default, null):Map<String, ILayer>;
 	public var namedTilesets(default, null):Map<String, TiledTileSet>;
@@ -45,6 +43,8 @@ class World extends FlxGroup {
 	
 	public var properties:TiledPropertySet;
 	public var combinedTileset:FlxTileFrames;
+	
+	public var signal_loadingProgressed(default, null):Signal1<Float>;//TODO change naming and remove msignal
 	
 	private static inline var TILESET_PATH = "assets/images/"; // TODO avoid explicit tileset path if possible
 	public function new(?scale:FlxPoint) {
@@ -71,7 +71,7 @@ class World extends FlxGroup {
 		
 		for (map in collidableTilemaps) {
 			// NOTE Always collide the map with objects, not the other way around
-			if(FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
+			if (FlxG.overlap(map, obj, notifyCallback, processCallback != null ? processCallback : FlxObject.separate)) {
 				return true;
 			}
 		}

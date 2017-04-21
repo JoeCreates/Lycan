@@ -1,10 +1,11 @@
 package lycan.world.components;
+
 import flixel.FlxObject;
 import lycan.components.Component;
 
 // TODO generalise to multiple states
 interface Switchable {
-	
+	public var switcher:SwitchComponent;
 }
 
 class SwitchComponent extends Component {

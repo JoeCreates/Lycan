@@ -23,7 +23,7 @@ import tink.macro.Types;
 
 class EntityBuilder {
 	
-	public static var packagePath:Array<String> = ["lycan.components"];
+	public static var packagePath:Array<String> = ["lycan", "components"];
 	public static var entityPath:TypePath = {pack: packagePath, name: "Entity"};
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
@@ -32,6 +32,8 @@ class EntityBuilder {
 		
 		// Get local type as ClassType
 		var classType:ClassType = TypeTools.getClass(Context.getLocalType());
+		
+		trace("Building " + classType.name);
 		
 		// Prevent a type from being built twice
 		// Adds a metadata if this is first time building, or returns early if it already
@@ -82,10 +84,10 @@ class EntityBuilder {
 		var componentInterfaces:Array<ClassType> = getComponentInterfaces();
 		
 		// Add components field
-		if (!hasField(classType, "components")) {
+		if (!hasFieldIncludingBuildFields(classType, "components", fields)) {
 			var c = macro class {
 				// TODO make it possible to customise this name
-				public var components:Array<components.Component<Dynamic>> = [];
+				public var components:Array<lycan.components.Component<Dynamic>> = [];
 			}
 			fields.push(c.fields[0]);
 		}
@@ -95,7 +97,7 @@ class EntityBuilder {
 		for (dummyField in getDummyPropertyFields(componentInterfaces)) {
 			
 			// Skip adding dummy field if class already has field with the same name
-			if (hasField(classType, dummyField.name)) {
+			if (hasFieldIncludingBuildFields(classType, dummyField.name, fields)) {
 				continue;
 			}
 			
@@ -114,7 +116,7 @@ class EntityBuilder {
 			
 			// Check we actually have a field for the dummy field to refer to
 			var dummySourceFieldName:String = dummyField.name.substring(7, dummyField.name.length);
-			if (!hasField(classType, dummySourceFieldName)) {
+			if (!hasFieldIncludingBuildFields(classType, dummySourceFieldName, fields)) {
 				throw("Field " + dummySourceFieldName + " ("+ dummyField.name+") required by component interface is missing in " + classType.name);
 			}
 			
@@ -155,7 +157,7 @@ class EntityBuilder {
 		
 		var prependComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
 			var field = componentFields.get(c.name).field;
-			if (hasField(classType, field.name)) {
+			if (hasFieldIncludingBuildFields(classType, field.name, fields)) {
 				throw("Class " + classType.pack + "." + classType.name + " has field " +
 					field.name + ", which must not be declared as it is required by " + c.name);
 			}
@@ -271,6 +273,7 @@ class EntityBuilder {
 			}
 		}
 		
+		trace("Done with " + classType.name);
 		return fields;
 	}
 	
@@ -311,6 +314,7 @@ class EntityBuilder {
 			}
 		}
 		
+		trace("Done with " + classType.name);
 		return fields;
 		
 	}
@@ -380,6 +384,22 @@ class EntityBuilder {
 			}
 		}
 		return null;
+	}
+	
+	
+	/** Recursively check if build field or inherited field */
+	public static function hasFieldIncludingBuildFields(type:ClassType, fieldName:String, fields:Array<Field>):Bool {
+		for (field in fields) {
+			// Check if this Field is the required field
+			if (field.name == fieldName) {
+				return true;
+			}
+		}
+		// If not, check the super class if there is one
+		if (type.superClass != null) {
+			return hasField(type.superClass.t.get(), fieldName);
+		}
+		return false;
 	}
 	
 	/** Recursively check if given ClassType has a field */

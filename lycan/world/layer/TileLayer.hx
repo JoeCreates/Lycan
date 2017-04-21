@@ -10,17 +10,8 @@ import flixel.math.FlxRect;
 import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.util.FlxSignal.FlxTypedSignal;
-import flixel.FlxComponent;
-import lycan.world.components.NapeTilemapComponent;
 import lycan.world.layer.ILayer.LayerType;
-import nape.geom.Vec2;
-import nape.phys.Body;
-import nape.phys.BodyType;
-import nape.phys.Material;
-import nape.shape.Circle;
-import nape.shape.Polygon;
 import flixel.math.FlxPoint;
-import lycan.world.components.NapeComponent;
 
 class TileLayer extends FlxTilemap implements ILayer {
 	
@@ -32,11 +23,6 @@ class TileLayer extends FlxTilemap implements ILayer {
 	
 	public var loaded:FlxTypedSignal<TiledTileLayer->Void>;
 	
-	#if nape
-		public var nape:NapeComponent;
-		public var napeTilemap:NapeTilemapComponent;
-	#end
-	
 	public var properties:TiledPropertySet;
 	
 	public function new(world:World) {
@@ -44,13 +30,6 @@ class TileLayer extends FlxTilemap implements ILayer {
 		this.world = world;
 		
 		loaded = new FlxTypedSignal<TiledTileLayer->Void>();
-		
-		#if nape
-			nape = new NapeComponent(BodyType.KINEMATIC, false, false);
-			napeTilemap = new NapeTilemapComponent();
-			components.add(nape);
-			components.add(napeTilemap);
-		#end
 	}
 	
 	override public function update(dt:Float):Void {
@@ -58,8 +37,10 @@ class TileLayer extends FlxTilemap implements ILayer {
 	}
 	
 	public function load(tiledLayer:TiledTileLayer):TileLayer {
+		
 		loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, world.combinedTileset,
 			Std.int(tiledLayer.map.tileWidth), Std.int(tiledLayer.map.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
+		
 		scale.copyFrom(world.scale);
 		tileWidth = tiledLayer.map.tileWidth;
 		tileHeight = tiledLayer.map.tileHeight;

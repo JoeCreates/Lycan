@@ -1,4 +1,4 @@
-package lycan.tween.ease;
+package lycan.tweens.ease;
 
 /**
  * Overshooting cubic easing equations.
