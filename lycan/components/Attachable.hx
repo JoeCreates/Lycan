@@ -10,6 +10,8 @@ interface Attachable extends Entity {
 	// TODO could add optional requirements?
 	@:relaxed public var flipX(get, set):Bool;
 	@:relaxed public var flipY(get, set):Bool;
+	
+	@:relaxed public var exists(get, set):Bool;
 }
 
 class AttachableComponent extends Component<Attachable> {
@@ -63,7 +65,7 @@ class AttachableComponent extends Component<Attachable> {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
-		if (isRoot || dirty) {
+		if (entity.entity_exists && (isRoot || dirty)) {
 			recursiveUpdate(FlxG.elapsed);
 		}
 	}

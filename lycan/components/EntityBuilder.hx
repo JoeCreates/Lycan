@@ -28,7 +28,7 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return true; };
+	static function shouldTrace() {return false; };
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
@@ -176,8 +176,6 @@ class EntityBuilder {
 				throw("Class " + classType.pack + "." + classType.name + " has field " +
 					field.name + ", which must not be declared as it is required by " + c.name);
 			}
-			
-			trace("Adding component field for " + field.name + ": " + c);
 			
 			// If we do not have a field for the component, create one
 			fields.push({
