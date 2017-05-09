@@ -8,10 +8,12 @@ import lycan.util.algorithm.StringTransforms.EditOperation;
 import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
 
-// Text that transforms from one string to another by executing a series of edit operations
+/**
+ *  Text that transforms from one string to another by executing a series of edit operations
+ */
 class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
-	public var signal_operationHandled(default, null) = new Signal1<EditOperation>(); // Fires when a string operation happens
-	public var signal_operationsHandled(default, null) = new Signal0(); // Fires when all operations have been executed
+	public var onOperationHandled(default, null) = new Signal1<EditOperation>(); // Fires when a string operation happens
+	public var onOperationsHandled(default, null) = new Signal0(); // Fires when all operations have been executed
 
 	private var letters:Array<TransformingLetter>;
 	private var textSize:Int;
@@ -42,7 +44,7 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 			handle(operations[opIdx]);
 			opIdx++;
 		} else {
-			signal_operationsHandled.dispatch();
+			onOperationsHandled.dispatch();
 		}
 	}
 
@@ -78,7 +80,7 @@ class TransformingText extends FlxTypedSpriteGroup<TransformingLetter> {
 				return;
 		}
 
-		signal_operationHandled.dispatch(e);
+		onOperationHandled.dispatch(e);
 		layoutLetters();
 	}
 

@@ -1,4 +1,4 @@
-package lycan.util;
+package lycan.util.distance;
 
 import flixel.math.FlxPoint;
 

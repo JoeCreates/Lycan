@@ -1,4 +1,4 @@
-package lycan.util;
+package lycan.ui;
 
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;

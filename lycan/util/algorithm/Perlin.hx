@@ -1,4 +1,4 @@
-package lycan.util.noise;
+package lycan.util.algorithm;
 
 // Perlin noise functions in this file were adapted from The Cinder Project (http://libcinder.org/) held under the Modified BSD license
 

@@ -1,4 +1,4 @@
-package lycan.util.screenshot;
+package lycan.util;
 
 #if cpp
 

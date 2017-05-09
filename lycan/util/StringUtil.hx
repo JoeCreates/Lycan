@@ -1,27 +1,17 @@
-package lycan.core;
+package lycan.util;
 
+import flixel.util.FlxStringUtil;
 import haxe.ds.StringMap;
 
 using StringTools;
 
-class StringExtensions {
-	public static inline function random(length:Int, alphabet:String):String {
-		var s:String = "";
-		for (i in 0...length) {
-			s += alphabet.charAt(Std.random(alphabet.length));
-		}
-		return s;
-	}
-	
+class StringUtil {
 	// NOTE this will be slow
 	public static inline function reverse(s:String):String {
-		Sure.sure(s != null);
-		var arr:Array<String> = s.split("");
-		arr.reverse();
-		return arr.join("");
+		return s.split("").reverse().join("");
 	}
 
-	public static inline function repeat(s:String, times:Int):String {
+	public static function repeat(s:String, times:Int):String {
 		Sure.sure(s != null);
 		Sure.sure(times >= 1);
 		var output:String = "";
@@ -31,7 +21,7 @@ class StringExtensions {
 		return output;
 	}
 
-	public static inline function contains(s:String, substr:String):Bool {
+	public static function contains(s:String, substr:String):Bool {
 		#if php
 		return test == "" || s.indexOf(substr) >= 0;
 		#else

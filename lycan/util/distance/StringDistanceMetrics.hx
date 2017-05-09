@@ -1,11 +1,11 @@
-package lycan.util;
+package lycan.util.distance;
 
 import haxe.ds.Vector;
 import lycan.util.structure.container.ArraySet;
 
 using lycan.core.IntExtensions;
 
-class EditDistanceMetrics {
+class StringDistanceMetrics {
 	// Returns the number of single-character edits (insertions, deletions and replacements) needed to transform the source into the target
 	// Fast iterative method that doesn't create a whole distance table up front
 	public static function levenshtein(source:String, target:String):Int {

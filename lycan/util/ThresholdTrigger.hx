@@ -13,7 +13,7 @@ interface Threshold {
 
 // Threshold that always triggers whenever it is crossed
 class SimpleThreshold implements Threshold {
-	public var signal_crossed(default, null) = new Signal2<Float, Float>();
+	public var onCrossed(default, null) = new Signal2<Float, Float>();
 	public var threshold(default, set):Float;
 
 	public function new(threshold:Float, ?cbs:Array<Float->Float->Void>) {
@@ -21,7 +21,7 @@ class SimpleThreshold implements Threshold {
 
 		if (cbs != null) {
 			for (cb in cbs) {
-				signal_crossed.add(cb);
+				onCrossed.add(cb);
 			}
 		}
 	}
@@ -63,7 +63,7 @@ class ChangeWatchThreshold implements Threshold {
 
 // Threshold that triggers up to n times when it is crossed below or above the threshold
 class CountedBidirectionalThreshold implements Threshold {
-	public var signal_crossed(default, null) = new Signal2<Float, Float>();
+	public var onCrossed(default, null) = new Signal2<Float, Float>();
 	public var threshold(default, set):Float;
 	public var belowTriggerCountdown(default, null):Int;
 	public var aboveTriggerCountdown(default, null):Int;
@@ -72,7 +72,7 @@ class CountedBidirectionalThreshold implements Threshold {
 		this.threshold = threshold;
 		if (cbs != null) {
 			for (cb in cbs) {
-				signal_crossed.add(cb);
+				onCrossed.add(cb);
 			}
 		}
 	}

@@ -17,16 +17,6 @@ class CenterPositionableComponent extends Component<CenterPositionable> {
 		super(entity);
 	}
 	
-	// TODO potential flaw here... what if something has happened to the parameter? e.g. modified before call
-	@:prepend("update") public function preupdate(dt:Float):Void {
-		trace("Pre Updated with dt = " + dt + " " + entity.val);
-		entity.val = 22;
-	}
-	@:append("update") public function postupdate(dt:Float):Void {
-		trace("Post Updated with dt = " + dt + " " + entity.val);
-		entity.val = 100;
-	}
-	
 	private function set_x(x:Float):Float {
 		entity.entity_x = x - entity.entity_width / 2;
 		return x;

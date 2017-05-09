@@ -10,7 +10,7 @@ import flixel.util.FlxColor;
 import haxe.io.Path;
 import lycan.ui.core.DebugRenderer;
 import lycan.ui.core.UIApplicationRoot;
-import lycan.util.screenshot.BatchScreenGrab;
+import lycan.util.BatchScreenGrab;
 import openfl.events.KeyboardEvent;
 import openfl.Lib;
 

@@ -8,7 +8,7 @@ using lycan.core.FloatExtensions;
 
 class Timeline<T:{}> extends TimelineItem {
 	public var currentTime(default, set):Float; // Setting this will skip to the absolute time without triggering items
-	public var signal_reset(default, null) = new Signal0();
+	public var onReset(default, null) = new Signal0();
 
 	private var items:LinkedList<TimelineItem>; // TODO an interval tree might be faster
 	private var dirtyDuration:Bool;
@@ -126,7 +126,7 @@ class Timeline<T:{}> extends TimelineItem {
 			item.reset();
 		}
 
-		signal_reset.dispatch();
+		onReset.dispatch();
 	}
 
 	public function itemTimeChanged(item:TimelineItem):Void {

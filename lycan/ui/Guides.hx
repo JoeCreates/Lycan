@@ -21,7 +21,7 @@ class Guides extends FlxSprite {
 		scrollFactor.set();
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, true, "guidesprite");
 		
-		text = new FlxText(0, 0, 0, "testing");
+		text = new FlxText(0, 0, 0, "");
 		alpha = 0.4;
 	}
 	

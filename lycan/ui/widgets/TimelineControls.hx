@@ -8,7 +8,7 @@ import lycan.ui.layouts.VBoxLayout;
 import lycan.ui.widgets.buttons.CheckBox;
 import lycan.ui.widgets.buttons.PushButton;
 import lycan.ui.widgets.sliders.SimpleHorizontalSlider;
-import lycan.util.DebugRenderItem;
+import lycan.ui.DebugRenderItem;
 import lycan.util.timeline.Timeline;
 
 class TimelineControls extends Widget {

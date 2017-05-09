@@ -18,12 +18,12 @@ class NamedCollectionBuilder {
 		}
 		
 		// Get local type as ClassType
-		var classType:ClassType;
-		switch (Context.getLocalType()) {
-			case TInst(r, _):
-				classType = r.get();
-			case _:
-		}
+		//var classType:ClassType;
+		//switch (Context.getLocalType()) {
+			//case TInst(r, _):
+				//classType = r.get();
+			//case _:
+		//}
 		
 		//trace(classType.superClass);
 		
@@ -36,16 +36,24 @@ class NamedCollectionBuilder {
 		}
 		
 		var newFieldsClass:TypeDefinition = macro class A {
-			public static var instance:$type = new $typePath();
+			public static var instance(get, null):$type;
 			
 			public static function get(name:String) {
 				return instance.map.get(name.toLowerCase());
+			}
+			
+			private static function get_instance():$type {
+				if (instance == null) {
+					instance = new $typePath();
+				}
+				return instance;
 			}
 		};
 		var newFields:Array<Field> = newFieldsClass.fields;
 		
 		fields.push(newFields[0]);
 		fields.push(newFields[1]);
+		fields.push(newFields[2]);
 		
 		return fields;
 	}

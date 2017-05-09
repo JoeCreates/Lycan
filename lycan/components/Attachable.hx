@@ -1,5 +1,8 @@
 package lycan.components;
 
+import flixel.FlxG;
+import flixel.system.frontEnds.SignalFrontEnd;
+
 interface Attachable extends Entity {
 	public var attachable:AttachableComponent;
 	@:relaxed public var x(get, set):Float;
@@ -41,14 +44,27 @@ class AttachableComponent extends Component<Attachable> {
 		originY = 0;
 		flipX = false;
 		flipY = false;
+		
+		FlxG.signals.postUpdate.add(lateUpdate);
+		
+		//removeSignals = function() {
+			//FlxG.signals.postUpdate.remove(lateUpdate);
+		//};
 	}
 	
-	public function lateUpdate(dt:Float):Void {
+	@:append("destroy")
+	public function destroy():Void {
+		FlxG.signals.postUpdate.remove(lateUpdate);
+	}
+	
+	//dynamic function removeSignals() {FlxG.signals.postUpdate.remove(lateUpdate);}
+	
+	public function lateUpdate():Void {
 		// The root is responsible for recursively updating its children
 		// However, children must also update if their attached position or origin
 		// have changed, which is indicated by the dirty flag
 		if (isRoot || dirty) {
-			recursiveUpdate(dt);
+			recursiveUpdate(FlxG.elapsed);
 		}
 	}
 	
