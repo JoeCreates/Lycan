@@ -73,8 +73,8 @@ class AttachableComponent extends Component<Attachable> {
 	/**
 	 * Attach a child to this object at the given position
 	 * @param   child The child to attach
-	 * @param   x The x position of the attachment
-	 * @param   y The y position of the attachment
+	 * @param   x The x position of the attachment. Null means use current attachment position.
+	 * @param   y The y position of the attachment. Null means use current attachment position.
 	 */
 	public function attach(child:Attachable, ?x:Float, ?y:Float, ?originX:Float, ?originY:Float, ?updateAndDraw:Bool):Void {
 		// Detach child from current parent
@@ -90,16 +90,19 @@ class AttachableComponent extends Component<Attachable> {
 		child.attachable.parent = entity;
 		
 		// Determine relative position if x/y are null
-		if (x == null) {
-			x = child.entity_x - entity.entity_x;
-		}
-		if (y == null) {
-			y = child.entity_y - entity.entity_y;
-		}
+		//if (x == null) {
+			//x = child.entity_x - entity.entity_x;
+		//}
+		//if (y == null) {
+			//y = child.entity_y - entity.entity_y;
+		//}
+		
+		// TODO test this. previous way above prevents setting attach position before attaching
+		
 		
 		// Set child's attached position
-		child.attachable.x = x;
-		child.attachable.y = y;
+		if (x != null) child.attachable.x = x;
+		if (y != null) child.attachable.y = y;
 		
 		// Set child's attachment origin if given
 		if (originX != null) { child.attachable.originX = originX; }
@@ -120,6 +123,27 @@ class AttachableComponent extends Component<Attachable> {
 		
 		children.remove(child);
 		child.attachable.parent = null;
+	}
+	
+	/**
+	 * Set the relative position of this attachable to its parent
+	 * @param	x
+	 * @param	y
+	 */
+	public function setXY(x:Float, y:Float):Void {
+		this.x = x;
+		this.y = y;
+	}
+	
+	/**
+	 * Set the attach position of this attachable to its current relative position
+	 * @param	fixX Fix the attachable on X
+	 * @param	fixY Fix the attachable on Y
+	 */
+	public function fix(fixX:Bool = true, fixY:Bool = true):Void {
+		if (parent == null) return;
+		if (fixX) x = entity.entity_x - parent.entity_x;
+		if (fixY) y = entity.entity_y - parent.entity_y;
 	}
 	
 	@:access(AttachableComponent)
