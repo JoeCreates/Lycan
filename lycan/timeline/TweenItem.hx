@@ -1,4 +1,4 @@
-package lycan.util.timeline;
+package lycan.timeline;
 
 import haxe.macro.Expr;
 import haxe.macro.Context;

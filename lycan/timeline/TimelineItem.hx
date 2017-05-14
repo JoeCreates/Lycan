@@ -1,22 +1,22 @@
-package lycan.util.timeline;
-
-import msignal.Signal.Signal1;
-import msignal.Signal.Signal2;
+package lycan.timeline;
+import flixel.util.FlxSignal;
 
 using lycan.util.structure.container.BitSet;
 
 using lycan.core.FloatExtensions;
 
+// TODO events (boundaries) should be queued up to happen in correct order when many are passed
+
 class Boundary {
 	public var parent(default, null):TimelineItem;
 	public var leftToRightCount:Int = 0;
 	public var rightToLeftCount:Int = 0;
-
-	private var signal_crossed:Signal2<Bool, Int>;
+	
+	public var onCrossed:FlxSignal<Bool, Int>;
 
 	public inline function new(parent:TimelineItem) {
 		this.parent = parent;
-		this.signal_crossed = new Signal2<Bool, Int>();
+		this.onCrossed = new FlxSignal<Bool, Int>();
 	}
 
 	public function add(f:Bool->Int->Void):Void {

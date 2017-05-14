@@ -1,7 +1,7 @@
-package lycan.util.timeline;
+package lycan.timeline;
 
 import lycan.util.structure.container.LinkedList;
-import lycan.util.timeline.TimelineItem.Boundary;
+import lycan.timeline.TimelineItem.Boundary;
 import msignal.Signal.Signal0;
 
 using lycan.core.FloatExtensions;

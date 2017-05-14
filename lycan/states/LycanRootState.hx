@@ -8,8 +8,6 @@ import flixel.math.FlxPoint;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import haxe.io.Path;
-import lycan.ui.core.DebugRenderer;
-import lycan.ui.core.UIApplicationRoot;
 import lycan.util.BatchScreenGrab;
 import openfl.events.KeyboardEvent;
 import openfl.Lib;
@@ -18,13 +16,6 @@ class LycanRootState extends FlxState {
 	
 	public static var get:LycanRootState;
 	
-	public var uiRoot(default, null) = new UIApplicationRoot();
-	
-	#if debug
-	//private var	debugUiRenderer:DebugRenderer;
-	//private var stateStackText:FlxSpriteGroup;
-	#end
-
 	private function new() {
 		super();
 		
