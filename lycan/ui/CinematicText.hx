@@ -6,8 +6,6 @@ import flixel.text.FlxText;
 class CinematicText extends FlxSpriteGroup {
 	public var letters:Array<CinematicLetter>;
 	public var fullText:FlxText;
-	public var minYMotion:Float = 10;
-	public var maxYMotion:Float = 20;
 	public var autoHide:Bool;
 	public var finishedShowing(default, set) = false;
 	public var onFinishedShowing:Void->Void;
