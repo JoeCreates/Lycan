@@ -7,7 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRandom;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import lycan.util.Parallax;
+import lycan.util.ParallaxUtil;
 
 class Stars extends FlxTypedSpriteGroup<Star> {
 	public var starCount:Int;
@@ -67,10 +67,10 @@ class Star extends FlxSprite {
 		
 		//TODO: for both axis and efficincy
 		if (point.x < 0 - frameWidth) {
-			Parallax.setPositionAtScroll(this, FlxG.camera.scroll.x + FlxG.width, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			ParallaxUtil.setPositionAtScroll(this, FlxG.camera.scroll.x + FlxG.width, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 		}
 		if (point.x > FlxG.width) {
-			Parallax.setPositionAtScroll(this, FlxG.camera.scroll.x - frameWidth, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
+			ParallaxUtil.setPositionAtScroll(this, FlxG.camera.scroll.x - frameWidth, y, FlxG.camera.scroll.x, FlxG.camera.scroll.y);
 		}
 	}
 }
