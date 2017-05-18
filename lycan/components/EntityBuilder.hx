@@ -28,7 +28,7 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return false; };
+	static function shouldTrace() {return false;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
@@ -169,7 +169,8 @@ class EntityBuilder {
 		
 		// Prepend component instantiation to constructor
 		var componentFields:Map<String, {field:ClassField, componentInterface:ClassType}> = getComponentFields(componentInterfaces);
-		
+		traceIf("Component fields: " + [for (f in componentFields) f.field.name]);
+
 		var prependComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
 			var field = componentFields.get(c.name).field;
 			if (hasFieldIncludingBuildFields(classType, field.name, fields)) {
@@ -177,6 +178,8 @@ class EntityBuilder {
 					field.name + ", which must not be declared as it is required by " + c.name);
 			}
 			
+			traceIf("Adding component field: " + field.name);
+
 			// If we do not have a field for the component, create one
 			fields.push({
 				name: field.name,
@@ -194,13 +197,16 @@ class EntityBuilder {
 			}
 		}
 		
+		var constructorFound:Bool = false;
 		// TODO potential big issue here because superclass needs to be built before subclasses
 		for (field in fields) {
 			switch (field.kind) {
 				// In the constructor...
 				case FFun(func) if (field.name == "new"):
+					constructorFound = true;
 					// For each component field, add if it hasn't been added by a superclass
 					for (componentField in componentFields) {
+						traceIf("checking component field: " + componentField.field.name);
 						if (classType.superClass != null) {
 							// Do not re-add components that have already been added by a superclass
 							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
@@ -217,6 +223,8 @@ class EntityBuilder {
 				case _:
 			}
 		}
+
+		if (!constructorFound) throw("Class " + classType.pack + "." + classType.name + " requires a constructor.");
 		
 		// Handle :append and :prepend metadata
 		//TODO
