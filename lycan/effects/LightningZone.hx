@@ -1,11 +1,8 @@
 package lycan.effects;
 
-import config.ColorPresets;
 import flash.display.BitmapData;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
-import flixel.FlxBasic;
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.shapes.FlxShapeLightning;
 import flixel.graphics.frames.FlxFilterFrames;
@@ -21,22 +18,24 @@ import flixel.util.FlxTimer;
 import flixel.util.helpers.FlxRange;
 import lycan.states.LycanState;
 import flixel.group.FlxGroup;
-import states.TestState.LightningPoint;
-import lycan.components.CenterPositionable;
 import flash.geom.ColorTransform;
 import flixel.util.FlxDestroyUtil;
+import flixel.FlxG;
+import flash.display.BitmapDataChannel;
 
 @:tink class LightningZone extends FlxSprite implements IFlxDestroyable {
 	@:forward(add, remove) public var group:FlxTypedGroup<Lightning>;
 	
 	var filter:GlowFilter;
 	var filterFrames:FlxFilterFrames;
-	var bitmap:BitmapData;
+
 	public var fade:Bool;
 	/** How much alpha fades per second */
 	public var fadeRate:Float;
 	/** Alternative method of setting fadeRate. Seconds until alpha fades to 0 */
 	public var fadeTime(get, set):Float;
+	public var enableFilters:Bool = false;
+	public var alphaChannel:Null<BitmapDataChannel>;
 
 	var fadeTransform:ColorTransform;
 
@@ -58,7 +57,11 @@ import flixel.util.FlxDestroyUtil;
 	
 	override public function draw():Void {
 		if (fade) {
-			fadeTransform.alphaMultiplier = Math.max(0, 1 - fadeRate * FlxG.elapsed);
+			var multiplier:Float = Math.max(0, 1 - fadeRate * FlxG.elapsed);
+			fadeTransform.redMultiplier = alphaChannel == BitmapDataChannel.RED ? multiplier : 1;
+			fadeTransform.greenMultiplier = alphaChannel == BitmapDataChannel.GREEN ? multiplier : 1;
+			fadeTransform.blueMultiplier = alphaChannel == BitmapDataChannel.BLUE ? multiplier : 1;
+			fadeTransform.alphaMultiplier = alphaChannel == BitmapDataChannel.ALPHA ? multiplier : 1;
 			pixels.colorTransform(pixels.rect, fadeTransform);
 		} else {
 			pixels.fillRect(pixels.rect, 0);
@@ -70,10 +73,18 @@ import flixel.util.FlxDestroyUtil;
 			}
 		}
 
+		// alphaChannel lets user use any channel as temporary alpha
+		// This converts that channel to be the new alpha
+		if (alphaChannel != null) {
+			pixels.copyChannel(pixels, pixels.rect, _flashPointZero, alphaChannel, BitmapDataChannel.ALPHA);
+		}
+
 		//TODO this is a workaround for a flixel issue
 		//applyToSprite sets sprites graphic to parent of filterFrames, which is null (unless we do this)
-		filterFrames.parent = graphic;
-		filterFrames.applyToSprite(this, false, true);
+		if (enableFilters) {
+			filterFrames.parent = graphic;
+			filterFrames.applyToSprite(this, false, true);
+		}
 		
 		super.draw();
 	}
