@@ -1,11 +1,8 @@
 package lycan.effects;
 
-import config.ColorPresets;
 import flash.display.BitmapData;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
-import flixel.FlxBasic;
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.shapes.FlxShapeLightning;
 import flixel.graphics.frames.FlxFilterFrames;
@@ -21,17 +18,44 @@ import flixel.util.FlxTimer;
 import flixel.util.helpers.FlxRange;
 import lycan.states.LycanState;
 import flixel.group.FlxGroup;
-import states.TestState.LightningPoint;
-import lycan.components.CenterPositionable;
 import flash.geom.ColorTransform;
 import flixel.util.FlxDestroyUtil;
+import flixel.FlxBasic;
+import flixel.FlxG;
+
+// Some good settings
+		// lightning = new Lightning(0.4);
+		// lightning.displaceTime.set(0.7, 1.2);
+		// lightning.detail = 0.25;
+		// lightning.thickness = 4;
+		// lightning.lightningType = LightningType.CONTINUOUS;
+		// lightning.startPoint.set(FlxG.width / 2, FlxG.height / 2);
+		// lightning.endPoint.set(FlxG.width / 2 + 100, FlxG.height / 2);
+		// lightning.generate();
+
+		
+		// add(zone);
+		// zone.add(lightning);
+		
+		// for (i in 0...2) {
+		// 	lightning = new Lightning(0.4);
+		// 	lightning.displaceTime.set(0.7, 1.2);
+		// 	lightning.regenerateDistance = 30;
+		// 	lightning.detail = 0.25;
+		// 	lightning.thickness = 1;
+		// 	lightning.lightningType = LightningType.CONTINUOUS;
+		// 	lightning.startPoint.set(FlxG.width / 2, FlxG.height / 2);
+		// 	lightning.endPoint.set(FlxG.width / 2 + 100, FlxG.height / 2);
+		// 	lightning.generate();
+		// 	zone.add(lightning);
+		// }
 
 // TODO
 // detail should be with respect to distance
 // Forking
 @:tink class Lightning extends FlxBasic {
-	var life:Float;
-	var lifeTime:Float;
+	public var life:Float;
+	public var lifeTime:Float;
 	
 	/**
 	 *  How detailed the lightning is in segments per pixel between the start and end points.
@@ -46,6 +70,7 @@ import flixel.util.FlxDestroyUtil;
 	 */
 	public var displacementPerPixel:Float;
 	public var thickness:Float;
+	public var endThickness:Null<Float>;
 	public var color:FlxColor;
 	public var endColor:Null<FlxColor>;
 	public var displaceTime:FlxRange<Float>;
@@ -70,6 +95,8 @@ import flixel.util.FlxDestroyUtil;
 	/** Rate at which the lightning randomly regenerates (per second) */
 	public var regeneratePerSecond:Float = 4;
 	
+	public var lineCount(default, null):Int;
+
 	@:calculated var length:Float = Math.sqrt(Math.pow(this.startPoint.x - this.endPoint.x, 2) + Math.pow(this.startPoint.y - this.endPoint.y, 2));
 
 	var rootPoint:LightningPoint;
@@ -81,13 +108,16 @@ import flixel.util.FlxDestroyUtil;
 
 	/** Used when drawing to keep track of which point is being drawn from */
 	var drawPoint:LightningPoint;
+	var drawIndex:Int;
 	var lineStyle:LineStyle;
 	
 	public function new(displacementPerPixel:Float, ?lightningType:LightningType) {
 		super();
 		
+		color = FlxColor.WHITE;
 		alpha = 1;
 		lifeTime = 0.4;
+		life = lifeTime;
 		thickness = 3;
 		this.lightningType = lightningType == null ? LightningType.FLASH : lightningType;
 		
@@ -104,6 +134,12 @@ import flixel.util.FlxDestroyUtil;
 
 		regenerateDistance = null;
 	}
+
+	override public function revive():Void {
+		super.revive();
+		life = lifeTime;
+		trace("revived");
+	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
@@ -115,7 +151,6 @@ import flixel.util.FlxDestroyUtil;
 		if (lightningType == FLASH) {
 			if (life > 0 && lifeTime > 0) {
 				life -= dt / lifeTime;
-				//pixels.fillRect(pixels.rect, 0);
 				alpha = life;
 			} else {
 				alpha = 0;
@@ -159,7 +194,10 @@ import flixel.util.FlxDestroyUtil;
 		if (rootPoint == null || !visible) return;
 		// Begin drawing from the start point
 		drawPoint = startPoint;
+		drawIndex = 0;
 		lineStyle.thickness = thickness;
+		lineStyle.color = color;
+		lineStyle.color.alphaFloat *= alpha;
 		FlxSpriteUtil.beginDraw(FlxColor.TRANSPARENT, lineStyle);
 		// Traverse the tree leaves from left to right to draw lines
 		drawLine(rootPoint);
@@ -176,7 +214,8 @@ import flixel.util.FlxDestroyUtil;
 
 		// Create a new structure and obtain a new root point
 		rootPoint = split(startPoint, endPoint, displacement, 1 / detail);
-		
+		lineCount = rootPoint != null ? rootPoint.decendentCount + 2 : 0;
+
 		// Displace the full structure
 		// Using the max displaceTime forces each point to calculate a new displacement value
 		if (rootPoint != null) {
@@ -219,12 +258,21 @@ import flixel.util.FlxDestroyUtil;
 		if (point.childA != null) {
 			drawLine(point.childA, leftTurns + 1);
 		}
-		
+
+		// Prepare lineStyle for drawing line
+		var lerpFactor:Float = drawIndex / (lineCount - 1);
+		lineStyle.color = endColor != null ? FlxColor.interpolate(color, endColor, lerpFactor) : color;
+		lineStyle.thickness = endThickness != null ? flixel.math.FlxMath.lerp(thickness, endThickness, lerpFactor) : thickness;
+
+		FlxSpriteUtil.setLineStyle(lineStyle);
+
 		// If a drawpoint is set, draw line from it to here
 		if (drawPoint != null) {
 			FlxSpriteUtil.flashGfx.moveTo(drawPoint.x, drawPoint.y);
 			FlxSpriteUtil.flashGfx.lineTo(point.x, point.y);
 		}
+
+		drawIndex++;
 		
 		// Set this point to be the next from which a line will be drawn
 		drawPoint = point;
@@ -251,9 +299,6 @@ class LightningPoint implements IFlxPooled {
 	private static function get_pool():IFlxPool<LightningPoint> {
 		return _pool;
 	}
-	public function destroy():Void {}
-	
-	private var _inPool:Bool = false;
 	
 	public static inline function get(x:Float = 0, y:Float = 0):LightningPoint{
 		var point = _pool.get();
@@ -283,16 +328,26 @@ class LightningPoint implements IFlxPooled {
 	public var x:Float;
 	public var y:Float;
 	public var thickness:Float;
+
+	public var decendentCount(get, never):Int;
 	
+	private var _inPool:Bool = false;
+
 	public function new(x:Float, y:Float) {
 		set(x, y);
 	}
+
+	public function destroy():Void {}
 	
 	public function set(x:Float, y:Float):Void {
 		this.x = x;
 		this.y = y;
 	}
 	
+	private function get_decendentCount():Int {
+		return (childA != null ? childA.decendentCount + 1 : 0) + (childB != null ? childB.decendentCount + 1 : 0);
+	}
+
 	public function updateDisplacement(start:LightningPoint, end:LightningPoint, displacement:Float, minDisplaceTime:Float, maxDisplaceTime:Float, dt:Float):Void {
 		// Update this point
 		if (timeUntilDisplaced > 0) {
