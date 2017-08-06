@@ -1,7 +1,5 @@
 package lycan.components;
 
-#if macro
-
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
@@ -537,9 +535,3 @@ class EntityBuilder {
 		return {pack: type.pack, name: type.name, params: params};
 	}
 }
-
-#else
-
-#error "EntityBuilder cannot be used in a non-macro context"
-
-#end

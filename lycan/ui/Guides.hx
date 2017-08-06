@@ -11,6 +11,7 @@ import flixel.util.FlxSpriteUtil;
 class Guides extends FlxSprite {
 
 	// TODO offsets, major and minor grid lines, options or when to show text
+	// TODO could be rewritten as a component
 	public var verticalLineSpacing:Float = 100;
 	public var horizontalLineSpacing:Float = 100;
 	
