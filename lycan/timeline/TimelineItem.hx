@@ -3,8 +3,6 @@ import flixel.util.FlxSignal;
 
 using lycan.util.structure.container.BitSet;
 
-using lycan.core.FloatExtensions;
-
 // TODO events (boundaries) should be queued up to happen in correct order when many are passed
 
 class Boundary {
@@ -12,26 +10,25 @@ class Boundary {
 	public var leftToRightCount:Int = 0;
 	public var rightToLeftCount:Int = 0;
 	
-	public var onCrossed:FlxSignal<Bool, Int>;
+	public var onCrossed:FlxTypedSignal<Bool->Int->Void>;
 
 	public inline function new(parent:TimelineItem) {
 		this.parent = parent;
-		this.onCrossed = new FlxSignal<Bool, Int>();
+		this.onCrossed = new FlxTypedSignal<Bool->Int->Void>();
 	}
 
 	public function add(f:Bool->Int->Void):Void {
-		signal_crossed.add(f);
+		onCrossed.add(f);
 	}
 
 	public function dispatch(reverse:Bool, count:Int):Void {
-		signal_crossed.dispatch(reverse, count);
+		onCrossed.dispatch(reverse, count);
 	}
 }
 
 // Base class for anything that can go on a timeline
 class TimelineItem {
-	public var parent(default, null):Timeline<Dynamic>;
-	public var target(default, set):Dynamic;
+	public var parent(default, null):Timeline;
 
 	public var startTime(default, set):Float;
 	@:isVar public var duration(get, set):Float;
@@ -47,11 +44,10 @@ class TimelineItem {
 
 	public var left:Boundary;
 	public var right:Boundary;
-	public var signal_removed = new Signal1<Timeline<Dynamic>>();
+	public var onRemoved = new FlxTypedSignal<Timeline->Void>();
 
-	public function new(?parent:Timeline<Dynamic>, target:Dynamic, startTime:Float, duration:Float) {
+	public function new(?parent:Timeline, startTime:Float, duration:Float) {
 		this.parent = parent;
-		this.target = target;
 		this.startTime = startTime;
 		this.duration = duration;
 
@@ -65,7 +61,7 @@ class TimelineItem {
 		markedForRemoval = false;
 
 		#if debug
-		signal_removed.add(function(parent:Timeline<Dynamic>) {
+		onRemoved.add(function(parent:Timeline) {
 			trace("Removed timeline item from timeline");
 		});
 		#end
@@ -95,10 +91,6 @@ class TimelineItem {
 		}
 
 		onUpdate(nextTime);
-	}
-
-	private function set_target(target:Dynamic):Dynamic {
-		return this.target = target;
 	}
 
 	private function get_duration():Float {

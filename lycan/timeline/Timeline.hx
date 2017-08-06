@@ -1,21 +1,20 @@
 package lycan.timeline;
 
-import lycan.util.structure.container.LinkedList;
+import flixel.math.FlxMath;
+import flixel.util.FlxSignal;
 import lycan.timeline.TimelineItem.Boundary;
-import msignal.Signal.Signal0;
 
-using lycan.core.FloatExtensions;
-
-class Timeline<T:{}> extends TimelineItem {
+class Timeline extends TimelineItem {
 	public var currentTime(default, set):Float; // Setting this will skip to the absolute time without triggering items
-	public var onReset(default, null) = new Signal0();
+	public var lastTime:Float;
+	public var onReset(default, null) = new FlxSignal();
 
-	private var items:LinkedList<TimelineItem>; // TODO an interval tree might be faster
+	public var items:List<TimelineItem>; // TODO an interval tree might be faster
 	private var dirtyDuration:Bool;
 
 	public function new() {
-		super(null, null, 0, 0);
-		items = new LinkedList<TimelineItem>();
+		super(null, 0, 0);
+		items = new List<TimelineItem>();
 		dirtyDuration = true;
 		currentTime = 0;
 	}
@@ -29,11 +28,15 @@ class Timeline<T:{}> extends TimelineItem {
 	// Boundary crossing callbacks of items are called in chronological order
 	// The order that individual items are updated is undefined
 	override public function stepTo(nextTime:Float, ?unusedCurrentTime:Float):Void {
-		nextTime = nextTime.clamp(0, duration);
+		nextTime = FlxMath.bound(nextTime, 0, duration);
 
 		if (currentTime == nextTime) {
 			return;
 		}
+		
+		//TODO hack... figure out better solution with Sam
+		var currentTime = currentTime;
+		this.currentTime = nextTime;
 
 		removeMarked();
 
@@ -64,7 +67,6 @@ class Timeline<T:{}> extends TimelineItem {
 		gatherIntersections(this);
 		for (item in items) {
 			gatherIntersections(item);
-			item.stepTo(nextTime, currentTime);
 		}
 
 		var reversing:Bool = currentTime > nextTime;
@@ -77,10 +79,10 @@ class Timeline<T:{}> extends TimelineItem {
 		for (boundary in intersections) {
 			boundary.dispatch(reversing, reversing ? ++boundary.rightToLeftCount : ++boundary.leftToRightCount);
 		}
+		
+		for (item in items) item.stepTo(nextTime, currentTime);
 
 		removeMarked();
-
-		currentTime = nextTime;
 	}
 
 	private inline function pointRangeIntersection(p:Float, x1:Float, x2:Float):Bool {
@@ -91,19 +93,15 @@ class Timeline<T:{}> extends TimelineItem {
 		return ((Math.min(x1, x2) <= Math.max(y1, y2)) && (Math.min(y1, y2) <= Math.max(x1, x2)));
 	}
 
-	public function addCue(target:T, f:Bool->Int->Void, startTime:Float):Cue {
+	public function addCue(target:Dynamic, f:Bool->Int->Void, startTime:Float):Cue {
 		Sure.sure(target != null);
 
-		var cue = new Cue(target, startTime, f);
+		var cue = new Cue(startTime, f);
 		add(cue);
 		return cue;
 	}
 
 	public function add(item:TimelineItem):Void {
-		Sure.sure(item != null);
-		Sure.sure(item.parent == null);
-		Sure.sure(item.target != null);
-
 		item.parent = this;
 		items.add(item);
 		dirtyDuration = true;
@@ -116,7 +114,7 @@ class Timeline<T:{}> extends TimelineItem {
 	}
 
 	public function clear():Void {
-		items = new LinkedList<TimelineItem>();
+		items = new List<TimelineItem>();
 	}
 
 	override public function reset():Void {
@@ -143,7 +141,7 @@ class Timeline<T:{}> extends TimelineItem {
 	}
 
 	private function set_currentTime(time:Float):Float {
-		return this.currentTime = time.clamp(0, duration);
+		return this.currentTime = FlxMath.bound(time, 0, duration);
 	}
 
 	override private function get_duration():Float {

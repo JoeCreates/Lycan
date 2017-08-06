@@ -1,5 +1,6 @@
 package lycan.util;
 
+import flixel.FlxCamera;
 import flixel.FlxSprite;
 
 class ParallaxUtil {
@@ -30,7 +31,31 @@ class ParallaxUtil {
 		ParallaxUtil.setPositionAtScroll(sprite, sprite.x, sprite.y, scrollX, scrollY);
 	}
 	
+	public static function adjustPositionForCamera(sprite:FlxSprite, camera:FlxCamera):Void {
+		ParallaxUtil.adjustPositionForScroll(sprite, camera.scroll.x, camera.scroll.y);
+	}
+	
 	public static function parallaxOrigin(origin:Float, cameraPosition:Float, scrollFactor:Float):Float {
 		return origin + cameraPosition * (scrollFactor - 1);
+	}
+	
+	/**
+	 * Calculate the position in the world an object given its position, scrollFactor and camera's scroll
+	 * 
+	 * @param	pos The x or y position of the object
+	 * @param 	scrollFactor The scrollFactor of the object on the given axis
+	 * @param	cameraScroll The camera's scroll position on the given axis
+	 * @return The apparent world position of the object on the given axis
+	 */
+	public static function getWorldPositionAtScroll(pos:Float, scrollFactor:Float, cameraScroll:Float):Float {
+		return pos - scrollFactor * cameraScroll + cameraScroll;
+	}
+	
+	public static function getWorldX(spr:FlxSprite, camera:FlxCamera):Float {
+		return getWorldPositionAtScroll(spr.x, spr.scrollFactor.x, camera.scroll.x);
+	}
+	
+	public static function getWorldY(spr:FlxSprite, camera:FlxCamera):Float {
+		return getWorldPositionAtScroll(spr.y, spr.scrollFactor.y, camera.scroll.y);
 	}
 }

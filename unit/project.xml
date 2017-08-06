@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-    <meta title="LycanUnitTests" version="1.0.0" />
-    <app file="TestMain" main="TestMain" />
-
-    <set name="SWF_VERSION" value="11.8" />
-    <source path="source" />
-
-    <set name="lycanunittest" />
-    <haxedef name="lycanunittest" />
-
-    <include path="../include.xml" />
-    <!-- <haxelib name="lycan" /> -->
-
-    <haxelib name="hamcrest" />
-    <haxelib name="munit" />
+	<meta title="FlixelUnitTests" version="1.0.0" />
+	<app file="TestMain" main="TestMain" />
+	
+	<set name="SWF_VERSION" value="11.8" />
+	<source path="src" />
+	
+	<set name="no-custom-backend" />
+	<set name="unit-test" />
+	
+	<haxelib name="munit" />
+	<haxelib name="flixel" />
+	<haxelib name="hamcrest" />
+	<haxelib name="Lycan" />
+	<haxelib name="sure" />
+	
+	<haxedef name="FLX_UNIT_TEST" />
+	<haxedef name="FLX_RECORD" />
 </project>

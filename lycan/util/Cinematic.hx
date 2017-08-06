@@ -1,7 +1,10 @@
-package mt.deepnight;
+package lycan.util;
+
 import haxe.macro.Expr;
 
 /*
+	Originally authord by deepnight
+	
 	BASIC USE: (see the static method "demo" for 2 examples)
 		var cm = new Cinematic();
 		cm.create({ INSTRUCTIONS; });

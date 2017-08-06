@@ -15,27 +15,35 @@ class CameraAttachableComponent extends Component<CameraAttachable> {
 	public var y:Float;
 
     public var camera(default, set):FlxCamera;
-	public var paddingX:Float = 0;
-	public var paddingY:Float = 0;
 
 	public function new(entity:CameraAttachable) {
 		super(entity);
+		x = 0;
+		y = 0;
 	}
     
      @:append("update") public function update(dt:Float):Void {
 		updatePosition();
-		updateSize();
 	}
-
-	public function setPadding(x:Float, y:Float):Void {
-		paddingX = x;
-		paddingY = y;
+	
+	public function setPosition(x:Float, y:Float):Void {
+		this.x = x;
+		this.y = y;
 	}
-
+	
 	public function centerOnCamera():Void {
 		if (camera == null) return;
-		updateSize();
+		centerXOnCamera();
+		centerYOnCamera();
+	}
+	
+	public function centerXOnCamera():Void {
+		if (camera == null) return;
 		x = (camera.width - entity.entity_width) / 2;
+	}
+	
+	public function centerYOnCamera():Void {
+		if (camera == null) return;
 		y = (camera.height - entity.entity_height) / 2;
 	}
 
@@ -43,12 +51,6 @@ class CameraAttachableComponent extends Component<CameraAttachable> {
 		if (camera == null) return;
 		entity.entity_x = camera.scroll.x + x;
 		entity.entity_y = camera.scroll.y + y;
-	}
-
-	public function updateSize():Void {
-		if (camera == null) return;
-		entity.entity_width = camera.width + paddingX;
-		entity.entity_height = camera.height + paddingY;
 	}
 	
 	public function set_camera(camera:FlxCamera):FlxCamera {

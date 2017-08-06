@@ -16,6 +16,7 @@ import flixel.util.FlxPool.IFlxPool;
 import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import flixel.util.helpers.FlxRange;
+import haxe.ds.Vector;
 import lycan.states.LycanState;
 import flixel.group.FlxGroup;
 import flash.geom.ColorTransform;
@@ -77,7 +78,7 @@ import flixel.FlxG;
 	public var lightningType:LightningType;
 	public var startPoint:LightningPoint;
 	public var endPoint:LightningPoint;
-	public var alpha:Float;
+	public var fades:Bool;
 	
 	/** Whether the lightning displacement evolves over time. Control with displaceTime. */
 	public var evolves:Bool = true;
@@ -115,11 +116,11 @@ import flixel.FlxG;
 		super();
 		
 		color = FlxColor.WHITE;
-		alpha = 1;
 		lifeTime = 0.4;
 		life = lifeTime;
 		thickness = 3;
 		this.lightningType = lightningType == null ? LightningType.FLASH : lightningType;
+		fades = true;
 		
 		detail = 0.5;
 		this.displacementPerPixel = displacementPerPixel;
@@ -138,7 +139,6 @@ import flixel.FlxG;
 	override public function revive():Void {
 		super.revive();
 		life = lifeTime;
-		trace("revived");
 	}
 	
 	override public function update(dt:Float):Void {
@@ -151,9 +151,7 @@ import flixel.FlxG;
 		if (lightningType == FLASH) {
 			if (life > 0 && lifeTime > 0) {
 				life -= dt / lifeTime;
-				alpha = life;
 			} else {
-				alpha = 0;
 				kill();
 			}
 		}
@@ -197,10 +195,12 @@ import flixel.FlxG;
 		drawIndex = 0;
 		lineStyle.thickness = thickness;
 		lineStyle.color = color;
-		lineStyle.color.alphaFloat *= alpha;
 		FlxSpriteUtil.beginDraw(FlxColor.TRANSPARENT, lineStyle);
 		// Traverse the tree leaves from left to right to draw lines
+		//var commands = new Vector<Int>();
+		//var coords = new Vector<Float>();
 		drawLine(rootPoint);
+		
 		FlxSpriteUtil.endDraw(sprite);
 	}
 	
@@ -262,10 +262,13 @@ import flixel.FlxG;
 		// Prepare lineStyle for drawing line
 		var lerpFactor:Float = drawIndex / (lineCount - 1);
 		lineStyle.color = endColor != null ? FlxColor.interpolate(color, endColor, lerpFactor) : color;
+		if (fades && lightningType == LightningType.FLASH) {
+			lineStyle.color.alphaFloat = lineStyle.color.alphaFloat * life;
+		}
 		lineStyle.thickness = endThickness != null ? flixel.math.FlxMath.lerp(thickness, endThickness, lerpFactor) : thickness;
-
+		
 		FlxSpriteUtil.setLineStyle(lineStyle);
-
+		
 		// If a drawpoint is set, draw line from it to here
 		if (drawPoint != null) {
 			FlxSpriteUtil.flashGfx.moveTo(drawPoint.x, drawPoint.y);
@@ -348,7 +351,9 @@ class LightningPoint implements IFlxPooled {
 		return (childA != null ? childA.decendentCount + 1 : 0) + (childB != null ? childB.decendentCount + 1 : 0);
 	}
 
-	public function updateDisplacement(start:LightningPoint, end:LightningPoint, displacement:Float, minDisplaceTime:Float, maxDisplaceTime:Float, dt:Float):Void {
+	public function updateDisplacement(start:LightningPoint, end:LightningPoint, displacement:Float,
+		minDisplaceTime:Float, maxDisplaceTime:Float, dt:Float):Void
+	{
 		// Update this point
 		if (timeUntilDisplaced > 0) {
 			displacementProgress += dt / timeUntilDisplaced;

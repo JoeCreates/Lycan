@@ -1,16 +1,38 @@
 package lycan.util;
 
 import flash.display.BitmapData;
+import flash.geom.Matrix;
+import flash.geom.Point;
 import flash.utils.ByteArray;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.util.FlxSpriteUtil;
 
 class GraphicUtil {
-
+	
+	static var pointZero:Point = new Point();
+	
+	/**
+	 * Draws a camera onto a FlxSprite
+	 * On native, camera's which are not in FlxG.cameras need to have clearDrawStack, canvas.graphics.clear
+	 * called prior to drawing the objects on the camera, and render after
+	 * @param	spr
+	 * @param	camera
+	 */
+	public static function drawCamera(spr:FlxSprite, camera:FlxCamera):Void {
+		if (FlxG.renderBlit) {
+			spr.pixels.copyPixels(camera.buffer, camera.buffer.rect, pointZero);
+			spr.dirty = true;
+		} else {
+			spr.pixels.draw(camera.canvas);
+		}
+	}
+	
 	public static function createTileSprite(asset:FlxGraphicAsset, tileWidth:Int, tileHeight:Int):FlxSprite {
 		var sprite:FlxSprite = new FlxSprite();
 		var graph:FlxGraphic = FlxG.bitmap.add(asset);

@@ -1,8 +1,8 @@
 package lycan.timeline;
 
 class Cue extends TimelineItem {
-	public function new(target:Dynamic, startTime:Float, ?enterLeft:Bool->Int->Void, ?exitRight:Bool->Int->Void, ?enterRight:Bool->Int->Void, ?exitLeft:Bool->Int->Void, removeOnCompletion:Bool = false) {
-		super(null, target, startTime, 0);
+	public function new(startTime:Float, ?enterLeft:Bool->Int->Void, ?exitRight:Bool->Int->Void, ?enterRight:Bool->Int->Void, ?exitLeft:Bool->Int->Void, removeOnCompletion:Bool = false) {
+		super(null, startTime, 0);
 		this.removeOnCompletion = removeOnCompletion;
 
 		if (enterLeft != null) {

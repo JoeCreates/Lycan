@@ -8,7 +8,9 @@ using StringTools;
 class StringUtil {
 	// NOTE this will be slow
 	public static inline function reverse(s:String):String {
-		return s.split("").reverse().join("");
+		var a = s.split("");
+		a.reverse();
+		return a.join("");
 	}
 
 	public static function repeat(s:String, times:Int):String {
