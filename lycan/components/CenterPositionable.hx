@@ -6,7 +6,6 @@ interface CenterPositionable extends Entity {
 	@:relaxed public var y(get, set):Float;
 	@:relaxed public var width(get, set):Float;
 	@:relaxed public var height(get, set):Float;
-	public var val:Int;
 }
 
 class CenterPositionableComponent extends Component<CenterPositionable> {

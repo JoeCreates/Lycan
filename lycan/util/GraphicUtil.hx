@@ -12,6 +12,10 @@ import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxSpriteUtil;
+import flixel.util.FlxColor;
+import flash.text.TextField;
+import flash.text.TextFormat;
+import flash.geom.Rectangle;
 
 class GraphicUtil {
 	
@@ -70,6 +74,28 @@ class GraphicUtil {
 		}
 		
 		source.setPixels(sourceRect, sourceBytes);
+	}
+	
+	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int, frameCount:Int = 1, color:FlxColor = FlxColor.WHITE):Void {
+		var bitmap:BitmapData = new BitmapData(width * frameCount, height, true, color);
+		spr.loadGraphic(bitmap, frameCount > 1, width, height);
+		
+		var txt:TextField = new TextField();
+		txt.defaultTextFormat = new TextFormat("Verdana", 9, color);
+		txt.text = "";		
+		
+		var mat:Matrix = new Matrix(0, 0, 0, 0, 0, 0);
+		mat.identity();
+		mat.translate(2, 2);
+		var rect:Rectangle = new Rectangle(1, 1, width - 2, height - 2);
+		var bgColor:FlxColor = color.getDarkened(0.7);
+		for (i in 0...frameCount) {
+			txt.text = name + "\n" + i;
+			bitmap.fillRect(rect, bgColor);
+			bitmap.draw(txt, mat, null, null, rect);
+			mat.translate(width, 0);
+			rect.x += width;
+		}
 	}
 	
 }
