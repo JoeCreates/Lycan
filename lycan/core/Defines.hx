@@ -1,4 +1,4 @@
-package lycan.core.defines;
+package lycan.core;
 
 #if macro
 
