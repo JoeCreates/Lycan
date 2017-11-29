@@ -25,7 +25,7 @@ import openfl.display.BitmapData;
 import lycan.world.layer.TileLayer;
 import lycan.world.layer.ObjectLayer;
 import lycan.world.layer.TileLayer;
-import msignal.Signal.Signal1;
+import flixel.util.FlxSignal;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
@@ -44,9 +44,10 @@ class World extends FlxGroup {
 	public var properties:TiledPropertySet;
 	public var combinedTileset:FlxTileFrames;
 	
-	public var signal_loadingProgressed(default, null):Signal1<Float>;//TODO change naming and remove msignal
+	public var onLoadingProgressed(default, null):FlxTypedSignal<Float->Void>;
 	
 	private static inline var TILESET_PATH = "assets/images/"; // TODO avoid explicit tileset path if possible
+	
 	public function new(?scale:FlxPoint) {
 		super();
 
@@ -60,7 +61,7 @@ class World extends FlxGroup {
 		namedLayers = new Map<String, ILayer>();
 		collidableTilemaps = new Array<FlxTilemap>();
 		
-		signal_loadingProgressed = new Signal1<Float>();
+		onLoadingProgressed = new FlxTypedSignal<Float->Void>();
 	}
 	
 	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void,
@@ -100,7 +101,7 @@ class World extends FlxGroup {
 			}
 			
 			var loadingProgressPercent:Float = (layersLoaded / tiledMap.layers.length) * 100;
-			signal_loadingProgressed.dispatch(loadingProgressPercent);
+			onLoadingProgressed.dispatch(loadingProgressPercent);
 			layersLoaded++;
 		}
 		

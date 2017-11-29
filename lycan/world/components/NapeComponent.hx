@@ -7,12 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 import lycan.components.Component;
 import lycan.components.Entity;
-import nape.geom.Vec2;
-import nape.phys.Body;
-import nape.phys.BodyType;
-import nape.phys.Material;
-import nape.shape.Circle;
-import nape.shape.Polygon;
+
 import flixel.FlxSprite;
 import flixel.FlxObject;
 
