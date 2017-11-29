@@ -1,36 +1,33 @@
 package lycan.world.components;
 
-import flixel.FlxComponent;
 import flixel.FlxObject;
-import flixel.FlxSprite;
+import lycan.components.Component;
+import lycan.components.Entity;
 
-class GroundableComponent extends FlxComponent {
+interface Groundable extends Entity {
+	public var groundable:GroundableComponent;
+}
+
+class GroundableComponent extends Component<Groundable> {
 	private var currentGrounds:Map<FlxObject, Bool>;
 	private var currentGroundCount:Int;
-	private var grounded:Bool; //Hacked in for ludum dare
-	private var queueGrounded:Bool;
 	
-	public var wasGrounded:Bool = false;
+	public var wasGrounded:Bool;
 	public var isGrounded(get, never):Bool;
 	/** Whether to force grounded checks to return true */
 	public var forceGrounded:Bool;
 	
-	public function new() {
-		super("groundable");
+	public function new(entity:Groundable) {
+		super(entity);
 		currentGrounds = new Map<FlxObject, Bool>();
+		currentGroundCount = 0;
+		wasGrounded = false;
 		forceGrounded = false;
-		queueGrounded = false;
-		grounded = false;
 	}
 	
+	@:append("update")
 	public function update(dt:Float):Void {
-		wasGrounded = grounded;
-		grounded = queueGrounded;
-		queueGrounded = false;
-	}
-	
-	public function groundForFrame():Void {
-		queueGrounded = true;
+		wasGrounded = isGrounded;
 	}
 	
 	public function add(object:FlxObject):Void {
@@ -40,7 +37,7 @@ class GroundableComponent extends FlxComponent {
 		}
 	}
 	
-	public function remove(object):Void {
+	public function remove(object:FlxObject):Void {
 		if (currentGrounds.exists(object)) {
 			currentGrounds.remove(object);
 			currentGroundCount--;
@@ -48,7 +45,6 @@ class GroundableComponent extends FlxComponent {
 	}
 	
 	private function get_isGrounded():Bool {
-		return grounded;
 		return forceGrounded || currentGroundCount > 0;
 	}
 }
