@@ -19,18 +19,17 @@ import openfl.text.TextFormat;
 
 #end
 class Box2D {	
-	public var world:B2World;
+	public static var world:B2World;
 	
 	/** Iterations for resolving velocity (default 10) */
-	public var velocityIterations:Int = 10;
+	public static var velocityIterations:Int = 10;
 	/** Iterations for resolving position (default 10) */
-	public var positionIterations:Int = 10;
-	
-	/**
-	 * Whether or not the nape debug graphics are enabled.
-	 */
+	public static var positionIterations:Int = 10;
+	/** Whether debug graphics are enabled */
 	public static var drawDebug(default, set):Bool;
-
+	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
+	public static var forceTimestep:Null<Float>;
+	
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
 	public static var debugSprite(default, null):Sprite;
@@ -38,34 +37,45 @@ class Box2D {
 	#end
 
 	public function new() {
+	}
+	
+	public function init():Void {
+		if (world != null) return;
+		
 		world = new B2World(new B2Vec2(0, 10), true);
 		
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		
-		#if !FLX_NO_DEBUG
-		setupDebugDrawing();
-		#end
+		setupDebugDraw();
 	}
 	
 	public function destroy():Void {
+		world = null;
+		
 		FlxG.signals.postUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
 	}
 	
-	#if !FLX_NO_DEBUG
-	private function setupDebugDrawing():Void {
+	private static function setupDebugDraw():Void {
+		#if !FLX_NO_DEBUG
+		
+		// Skip if we have already initialised debug drawing
+		if (debugDraw != null) return;
+		
+		// Create sprite and debug renderer
 		debugDraw = new B2DebugDraw();
 		debugSprite = new Sprite();
+		
+		// Set up debug renderer
 		debugDraw.setSprite(debugSprite);
-		debugDraw.setDrawScale(30.0); // TODO
+		debugDraw.setDrawScale(30.0);
 		debugDraw.setFillAlpha(0.3);
-		debugDraw.setLineThickness(1.0);
+		debugDraw.setLineThickness(1.5);
 		debugDraw.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
 		world.setDebugDraw(debugDraw);
 	
 		// Add a button to toggle debug shapes to the debugger
-		// TODO could do box2d icon instead of the Nape one
 		var icon:BitmapData = new BitmapData(11, 11, true, 0);
 		var text:TextField = new TextField();
 		text.text = "B2";
@@ -77,9 +87,11 @@ class Box2D {
 		drawDebugButton = FlxG.debugger.addButton(RIGHT, icon, function() {
 			drawDebug = !drawDebug;
 		}, true, true);
+		
 		drawDebug = false;
+		
+		#end
 	}
-	#end
 
 	/**
 	 * Creates simple walls around the game area - useful for prototying.
@@ -122,35 +134,30 @@ class Box2D {
 	}
 
 	private static function set_drawDebug(drawDebug:Bool):Bool {
+		if (drawDebug == Box2D.drawDebug) return drawDebug;
+		
 		#if !FLX_NO_DEBUG
-		if (drawDebug == Box2D.drawDebug) {
-			return Box2D.drawDebug;
-		}
-		
-		if (drawDebug) {
-			FlxG.addChildBelowMouse(debugSprite);
-		} else {
-			FlxG.removeChild(debugSprite);
-		}
-		
-		if (drawDebugButton != null) drawDebugButton.toggled = !drawDebug;
-
+			if (drawDebug) {
+				FlxG.addChildBelowMouse(debugSprite);
+			} else {
+				FlxG.removeChild(debugSprite);
+			}
+			
+			if (drawDebugButton != null) drawDebugButton.toggled = !drawDebug;
 		#end
 		
 		return Box2D.drawDebug = drawDebug;
 	}
 
-	public function update():Void {
+	public static function update():Void {
 		if (world != null && FlxG.elapsed > 0) {
-			world.step(FlxG.elapsed, velocityIterations, positionIterations);
+			world..step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
 		}
 	}
 
-	public function draw():Void {
+	public static function draw():Void {
 		#if !FLX_NO_DEBUG
-		if (world == null || !drawDebug) {
-			return;
-		}
+		if (world == null || !drawDebug) return;
 		
 		world.drawDebugData();
 		

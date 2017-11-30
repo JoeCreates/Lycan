@@ -1,5 +1,11 @@
 package lycan.world.components;
 
+import box2D.dynamics.B2Body;
+import box2D.dynamics.B2BodyDef;
+import box2D.dynamics.B2Fixture;
+import box2D.dynamics.B2FixtureDef;
+import box2D.dynamics.B2BodyType;
+import box2D.dynamics.B2World;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.math.FlxAngle;
@@ -20,30 +26,27 @@ interface PhysicsEntity extends Entity {
 }
 
 class PhysicsComponent extends Component<PhysicsEntity> {
-	public var body:Body;
-	public var enabled(default, set):Bool = false;
+	public var body:B2Body;
+	public var world(get, never):B2World;
+	private function get_world():B2World return body.getWorld();
 	
+	public var enabled(default, set):Bool = false;
 	public var offset:FlxPoint;
 	
-	/**
-	 * Internal var to update body.velocity.x and body.velocity.y.
-	 * Default is 1, which menas no drag.
-	 */
+	/** Internal var to update body.velocity.x and body.velocity.y. 1 = no drag */
 	private var _linearDrag:Float = 1;
-	/**
-	 * Internal var to update body.angularVel
-	 * Default is 1, which menas no drag.
-	 */
+	/** Internal var to update body.angularVel. 1 = no drag */
 	private var _angularDrag:Float = 1;
 	
-	public function init(?bodyType:BodyType, createRectangularBody:Bool = true, enabled:Bool = true) {
-		if (bodyType == null) bodyType = BodyType.DYNAMIC;
+	public function init(?bodyType:B2BodyType, createRectBody:Bool = true, enabled:Bool = true) {
+		if (bodyType == null) bodyType = B2BodyType.DYNAMIC_BODY;
 		
-		body = new Body(bodyType);
-		body.space = NapeSpace.space;
+		var bd:B2BodyDef;
+		body = Box2D.world.createBody(bd);
+		
 		offset = FlxPoint.get();
 		
-		if (createRectangularBody) {
+		if (createRectBody) {
 			this.createRectangularBody();
 		}
 		this.enabled = enabled;
@@ -60,23 +63,14 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		}
 	}
 
-	/**
-	 * Handy function for "killing" game objects.
-	 * Default behavior is to flag them as nonexistent AND dead.
-	 */
 	public function onKill():Void {
 		if (body != null) {
-			body.space = null;
-		}
+			
 	}
-
-	/**
-	 * Handy function for bringing game objects "back to life". Just sets alive and exists back to true.
-	 * In practice, this function is most often called by FlxObject.reset().
-	 */
+	
 	public function onRevive():Void {
 		if (body != null) {
-			body.space = NapeSpace.space;
+			Box2D.world.createBody
 		}
 	}
 	
@@ -86,7 +80,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	 *
 	 * @param	NewBody 	The new physics body replacing the old one.
 	 */
-	public function addPremadeBody(NewBody:Body):Void {
+	public function addPremadeBody(newBody:B2Body):Void {
 		if (body != null) {
 			destroyPhysObjects();
 		}
