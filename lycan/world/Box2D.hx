@@ -3,48 +3,38 @@ package lycan.world;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
+import box2D.dynamics.B2DebugDraw;
 import box2D.dynamics.B2World;
 import flash.display.BitmapData;
 import flash.geom.Matrix;
-import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
+import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 
 #if !FLX_NO_DEBUG
 
 #end
-class Box2D {
-	
-	@:isVar public static var get(get, never):Box2D;
-	private static function get_get():Box2D return get == null ? new Box2D() : get;
-	
+class Box2D {	
 	public var world:B2World;
 	
 	/** Iterations for resolving velocity (default 10) */
 	public var velocityIterations:Int = 10;
 	/** Iterations for resolving position (default 10) */
 	public var positionIterations:Int = 10;
-
+	
 	/**
 	 * Whether or not the nape debug graphics are enabled.
 	 */
-	public var drawDebug(default, set):Bool;
+	public static var drawDebug(default, set):Bool;
 
 	#if !FLX_NO_DEBUG
-		/**
-		 * A useful "canvas" which can be used to draw debug information on.
-		 * To get a better idea of its use, see the official Nape demo 'SpatialQueries'
-		 * (http://napephys.com/samples.html#swf-SpatialQueries)
-		 * where this is used to draw lines emitted from Rays.
-		 * A sensible place to use this would be the state's draw() method.
-		 * Note that shapeDebug is null if drawDebug is false.
-		 */
-		//public var shapeDebug(default, null):ShapeDebug;
-		private var drawDebugButton:FlxSystemButton;
+	private static var drawDebugButton:FlxSystemButton;
+	public static var debugSprite(default, null):Sprite;
+	public static var debugDraw(default, null):B2DebugDraw;
 	#end
 
 	public function new() {
@@ -52,25 +42,44 @@ class Box2D {
 		
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
-		FlxG.signals.stateSwitched.add(onStateSwitch);
 		
 		#if !FLX_NO_DEBUG
-			// Add a button to toggle debug shapes to the debugger
-			// TODO could do box2d icon instead of the Nape one
-			var icon:BitmapData = new BitmapData(11, 11, true, 0);
-			var text:TextField = new TextField();
-			text.text = "B2";
-			text.embedFonts = true;
-			text.setTextFormat(new TextFormat(FlxAssets.FONT_DEFAULT, 8, FlxColor.WHITE, false));
-			var mat = new Matrix();
-			mat.translate(-2, -1);
-			icon.draw(text, mat);
-			drawDebugButton = FlxG.debugger.addButton(RIGHT, icon, function() {
-				drawDebug = !drawDebug;
-			}, true, true);
-			drawDebug = false;
+		setupDebugDrawing();
 		#end
 	}
+	
+	public function destroy():Void {
+		FlxG.signals.postUpdate.remove(update);
+		FlxG.signals.postUpdate.remove(draw);
+	}
+	
+	#if !FLX_NO_DEBUG
+	private function setupDebugDrawing():Void {
+		debugDraw = new B2DebugDraw();
+		debugSprite = new Sprite();
+		debugDraw.setSprite(debugSprite);
+		debugDraw.setDrawScale(30.0); // TODO
+		debugDraw.setFillAlpha(0.3);
+		debugDraw.setLineThickness(1.0);
+		debugDraw.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
+		world.setDebugDraw(debugDraw);
+	
+		// Add a button to toggle debug shapes to the debugger
+		// TODO could do box2d icon instead of the Nape one
+		var icon:BitmapData = new BitmapData(11, 11, true, 0);
+		var text:TextField = new TextField();
+		text.text = "B2";
+		text.embedFonts = true;
+		text.setTextFormat(new TextFormat(FlxAssets.FONT_DEFAULT, 8, FlxColor.WHITE, false));
+		var mat = new Matrix();
+		mat.translate(-2, -1);
+		icon.draw(text, mat);
+		drawDebugButton = FlxG.debugger.addButton(RIGHT, icon, function() {
+			drawDebug = !drawDebug;
+		}, true, true);
+		drawDebug = false;
+	}
+	#end
 
 	/**
 	 * Creates simple walls around the game area - useful for prototying.
@@ -112,67 +121,45 @@ class Box2D {
 		return walls;
 	}
 
-	private function set_drawDebug(drawDebug:Bool):Bool {
-		//#if !FLX_NO_DEBUG
-		//if (drawDebugButton != null)
-			//drawDebugButton.toggled = !drawDebug;
-//
-		//if (drawDebug) {
-			//if (shapeDebug == null) {
-				//shapeDebug = new ShapeDebug(FlxG.width, FlxG.height);
-				//shapeDebug.drawConstraints = true;
-				//shapeDebug.display.scrollRect = null;
-				//shapeDebug.thickness = 1;
-				//FlxG.addChildBelowMouse(shapeDebug.display);
-			//}
-		//} else if (shapeDebug != null) {
-			//FlxG.removeChild(shapeDebug.display);
-			//shapeDebug = null;
-		//}
-		//#end
-//
-		return drawDebug = this.drawDebug;
-	}
+	private static function set_drawDebug(drawDebug:Bool):Bool {
+		#if !FLX_NO_DEBUG
+		if (drawDebug == Box2D.drawDebug) {
+			return Box2D.drawDebug;
+		}
+		
+		if (drawDebug) {
+			FlxG.addChildBelowMouse(debugSprite);
+		} else {
+			FlxG.removeChild(debugSprite);
+		}
+		
+		if (drawDebugButton != null) drawDebugButton.toggled = !drawDebug;
 
-	private function onStateSwitch():Void {
-		//if (world != null) {
-			//world.clear();
-			//world = null; // resets atributes like gravity.
-		//}
-//
-		//#if !FLX_NO_DEBUG
-		//drawDebug = false;
-//
-		//if (drawDebugButton != null) {
-			//FlxG.debugger.removeButton(drawDebugButton);
-			//drawDebugButton = null;
-		//}
-		//#end
+		#end
+		
+		return Box2D.drawDebug = drawDebug;
 	}
 
 	public function update():Void {
-		//if (world != null && FlxG.elapsed > 0) {
-			//world.step(FlxG.elapsed, velocityIterations, positionIterations);
-		//}
+		if (world != null && FlxG.elapsed > 0) {
+			world.step(FlxG.elapsed, velocityIterations, positionIterations);
+		}
 	}
 
 	public function draw():Void {
-		//#if !FLX_NO_DEBUG
-		//if (shapeDebug == null || world == null) {
-			//return;
-		//}
-//
-		//shapeDebug.clear();
-		//shapeDebug.draw(world);
-//
+		#if !FLX_NO_DEBUG
+		if (world == null || !drawDebug) {
+			return;
+		}
+		
+		world.drawDebugData();
+		
 		//var zoom = FlxG.camera.zoom;
 		//var sprite = shapeDebug.display;
-//
 		//sprite.scaleX = zoom;
 		//sprite.scaleY = zoom;
-//
 		//sprite.x = -FlxG.camera.scroll.x * zoom;
 		//sprite.y = -FlxG.camera.scroll.y * zoom;
-		//#end
+		#end
 	}
 }

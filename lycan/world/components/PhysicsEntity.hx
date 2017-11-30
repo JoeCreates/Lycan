@@ -11,15 +11,15 @@ import lycan.components.Entity;
 import flixel.FlxSprite;
 import flixel.FlxObject;
 
-interface NapeEntity extends Entity {
-	public var nape:NapeComponent;
+interface PhysicsEntity extends Entity {
+	public var physics:PhysicsComponent;
 	@:relaxed public var x(get, set):Float;
 	@:relaxed public var y(get, set):Float;
 	@:relaxed public var moves(get, set):Bool;
 	@:relaxed public var angle(get, set):Float;
 }
 
-class NapeComponent extends Component<NapeEntity> {
+class PhysicsComponent extends Component<PhysicsEntity> {
 	public var body:Body;
 	public var enabled(default, set):Bool = false;
 	
@@ -205,7 +205,7 @@ class NapeComponent extends Component<NapeEntity> {
 		updatePosition();
 	}
 	
-	override public function set_entity(entity:NapeEntity):NapeEntity {
+	override public function set_entity(entity:PhysicsEntity):PhysicsEntity {
 		this.entity = entity;
 		//autoSub(FlxG.signals.preDraw, update);
 		//autoSub(entity.killed, onKill);

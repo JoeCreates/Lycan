@@ -24,15 +24,16 @@ import flixel.math.FlxPoint;
 import lycan.world.layer.TileLayer;
 import lycan.world.NapeSpace;
 
-#if nape
-interface NapeTilemapEntity extends Entity {
-	public var nape:NapeTilemapComponent;
+#if box2d
+
+interface PhysicsTilemapEntity extends Entity {
+	public var physics:NapeTilemapComponent;
 	@:relaxed public var x(get, set):Float;
 	@:relaxed public var y(get, set):Float;
 	public function drawDebug():Void;
 }
 
-class NapeTilemapComponent extends Component<NapeTilemapEntity> {
+class PhysicsTilemapComponent extends Component<PhysicsTilemapEntity> {
 	public var body(get, never):Body;
 	private var binaryData:Array<Int>;
 	
@@ -275,7 +276,7 @@ class NapeTilemapComponent extends Component<NapeTilemapEntity> {
 		return FlxRect.get(StartX - 1, StartY, entity.widthInTiles - 1, EndY);
 	}
 	
-	override private function set_entity(entity:NapeTilemapEntity):NapeTilemapEntity {
+	override private function set_entity(entity:PhysicsTilemapEntity):PhysicsTilemapEntity {
 		super.set_entity(entity);
 		//autoSub(entity.loaded, onMapLoaded);
 		return entity;
