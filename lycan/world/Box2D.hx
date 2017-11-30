@@ -29,6 +29,8 @@ class Box2D {
 	public static var drawDebug(default, set):Bool;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float>;
+	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
+	public static var pixelsPerMeter:Float = 30;
 	
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
@@ -39,7 +41,7 @@ class Box2D {
 	public static function init():Void {
 		if (world != null) return;
 		
-		world = new B2World(new B2Vec2(0, 10), true);
+		world = new B2World(new B2Vec2(0, 3), true);
 		
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
@@ -101,33 +103,7 @@ class Box2D {
 	 * @param   material    The Material to use for the physics body of the walls.
 	 */
 	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10):B2Body {
-		//if (maxX == 0) {
-			//maxX = FlxG.width;
-		//}
-//
-		//if (maxY == 0) {
-			//maxY = FlxG.height;
-		//}
-//
-		//if (material == null) {
-			//material = new Material(0.4, 0.2, 0.38, 0.7);
-		//}
-//
-		var walls:B2Body = world.createBody(new B2BodyDef());
-//
-		//// Left wall
-		//walls.shapes.add(new Polygon(Polygon.rect(minX - thickness, minY, thickness, maxY + Math.abs(minY))));
-		//// Right wall
-		//walls.shapes.add(new Polygon(Polygon.rect(maxX, minY, thickness, maxY + Math.abs(minY))));
-		//// Upper wall
-		//walls.shapes.add(new Polygon(Polygon.rect(minX, minY - thickness, maxX + Math.abs(minX), thickness)));
-		//// Bottom wall
-		//walls.shapes.add(new Polygon(Polygon.rect(minX, maxY, maxX + Math.abs(minX), thickness)));
-//
-		//walls.space = world;
-		//walls.setShapeMaterials(material);
-//
-		return walls;
+		return null;// TODO
 	}
 
 	private static function set_drawDebug(drawDebug:Bool):Bool {

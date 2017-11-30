@@ -1,5 +1,6 @@
 package lycan.world.components;
 
+import box2D.collision.shapes.B2PolygonShape;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
@@ -14,6 +15,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 import lycan.components.Component;
 import lycan.components.Entity;
+import box2D.collision.shapes.B2MassData;
 
 import flixel.FlxSprite;
 import flixel.FlxObject;
@@ -27,6 +29,8 @@ interface PhysicsEntity extends Entity {
 	@:relaxed public var alive(get, set):Bool;
 	@:relaxed public var origin(get, set):FlxPoint;
 	@:relaxed public var scale(get, set):FlxPoint;
+	@:relaxed public var width(get, set):Float;
+	@:relaxed public var height(get, set):Float;
 }
 
 class PhysicsComponent extends Component<PhysicsEntity> {
@@ -62,17 +66,20 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		super(entity);
 	}
 	
-	public function init(?bodyType:B2BodyType, createRectBody:Bool = true, enabled:Bool = true) {
+	public function init(?bodyType:B2BodyType, createRectShape:Bool = true, enabled:Bool = true) {
 		if (bodyType == null) bodyType = B2BodyType.DYNAMIC_BODY;
 		
 		var bd:B2BodyDef;
 		bd = new B2BodyDef();
+		bd.type = bodyType;
+		bd.position.set(entity.entity_x / Box2D.pixelsPerMeter, entity.entity_y / Box2D.pixelsPerMeter);
+		bd.userData = this;
 		body = Box2D.world.createBody(bd);
 		
 		offset = FlxPoint.get();
 		
-		if (createRectBody) {
-			this.createRectangularBody();
+		if (createRectShape) {
+			this.createRectangularShape(entity.entity_width, entity.entity_height);
 		}
 		//this.enabled = enabled;
 		
@@ -124,7 +131,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		//setBodyMaterial();
 	//}
 	
-	public function createCircularBody(radius:Float = 16, ?type:B2BodyType):Void {
+	public function createCircularShape(radius:Float = 16, ?type:B2BodyType):Void {
 		//trace("Create circular body");
 		//if (Std.is(entity, FlxSprite)) {
 			//trace("Is a sprite");
@@ -142,7 +149,11 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		//}
 	}
 	
-	public function createRectangularBody(width:Float = 0, height:Float = 0, ?type:B2BodyType):Void {
+	public function createRectangularShape(pixelWidth:Float = 0, pixelHeight:Float = 0):Void {
+		var rect = new B2PolygonShape();
+		rect.setAsBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5);
+		body.createFixture2(rect);
+		
 		//if (body != null) {
 			//destroyPhysObjects();
 		//}
@@ -186,7 +197,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	private function updatePhysObjects():Void {
 		updatePosition();
 		
-		if (body.isFixedRotation()) entity.entity_angle = angleDeg;
+		if (!body.isFixedRotation()) entity.entity_angle = angleDeg;
 		
 		// Applies custom physics drag.
 		if (angularDamping < 1) body.setAngularVelocity(body.getAngularVelocity() * angularDamping);
@@ -197,14 +208,14 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	private function updatePosition():Void {
 		if (!Std.is(entity, FlxSprite)) return;
 		
-		entity.entity_x = x - entity.entity_origin.x * entity.entity_scale.x;
-		entity.entity_y = y - entity.entity_origin.y * entity.entity_scale.y;
+		entity.entity_x = x * Box2D.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x;
+		entity.entity_y = y * Box2D.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y;
 	}
 	
 	// TODO enable/disable? :(
 	
-	public function setPosition(x:Float = 0, y:Float = 0):Void {
-		body.setPosition(vec2(x, y));
+	public function setPixelPosition(x:Float = 0, y:Float = 0):Void {
+		body.setPosition(new B2Vec2(x / Box2D.pixelsPerMeter, y / Box2D.pixelsPerMeter));
 		updatePosition();
 	}
 	
