@@ -1,5 +1,6 @@
 package lycan.world.components;
 
+import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2Fixture;
@@ -23,6 +24,9 @@ interface PhysicsEntity extends Entity {
 	@:relaxed public var y(get, set):Float;
 	@:relaxed public var moves(get, set):Bool;
 	@:relaxed public var angle(get, set):Float;
+	@:relaxed public var alive(get, set):Bool;
+	@:relaxed public var origin(get, set):FlxPoint;
+	@:relaxed public var scale(get, set):FlxPoint;
 }
 
 class PhysicsComponent extends Component<PhysicsEntity> {
@@ -30,18 +34,39 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	public var world(get, never):B2World;
 	private function get_world():B2World return body.getWorld();
 	
-	public var enabled(default, set):Bool = false;
+	public var x(get, set):Float;
+	private function get_x():Float return body.getPosition().x;
+	private function set_x(x:Float):Float return body.getPosition().x = x;
+	public var y(get, set):Float;
+	private function get_y():Float return body.getPosition().y;
+	private function set_y(y:Float):Float return body.getPosition().y = y;
+	public var angle(get, set):Float;
+	private function get_angle():Float return body.getAngle();
+	private function set_angle(angle:Float):Float {body.setAngle(angle); return angle;}
+	public var angleDeg(get, set):Float;
+	private function get_angleDeg():Float return body.getAngle() * FlxAngle.TO_DEG;
+	private function set_angleDeg(angleDeg:Float):Float {body.setAngle(angleDeg * FlxAngle.TO_RAD); return angleDeg;}
+	
+	//public var enabled(default, set):Bool = false;
 	public var offset:FlxPoint;
 	
-	/** Internal var to update body.velocity.x and body.velocity.y. 1 = no drag */
-	private var _linearDrag:Float = 1;
-	/** Internal var to update body.angularVel. 1 = no drag */
-	private var _angularDrag:Float = 1;
+	/** Helper vec2 to reduce object instantiation */
+	private static var _vec2:B2Vec2 = new B2Vec2();
+	
+	/** Multiplier on velocity per step. 1 = no drag */
+	public var linearDamping:Float = 1;
+	/** Multiplier on angular velocity on step. 1 = no drag */
+	public var angularDamping:Float = 1;
+	
+	public function new(entity:PhysicsEntity) {
+		super(entity);
+	}
 	
 	public function init(?bodyType:B2BodyType, createRectBody:Bool = true, enabled:Bool = true) {
 		if (bodyType == null) bodyType = B2BodyType.DYNAMIC_BODY;
 		
 		var bd:B2BodyDef;
+		bd = new B2BodyDef();
 		body = Box2D.world.createBody(bd);
 		
 		offset = FlxPoint.get();
@@ -49,28 +74,36 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		if (createRectBody) {
 			this.createRectangularBody();
 		}
-		this.enabled = enabled;
+		//this.enabled = enabled;
+		
+		FlxG.signals.postUpdate.add(update);
 	}
 	
+	@:append("destroy")
 	public function destroy():Void {
 		destroyPhysObjects();
 		offset = FlxDestroyUtil.put(offset);
+		FlxG.signals.postUpdate.remove(update);
 	}
 
 	public function update():Void {
+		if (!entity.entity_alive) return;
+		
 		if (body != null && entity.entity_moves) {
 			updatePhysObjects();
 		}
 	}
-
+	
+	@:prepend("kill")
 	public function onKill():Void {
-		if (body != null) {
-			
+		//TODO 
 	}
 	
+	@:prepend("revive")
 	public function onRevive():Void {
 		if (body != null) {
-			Box2D.world.createBody
+			//Box2D.world.createBody
+			//TODO
 		}
 	}
 	
@@ -80,130 +113,103 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	 *
 	 * @param	NewBody 	The new physics body replacing the old one.
 	 */
-	public function addPremadeBody(newBody:B2Body):Void {
-		if (body != null) {
-			destroyPhysObjects();
-		}
-		
-		NewBody.position.x = entity.entity_x;
-		NewBody.position.y = entity.entity_y;
-		setBody(NewBody);
-		setBodyMaterial();
+	//public function addPremadeBody(newBody:B2Body):Void {
+		//if (body != null) {
+			//destroyPhysObjects();
+		//}
+		//
+		//NewBody.position.x = entity.entity_x;
+		//NewBody.position.y = entity.entity_y;
+		//setBody(NewBody);
+		//setBodyMaterial();
+	//}
+	
+	public function createCircularBody(radius:Float = 16, ?type:B2BodyType):Void {
+		//trace("Create circular body");
+		//if (Std.is(entity, FlxSprite)) {
+			//trace("Is a sprite");
+			//var entity:FlxSprite = cast entity;
+			//
+			//if (body != null) {
+				//destroyPhysObjects();
+			//}
+			//
+			//entity.centerOffsets(false);
+			//setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
+			//body.shapes.add(new Circle(Radius));
+			//
+			//setBodyMaterial();
+		//}
 	}
 	
-	public function createCircularBody(Radius:Float = 16, ?_Type:BodyType):Void {
-		trace("Create circular body");
-		if (Std.is(entity, FlxSprite)) {
-			trace("Is a sprite");
-			var entity:FlxSprite = cast entity;
-			
-			if (body != null) {
-				destroyPhysObjects();
-			}
-			
-			entity.centerOffsets(false);
-			setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
-			body.shapes.add(new Circle(Radius));
-			
-			setBodyMaterial();
-		}
-	}
-	
-	public function createRectangularBody(Width:Float = 0, Height:Float = 0, ?_Type:BodyType):Void {
-		if (body != null) {
-			destroyPhysObjects();
-		}
-		
-		if (Std.is(entity, FlxSprite)) {
-			var entity:FlxSprite = cast this.entity;
-			if (Width <= 0) {
-				Width = entity.frameWidth * entity.scale.x;
-			}
-			if (Height <= 0) {
-				Height = entity.frameHeight * entity.scale.y;
-			}
-			
-			entity.centerOffsets(false);
-			
-			// Todo check for transform instead when such a thing exists
-			setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
-			body.shapes.add(new Polygon(Polygon.box(Width, Height)));
-			
-			setBodyMaterial();
-		}
+	public function createRectangularBody(width:Float = 0, height:Float = 0, ?type:B2BodyType):Void {
+		//if (body != null) {
+			//destroyPhysObjects();
+		//}
+		//
+		//if (Std.is(entity, FlxSprite)) {
+			//var entity:FlxSprite = cast this.entity;
+			//if (Width <= 0) {
+				//Width = entity.frameWidth * entity.scale.x;
+			//}
+			//if (Height <= 0) {
+				//Height = entity.frameHeight * entity.scale.y;
+			//}
+			//
+			//entity.centerOffsets(false);
+			//
+			//// Todo check for transform instead when such a thing exists
+			//setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
+			//body.shapes.add(new Polygon(Polygon.box(Width, Height)));
+			//
+			//setBodyMaterial();
+		//}
 	}
 	
 	public function setBodyMaterial(Elasticity:Float = 1, DynamicFriction:Float = 0.2, StaticFriction:Float = 0.4, Density:Float = 1, RotationFriction:Float = 0.001):Void {
 		if (body == null)
 			return;
 		
-		body.setShapeMaterials(new Material(Elasticity, DynamicFriction, StaticFriction, Density, RotationFriction));
+		//body.setShapeMaterials(new Material(Elasticity, DynamicFriction, StaticFriction, Density, RotationFriction));
 	}
 	
 	public function destroyPhysObjects():Void {
 		if (body != null) {
-			if (NapeSpace.space != null)
-				NapeSpace.space.bodies.remove(body);
+			if (world != null) {
+				world.destroyBody(body);
+			}
 			body = null;
 		}
 	}
 	
-	public inline function setDrag(LinearDrag:Float = 1, AngularDrag:Float = 1):Void {
-		_linearDrag	= LinearDrag;
-		_angularDrag = AngularDrag;
-	}
-	
-	public function setBody(body:Body):Void {
-		this.body = body;
-		this.enabled = enabled;//TODO make it so this isn't necessary
-	}
-	
-	/**
-	 * Updates physics FlxSprite graphics to follow this sprite physics object, called at the end of update().
-	 * Things that are updated: Position, angle, angular and linear drag.
-	 */
+	/** Update FlxSprite based on physics body and apply damping */
 	private function updatePhysObjects():Void {
 		updatePosition();
 		
-		if (body.allowRotation) {
-			entity.entity_angle = body.rotation * FlxAngle.TO_DEG;
-		}
+		if (body.isFixedRotation()) entity.entity_angle = angleDeg;
 		
 		// Applies custom physics drag.
-		if (_linearDrag < 1 || _angularDrag < 1) {
-			body.angularVel *= _angularDrag;
-			body.velocity.x *= _linearDrag;
-			body.velocity.y *= _linearDrag;
-		}
+		if (angularDamping < 1) body.setAngularVelocity(body.getAngularVelocity() * angularDamping);
+		if (linearDamping < 1) body.getLinearVelocity().multiply(linearDamping);//TODO does this work?
 	}
 	
 	//TODO from old flixel. origin is not correct
 	private function updatePosition():Void {
 		if (!Std.is(entity, FlxSprite)) return;
-		var entity:FlxSprite = cast entity;
-		entity.x = body.position.x - entity.origin.x * entity.scale.x;
-		entity.y = body.position.y - entity.origin.y * entity.scale.y;
-	}
-	
-	//TODO remove old body?
-	private function set_enabled(Value:Bool):Bool {
-		if (body != null)
-			body.space = Value ? NapeSpace.space : null;
-		return enabled = Value;
-	}
-	
-	public function setPosition(X:Float = 0, Y:Float = 0):Void {
-		body.position.x = X;
-		body.position.y = Y;
 		
+		entity.entity_x = x - entity.entity_origin.x * entity.entity_scale.x;
+		entity.entity_y = y - entity.entity_origin.y * entity.entity_scale.y;
+	}
+	
+	// TODO enable/disable? :(
+	
+	public function setPosition(x:Float = 0, y:Float = 0):Void {
+		body.setPosition(vec2(x, y));
 		updatePosition();
 	}
 	
-	override public function set_entity(entity:PhysicsEntity):PhysicsEntity {
-		this.entity = entity;
-		//autoSub(FlxG.signals.preDraw, update);
-		//autoSub(entity.killed, onKill);
-		//autoSub(entity.revived, onRevive);
-		return entity;
+	public static function vec2(x:Float, y:Float):B2Vec2 {
+		_vec2.set(x, y);
+		return _vec2;
 	}
 }

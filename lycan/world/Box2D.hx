@@ -35,11 +35,8 @@ class Box2D {
 	public static var debugSprite(default, null):Sprite;
 	public static var debugDraw(default, null):B2DebugDraw;
 	#end
-
-	public function new() {
-	}
 	
-	public function init():Void {
+	public static function init():Void {
 		if (world != null) return;
 		
 		world = new B2World(new B2Vec2(0, 10), true);
@@ -50,7 +47,7 @@ class Box2D {
 		setupDebugDraw();
 	}
 	
-	public function destroy():Void {
+	public static function destroy():Void {
 		world = null;
 		
 		FlxG.signals.postUpdate.remove(update);
@@ -103,7 +100,7 @@ class Box2D {
 	 * @param   thickness   How thick the walls are. 10 by default.
 	 * @param   material    The Material to use for the physics body of the walls.
 	 */
-	public function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10):B2Body {
+	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10):B2Body {
 		//if (maxX == 0) {
 			//maxX = FlxG.width;
 		//}
@@ -151,7 +148,7 @@ class Box2D {
 
 	public static function update():Void {
 		if (world != null && FlxG.elapsed > 0) {
-			world..step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
+			world.step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
 		}
 	}
 
