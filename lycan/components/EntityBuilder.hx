@@ -103,7 +103,7 @@ class EntityBuilder {
 		if (!hasFieldIncludingBuildFields(classType, "components", fields)) {
 			var c = macro class {
 				// TODO make it possible to customise this name
-				public var components:Array<lycan.components.Component<Dynamic>> = [];
+				public var components:Array<lycan.components.Component<Dynamic>>;
 			}
 			fields.push(c.fields[0]);
 		}
@@ -193,8 +193,11 @@ class EntityBuilder {
 				pos: Context.currentPos()
 			});
 			
+			var cn = classType.name;
+			
 			return macro {
 				$i{field.name} = new $c(this);
+				if (components == null) components = [];
 				components.push($i{field.name});// TODO is the components array useful?
 				${e};
 			}
