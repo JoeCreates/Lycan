@@ -1,24 +1,23 @@
 package lycan.world.components;
 
 import box2D.collision.shapes.B2PolygonShape;
+import box2D.collision.shapes.B2Shape;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
+import box2D.dynamics.B2BodyType;
+import box2D.dynamics.B2FilterData;
 import box2D.dynamics.B2Fixture;
 import box2D.dynamics.B2FixtureDef;
-import box2D.dynamics.B2BodyType;
 import box2D.dynamics.B2World;
-import flixel.FlxBasic;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 import lycan.components.Component;
 import lycan.components.Entity;
-import box2D.collision.shapes.B2MassData;
-
-import flixel.FlxSprite;
-import flixel.FlxObject;
+import box2D.collision.shapes.B2CircleShape;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -57,10 +56,39 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	/** Helper vec2 to reduce object instantiation */
 	private static var _vec2:B2Vec2 = new B2Vec2();
 	
+	public var linearVelocityX(get, set):Float;
+	private function get_linearVelocityX():Float return body.getLinearVelocity().x;
+	private function set_linearVelocityX(vel:Float):Float { body.setLinearVelocity(vec2(vel, body.getLinearVelocity().y)); return vel; }
+	
+	public var linearVelocityY(get, set):Float;
+	private function get_linearVelocityY():Float return body.getLinearVelocity().y;
+	private function set_linearVelocityY(vel:Float):Float { body.setLinearVelocity(vec2(body.getLinearVelocity().x, vel)); return vel; }
+	
 	/** Multiplier on velocity per step. 1 = no drag */
-	public var linearDamping:Float = 1;
+	public var linearDamping(get, set):Float;
+	public function get_linearDamping():Float return body.getLinearDamping();
+	public function set_linearDamping(damping:Float):Float { body.setLinearDamping(damping); return damping; }
+	
+	public var angularVelocity(get, set):Float;
+	public function get_angularVelocity():Float return body.getAngularVelocity();
+	public function set_angularVelocity(vel:Float):Float { body.setAngularVelocity(vel); return vel; }
+	
 	/** Multiplier on angular velocity on step. 1 = no drag */
-	public var angularDamping:Float = 1;
+	public var angularDamping(get, set):Float;
+	public function get_angularDamping():Float return body.getAngularDamping();
+	public function set_angularDamping(damping:Float):Float { body.setAngularDamping(damping); return damping; }
+	
+	public var bodyType(get, set):B2BodyType;
+	public function get_bodyType():B2BodyType return body.getType();
+	public function set_bodyType(type:B2BodyType) { body.setType(type); return type; }
+	
+	public var fixedRotation(get, set):Bool;
+	public function get_fixedRotation():Bool return body.isFixedRotation();
+	public function set_fixedRotation(fixed:Bool) { body.setFixedRotation(fixed); return fixed; }
+	
+	public var sleepingAllowed(get, set):Bool;
+	public function get_sleepingAllowed():Bool { return body.isSleepingAllowed(); }
+	public function set_sleepingAllowed(sleep:Bool) { body.setSleepingAllowed(sleep); return sleep; }
 	
 	public function new(entity:PhysicsEntity) {
 		super(entity);
@@ -76,14 +104,18 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		bd.userData = this;
 		body = Box2D.world.createBody(bd);
 		
+		setPixelPosition(entity.entity_x, entity.entity_y);
+		
 		offset = FlxPoint.get();
 		
-		if (createRectShape) {
-			this.createRectangularShape(entity.entity_width, entity.entity_height);
-		}
 		//this.enabled = enabled;
 		
 		FlxG.signals.postUpdate.add(update);
+	}
+	
+	public function initWithRectShape(?bodyType:B2BodyType, enabled:Bool = true, density:Float = 0) {
+		init(bodyType, enabled);
+		this.addRectangularShape(entity.entity_width, entity.entity_height, density);
 	}
 	
 	@:append("destroy")
@@ -114,74 +146,41 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		}
 	}
 	
-	/**
-	 * Makes it easier to add a physics body of your own to this sprite by setting its position,
-	 * space and material for you.
-	 *
-	 * @param	NewBody 	The new physics body replacing the old one.
-	 */
-	//public function addPremadeBody(newBody:B2Body):Void {
-		//if (body != null) {
-			//destroyPhysObjects();
-		//}
-		//
-		//NewBody.position.x = entity.entity_x;
-		//NewBody.position.y = entity.entity_y;
-		//setBody(NewBody);
-		//setBodyMaterial();
-	//}
-	
-	public function createCircularShape(radius:Float = 16, ?type:B2BodyType):Void {
-		//trace("Create circular body");
-		//if (Std.is(entity, FlxSprite)) {
-			//trace("Is a sprite");
-			//var entity:FlxSprite = cast entity;
-			//
-			//if (body != null) {
-				//destroyPhysObjects();
-			//}
-			//
-			//entity.centerOffsets(false);
-			//setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
-			//body.shapes.add(new Circle(Radius));
-			//
-			//setBodyMaterial();
-		//}
+	public function addFixture(shape:B2Shape, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
+		var def = new B2FixtureDef();
+		def.shape = shape;
+		def.density = density;
+		def.filter = filter;
+		def.friction = friction;
+		def.isSensor = isSensor;
+		def.restitution = restitution;
+		def.userData = userData;
+		return body.createFixture(def);
 	}
 	
-	public function createRectangularShape(pixelWidth:Float = 0, pixelHeight:Float = 0):Void {
-		var rect = new B2PolygonShape();
-		rect.setAsBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5);
-		body.createFixture2(rect);
+	public function addRectangularShape(pixelWidth:Float, pixelHeight:Float, density:Float = 0):B2Fixture {
+		// TODO?
+		//if (pixelWidth <= 0) {
+		//	pixelWidth = entity.entity_frameWidth * entity.entity_scale.x;
+		//}
+		//if (pixelHeight <= 0) {
+		//	pixelHeight = entity.entity_frameHeight * entity.entity_scale.y;
+		//}
+		//entity.centerOffsets(false);
 		
-		//if (body != null) {
-			//destroyPhysObjects();
-		//}
-		//
-		//if (Std.is(entity, FlxSprite)) {
-			//var entity:FlxSprite = cast this.entity;
-			//if (Width <= 0) {
-				//Width = entity.frameWidth * entity.scale.x;
-			//}
-			//if (Height <= 0) {
-				//Height = entity.frameHeight * entity.scale.y;
-			//}
-			//
-			//entity.centerOffsets(false);
-			//
-			//// Todo check for transform instead when such a thing exists
-			//setBody(new Body(_Type != null ? _Type : BodyType.DYNAMIC, Vec2.weak(entity.x, entity.y)));
-			//body.shapes.add(new Polygon(Polygon.box(Width, Height)));
-			//
-			//setBodyMaterial();
-		//}
+		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight);
+		var fixture = body.createFixture2(rect, density);
+		return fixture;
 	}
 	
-	public function setBodyMaterial(Elasticity:Float = 1, DynamicFriction:Float = 0.2, StaticFriction:Float = 0.4, Density:Float = 1, RotationFriction:Float = 0.001):Void {
-		if (body == null)
-			return;
-		
-		//body.setShapeMaterials(new Material(Elasticity, DynamicFriction, StaticFriction, Density, RotationFriction));
+	public function addRectangularShapeAdv(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
+		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight,pixelPositionX, pixelPositionY);
+		return addFixture(rect, density, filter, friction, isSensor, restitution, userData);
+	}
+	
+	public function addCircleShapeAdv(pixelRadius:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
+		var circle = Box2D.createCircleShape(pixelRadius, pixelPositionX, pixelPositionY);
+		return addFixture(circle, density, filter, friction, isSensor, restitution, userData);
 	}
 	
 	public function destroyPhysObjects():Void {
@@ -197,17 +196,13 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	private function updatePhysObjects():Void {
 		updatePosition();
 		
-		if (!body.isFixedRotation()) entity.entity_angle = angleDeg;
-		
-		// Applies custom physics drag.
-		if (angularDamping < 1) body.setAngularVelocity(body.getAngularVelocity() * angularDamping);
-		if (linearDamping < 1) body.getLinearVelocity().multiply(linearDamping);//TODO does this work?
+		if (!body.isFixedRotation()) {
+			entity.entity_angle = angleDeg;
+		}
 	}
 	
 	//TODO from old flixel. origin is not correct
 	private function updatePosition():Void {
-		if (!Std.is(entity, FlxSprite)) return;
-		
 		entity.entity_x = x * Box2D.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x;
 		entity.entity_y = y * Box2D.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y;
 	}
@@ -219,7 +214,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		updatePosition();
 	}
 	
-	public static function vec2(x:Float, y:Float):B2Vec2 {
+	private static function vec2(x:Float, y:Float):B2Vec2 {
 		_vec2.set(x, y);
 		return _vec2;
 	}
