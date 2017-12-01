@@ -97,11 +97,11 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	public function init(?bodyType:B2BodyType, createRectShape:Bool = true, enabled:Bool = true) {
 		if (bodyType == null) bodyType = B2BodyType.DYNAMIC_BODY;
 		
-		var bd:B2BodyDef;
-		bd = new B2BodyDef();
+		var bd:B2BodyDef = new B2BodyDef();
 		bd.type = bodyType;
 		bd.position.set(entity.entity_x / Box2D.pixelsPerMeter, entity.entity_y / Box2D.pixelsPerMeter);
 		bd.userData = this;
+		bd.bullet = false;
 		body = Box2D.world.createBody(bd);
 		
 		setPixelPosition(entity.entity_x, entity.entity_y);
@@ -192,7 +192,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		}
 	}
 	
-	/** Update FlxSprite based on physics body and apply damping */
+	/** Update FlxSprite based on physics body */
 	private function updatePhysObjects():Void {
 		updatePosition();
 		

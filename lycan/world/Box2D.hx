@@ -30,7 +30,9 @@ class Box2D {
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
 	public static var pixelsPerMeter:Float = 30;
 	/** Whether to enable debug mouse-based item manipulation */
-	public static var debugManipulation:Bool;
+	public static var debugManipulation:Bool = false;
+	/** Minimum size of shape in Box2D space (in meters), lower than this will result in warnings */
+	public static var minimumSize:Float = 0.1;
 	
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
@@ -70,14 +72,34 @@ class Box2D {
 	
 	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2PolygonShape {
 		var rect = new B2PolygonShape();
-		rect.setAsOrientedBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5, vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));
+		
+		var width = pixelWidth / Box2D.pixelsPerMeter;
+		var height = pixelHeight / Box2D.pixelsPerMeter;
+
+		if (width < minimumSize || height < minimumSize) {
+			printSizeWarning();
+		}
+		
+		rect.setAsOrientedBox(width * 0.5, height * 0.5, vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));		
 		return rect;
 	}
 	
 	public static function createCircleShape(pixelRadius:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2CircleShape {
-		var circle = new B2CircleShape(pixelRadius / Box2D.pixelsPerMeter);
+		var radius = pixelRadius / Box2D.pixelsPerMeter;
+		var circle = new B2CircleShape();
+		
+		if (radius * 2 < minimumSize) {
+			printSizeWarning();
+		}
+		
 		circle.setLocalPosition(vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));
 		return circle;
+	}
+	
+	private static function printSizeWarning():Void {
+		#if !FLX_NO_DEBUG
+		trace("Shape is smaller than minimum recommended Box2D size");
+		#end
 	}
 	
 	private static function setupdebugRenderer():Void {
