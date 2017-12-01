@@ -14,6 +14,7 @@ import flixel.util.FlxColor;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import box2D.collision.shapes.B2PolygonShape;
 
 #if !FLX_NO_DEBUG
 
@@ -54,6 +55,12 @@ class Box2D {
 		
 		FlxG.signals.postUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
+	}
+	
+	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float):B2PolygonShape {
+		var rect = new B2PolygonShape();
+		rect.setAsBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5);
+		return rect;
 	}
 	
 	private static function setupDebugDraw():Void {
