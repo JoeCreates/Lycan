@@ -7,14 +7,17 @@ import haxe.macro.Type;
 import haxe.macro.TypeTools;
 import tink.macro.ClassBuilder;
 import tink.macro.Exprs;
+import tink.macro.Member;
 import tink.macro.Types;
+
+using tink.MacroApi;
 
 /**
  * TODO
  * - Remove need to override new (will need to add a new field to classes that miss one)
- * - Add append and prepend metadatas to inject method calls into entity methods
  * - Identify component field with metadata? Not sure about this one.
- * - Allow dummy fields to be named in metadata
+ * - Allow dummy fields to be named in metadata (instead of default "entity_")
+ * 
  * 
  * Documentation
  * Using append to destroy components in entity's detroy method
@@ -261,9 +264,34 @@ class EntityBuilder {
 					}
 				}
 				
+				// If target function isn't in the entity...
 				if (targetFunc == null) {
-					throw(classType.name + " has no function " + targetMethodName +
-						", required by " + componentClass.name);
+					// Try to get it from a super class
+					var targetField:ClassField = getField(classType, targetMethodName);
+					
+					// If it's not in a super class, throw an error
+					if (targetField == null) {
+						throw(classType.name + " has no function " + targetMethodName +
+							", required by " + componentClass.name);
+					}
+					
+					// Get the super function
+					var func:Function;
+					switch (Context.getTypedExpr(targetField.expr()).expr) {
+						case EFunction(_, f): func = f;
+						case _:
+							throw("Tried to override " + targetMethodName + ", but it is not a function");
+					}
+					
+					// Create the super call expression
+					func.expr = ("super." + targetMethodName).resolve().call(func.getArgIdents());
+					
+					// Override the function
+					var mem:Member = Member.method(targetMethodName, null, null, func);
+					mem.overrides = true;
+					fields.push(mem);
+					
+					targetFunc = func;
 				}
 				
 				// Create the method call expressions
