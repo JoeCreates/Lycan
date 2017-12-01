@@ -1,8 +1,9 @@
 package lycan.world;
 
+import box2D.collision.shapes.B2CircleShape;
+import box2D.collision.shapes.B2PolygonShape;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
-import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2DebugDraw;
 import box2D.dynamics.B2World;
 import flash.display.BitmapData;
@@ -14,11 +15,7 @@ import flixel.util.FlxColor;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import box2D.collision.shapes.B2PolygonShape;
 
-#if !FLX_NO_DEBUG
-
-#end
 class Box2D {	
 	public static var world:B2World;
 	
@@ -36,8 +33,15 @@ class Box2D {
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
 	public static var debugSprite(default, null):Sprite;
-	public static var debugDraw(default, null):B2DebugDraw;
+	public static var debugRenderer(default, null):B2DebugDraw;
 	#end
+	
+	/** Helper vec2 to reduce object instantiation */
+	private static var _vec2:B2Vec2 = new B2Vec2();
+	private static function vec2(x:Float, y:Float):B2Vec2 {
+		_vec2.set(x, y);
+		return _vec2;
+	}
 	
 	public static function init():Void {
 		if (world != null) return;
@@ -47,39 +51,50 @@ class Box2D {
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		
-		setupDebugDraw();
+		setupdebugRenderer();
 	}
 	
 	public static function destroy():Void {
 		world = null;
 		
+		#if !FLX_NO_DEBUG
+		debugSprite = null;
+		debugRenderer = null;
+		#end
+		
 		FlxG.signals.postUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
 	}
 	
-	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float):B2PolygonShape {
+	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2PolygonShape {
 		var rect = new B2PolygonShape();
 		rect.setAsBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5);
+		//TODO move vertices to set local position?
 		return rect;
 	}
 	
-	private static function setupDebugDraw():Void {
+	public static function createCircleShape(pixelRadius:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2CircleShape {
+		var circle = new B2CircleShape(pixelRadius / Box2D.pixelsPerMeter);
+		circle.setLocalPosition(vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));
+		return circle;
+	}
+	
+	private static function setupdebugRenderer():Void {
 		#if !FLX_NO_DEBUG
 		
 		// Skip if we have already initialised debug drawing
-		if (debugDraw != null) return;
+		if (debugRenderer != null) return;
 		
 		// Create sprite and debug renderer
-		debugDraw = new B2DebugDraw();
+		debugRenderer = new B2DebugDraw();
 		debugSprite = new Sprite();
 		
 		// Set up debug renderer
-		debugDraw.setSprite(debugSprite);
-		debugDraw.setDrawScale(30.0);
-		debugDraw.setFillAlpha(0.3);
-		debugDraw.setLineThickness(1.5);
-		debugDraw.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
-		world.setDebugDraw(debugDraw);
+		debugRenderer.setSprite(debugSprite);
+		debugRenderer.setDrawScale(30.0);
+		debugRenderer.setFillAlpha(0.3);
+		debugRenderer.setLineThickness(1.5);
+		debugRenderer.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
 	
 		// Add a button to toggle debug shapes to the debugger
 		var icon:BitmapData = new BitmapData(11, 11, true, 0);
@@ -118,8 +133,10 @@ class Box2D {
 		
 		#if !FLX_NO_DEBUG
 			if (drawDebug) {
+				world.setDebugDraw(debugRenderer);
 				FlxG.addChildBelowMouse(debugSprite);
 			} else {
+				world.setDebugDraw(null);
 				FlxG.removeChild(debugSprite);
 			}
 			
@@ -139,14 +156,16 @@ class Box2D {
 		#if !FLX_NO_DEBUG
 		if (world == null || !drawDebug) return;
 		
+		// TODO
+		var zoom = FlxG.camera.zoom;
+		var sprite = debugSprite;
+		sprite.scaleX = zoom;
+		sprite.scaleY = zoom;
+		sprite.x = -FlxG.camera.scroll.x * zoom;
+		sprite.y = -FlxG.camera.scroll.y * zoom;
+		
 		world.drawDebugData();
 		
-		//var zoom = FlxG.camera.zoom;
-		//var sprite = shapeDebug.display;
-		//sprite.scaleX = zoom;
-		//sprite.scaleY = zoom;
-		//sprite.x = -FlxG.camera.scroll.x * zoom;
-		//sprite.y = -FlxG.camera.scroll.y * zoom;
 		#end
 	}
 }

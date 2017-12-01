@@ -17,6 +17,7 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 import lycan.components.Component;
 import lycan.components.Entity;
+import box2D.collision.shapes.B2CircleShape;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -80,6 +81,14 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	public var bodyType(get, set):B2BodyType;
 	public function get_bodyType():B2BodyType return body.getType();
 	public function set_bodyType(type:B2BodyType) { body.setType(type); return type; }
+	
+	public var fixedRotation(get, set):Bool;
+	public function get_fixedRotation():Bool return body.isFixedRotation();
+	public function set_fixedRotation(fixed:Bool) { body.setFixedRotation(fixed); return fixed; }
+	
+	public var sleepingAllowed(get, set):Bool;
+	public function get_sleepingAllowed():Bool { return body.isSleepingAllowed(); }
+	public function set_sleepingAllowed(sleep:Bool) { body.setSleepingAllowed(sleep); return sleep; }
 	
 	public function new(entity:PhysicsEntity) {
 		super(entity);
@@ -164,9 +173,14 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		return fixture;
 	}
 	
-	public function addRectangularShapeAdv(pixelWidth:Float, pixelHeight:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
-		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight);
+	public function addRectangularShapeAdv(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
+		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight,pixelPositionX, pixelPositionY);
 		return addFixture(rect, density, filter, friction, isSensor, restitution, userData);
+	}
+	
+	public function addCircleShapeAdv(pixelRadius:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
+		var circle = Box2D.createCircleShape(pixelRadius, pixelPositionX, pixelPositionY);
+		return addFixture(circle, density, filter, friction, isSensor, restitution, userData);
 	}
 	
 	public function destroyPhysObjects():Void {
@@ -200,7 +214,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		updatePosition();
 	}
 	
-	public static function vec2(x:Float, y:Float):B2Vec2 {
+	private static function vec2(x:Float, y:Float):B2Vec2 {
 		_vec2.set(x, y);
 		return _vec2;
 	}
