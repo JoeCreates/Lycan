@@ -24,11 +24,13 @@ class Box2D {
 	/** Iterations for resolving position (default 10) */
 	public static var positionIterations:Int = 10;
 	/** Whether debug graphics are enabled */
-	public static var drawDebug(default, set):Bool;
+	public static var drawDebug(default, set):Bool = false;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
-	public static var forceTimestep:Null<Float>;
+	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
 	public static var pixelsPerMeter:Float = 30;
+	/** Whether to enable debug mouse-based item manipulation */
+	public static var debugManipulation:Bool;
 	
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
@@ -68,8 +70,7 @@ class Box2D {
 	
 	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2PolygonShape {
 		var rect = new B2PolygonShape();
-		rect.setAsBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5);
-		//TODO move vertices to set local position?
+		rect.setAsOrientedBox(pixelWidth / Box2D.pixelsPerMeter * 0.5, pixelHeight / Box2D.pixelsPerMeter * 0.5, vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));
 		return rect;
 	}
 	
