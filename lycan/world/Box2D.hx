@@ -15,6 +15,7 @@ import flixel.util.FlxColor;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import box2D.dynamics.B2BodyDef;
 
 class Box2D {	
 	public static var world:B2World;
@@ -24,7 +25,7 @@ class Box2D {
 	/** Iterations for resolving position (default 10) */
 	public static var positionIterations:Int = 10;
 	/** Whether debug graphics are enabled */
-	public static var drawDebug(default, set):Bool = false;
+	public static var drawDebug(default, set):Null<Bool> = null;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
@@ -55,7 +56,7 @@ class Box2D {
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		
-		setupdebugRenderer();
+		setupDebugDrawing();
 	}
 	
 	public static function destroy():Void {
@@ -96,13 +97,21 @@ class Box2D {
 		return circle;
 	}
 	
+	public static function addWalls(thickness:Float = 50):Void {		
+		var width = FlxG.width;
+		var height = FlxG.height;
+		
+		var wall:B2PolygonShape= new B2PolygonShape();
+		var wallBd:B2BodyDef = new B2BodyDef();
+	}
+	
 	private static function printSizeWarning():Void {
 		#if !FLX_NO_DEBUG
 		trace("Shape is smaller than minimum recommended Box2D size");
 		#end
 	}
 	
-	private static function setupdebugRenderer():Void {
+	private static function setupDebugDrawing():Void {
 		#if !FLX_NO_DEBUG
 		
 		// Skip if we have already initialised debug drawing
