@@ -15,6 +15,7 @@ import flixel.util.FlxColor;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import box2D.dynamics.B2BodyDef;
 
 class Box2D {	
 	public static var world:B2World;
@@ -24,7 +25,7 @@ class Box2D {
 	/** Iterations for resolving position (default 10) */
 	public static var positionIterations:Int = 10;
 	/** Whether debug graphics are enabled */
-	public static var drawDebug(default, set):Bool = false;
+	public static var drawDebug(default, set):Null<Bool> = null;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
@@ -55,7 +56,7 @@ class Box2D {
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		
-		setupdebugRenderer();
+		setupDebugDrawing();
 	}
 	
 	public static function destroy():Void {
@@ -86,7 +87,7 @@ class Box2D {
 	
 	public static function createCircleShape(pixelRadius:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2CircleShape {
 		var radius = pixelRadius / Box2D.pixelsPerMeter;
-		var circle = new B2CircleShape();
+		var circle = new B2CircleShape(radius);
 		
 		if (radius * 2 < minimumSize) {
 			printSizeWarning();
@@ -96,13 +97,21 @@ class Box2D {
 		return circle;
 	}
 	
+	public static function addWalls(thickness:Float = 50):Void {		
+		var width = FlxG.width;
+		var height = FlxG.height;
+		
+		var wall:B2PolygonShape= new B2PolygonShape();
+		var wallBd:B2BodyDef = new B2BodyDef();
+	}
+	
 	private static function printSizeWarning():Void {
 		#if !FLX_NO_DEBUG
 		trace("Shape is smaller than minimum recommended Box2D size");
 		#end
 	}
 	
-	private static function setupdebugRenderer():Void {
+	private static function setupDebugDrawing():Void {
 		#if !FLX_NO_DEBUG
 		
 		// Skip if we have already initialised debug drawing
@@ -119,7 +128,22 @@ class Box2D {
 		debugRenderer.setLineThickness(1.5);
 		debugRenderer.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
 	
-		// Add a button to toggle debug shapes to the debugger
+		addDebugButton();
+		
+		drawDebug = false;
+		
+		#end
+	}
+	
+	#if !FLX_NO_DEBUG
+	/**
+	 * Adds a button to toggle debug shapes to the debugger.
+	 */
+	private static function addDebugButton():Void {
+		if (drawDebugButton != null) {
+			return;
+		}
+		
 		var icon:BitmapData = new BitmapData(11, 11, true, 0);
 		var text:TextField = new TextField();
 		text.text = "B2";
@@ -131,11 +155,8 @@ class Box2D {
 		drawDebugButton = FlxG.debugger.addButton(RIGHT, icon, function() {
 			drawDebug = !drawDebug;
 		}, true, true);
-		
-		drawDebug = false;
-		
-		#end
 	}
+	#end
 
 	/**
 	 * Creates simple walls around the game area - useful for prototying.

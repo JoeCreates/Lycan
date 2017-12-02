@@ -174,7 +174,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	}
 	
 	public function addRectangularShapeAdv(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
-		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight,pixelPositionX, pixelPositionY);
+		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight, pixelPositionX, pixelPositionY);
 		return addFixture(rect, density, filter, friction, isSensor, restitution, userData);
 	}
 	
