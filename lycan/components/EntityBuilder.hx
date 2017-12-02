@@ -3,6 +3,7 @@ package lycan.components;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
+import haxe.macro.Printer;
 import haxe.macro.Type;
 import haxe.macro.TypeTools;
 import tink.macro.ClassBuilder;
@@ -31,7 +32,7 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return false;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
+	static function shouldTrace() {return true;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
@@ -174,7 +175,7 @@ class EntityBuilder {
 		var componentFields:Map<String, {field:ClassField, componentInterface:ClassType}> = getComponentFields(componentInterfaces);
 		traceIf("Component fields: " + [for (f in componentFields) f.field.name]);
 
-		var prependComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
+		var makeComponent:TypePath->Expr = function(c:TypePath) {
 			var field = componentFields.get(c.name).field;
 			if (hasFieldIncludingBuildFields(classType, field.name, fields)) {
 				throw("Class " + classType.pack + "." + classType.name + " has field " +
@@ -193,47 +194,46 @@ class EntityBuilder {
 				pos: Context.currentPos()
 			});
 			
-			var cn = classType.name;
-			
 			return macro {
 				$i{field.name} = new $c(this);
 				if (components == null) components = [];
-				components.push($i{field.name});// TODO is the components array useful?
-				${e};
+				components.push($i{field.name});// TODO make map?
 			}
 		}
 		
-		var constructorFound:Bool = false;
-		// TODO potential big issue here because superclass needs to be built before subclasses
-		for (field in fields) {
-			switch (field.kind) {
-				// In the constructor...
-				case FFun(func) if (field.name == "new"):
-					constructorFound = true;
-					// For each component field, add if it hasn't been added by a superclass
-					for (componentField in componentFields) {
-						traceIf("checking component field: " + componentField.field.name);
-						if (classType.superClass != null) {
-							// Do not re-add components that have already been added by a superclass
-							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
-								continue;
-							}
-						}
-						// Finally, add the component instantation
-						var cType:ClassType = TypeTools.getClass(componentField.field.type);
-						func.expr = prependComponentInstantiation(func.expr, {
-								pack: componentField.componentInterface.pack,
-								name: cType.name
-							} );
-					}
-				case _:
+		var cb:ClassBuilder = new ClassBuilder();
+		var hadConstructor:Bool = cb.hasConstructor();
+		var constructor:Constructor = cb.getConstructor();
+		
+		// For each component field, add if it hasn't been added by a superclass
+		for (componentField in componentFields) {
+			traceIf("checking component field: " + componentField.field.name);
+			if (classType.superClass != null) {
+				// Do not re-add components that have already been added by a superclass
+				if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
+					continue;
+				}
+			}
+			// Finally, add the component instantation
+			var cType:ClassType = TypeTools.getClass(componentField.field.type);
+			constructor.addStatement(makeComponent({pack: componentField.componentInterface.pack, name: cType.name}), true);
+		}
+		
+		if (hadConstructor) {
+			for (field in fields) {
+				if (field.name == "new") {
+					fields.remove(field);
+					break;
+				}
 			}
 		}
-
-		if (!constructorFound) throw("Class " + classType.pack + "." + classType.name + " requires a constructor.");
+		
+		fields.push(constructor.toHaxe());
+		
+		
+		
 		
 		// Handle :append and :prepend metadata
-		//TODO
 		// Once we've found the "component field", for each of its fields look for the :prepend and :append metadata then handle them
 		// For the modified field, use findField to see if it already exists
 		// If it does exist, check if it is in the current class in order to determine if override should be marked
