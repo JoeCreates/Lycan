@@ -303,21 +303,21 @@ class Box2D {
 			}
 		}
 	}
-
+	
+	@:access(flixel.FlxCamera)
 	public static function draw():Void {
 		#if !FLX_NO_DEBUG
 		if (world == null || !drawDebug) return;
 		
-		// TODO
-		var zoom = FlxG.camera.zoom;
-		var sprite = debugSprite;
-		sprite.scaleX = zoom;
-		sprite.scaleY = zoom;
-		sprite.x = -FlxG.camera.scroll.x * zoom;
-		sprite.y = -FlxG.camera.scroll.y * zoom;
-		
 		world.drawDebugData();
 		
+		var sprite = debugSprite;
+		sprite.scaleX = 1;
+		sprite.scaleY = 1;
+		sprite.x = 0;
+		sprite.y = 0;
+		
+		FlxG.camera.transformObject(sprite);
 		#end
 	}
 }

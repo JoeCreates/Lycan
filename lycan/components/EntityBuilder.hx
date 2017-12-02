@@ -32,7 +32,7 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return true;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
+	static function shouldTrace() {return false;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
