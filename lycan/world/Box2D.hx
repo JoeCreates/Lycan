@@ -87,7 +87,7 @@ class Box2D {
 	
 	public static function createCircleShape(pixelRadius:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2CircleShape {
 		var radius = pixelRadius / Box2D.pixelsPerMeter;
-		var circle = new B2CircleShape();
+		var circle = new B2CircleShape(radius);
 		
 		if (radius * 2 < minimumSize) {
 			printSizeWarning();
