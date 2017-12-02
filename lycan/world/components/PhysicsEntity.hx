@@ -1,6 +1,5 @@
 package lycan.world.components;
 
-import box2D.collision.shapes.B2PolygonShape;
 import box2D.collision.shapes.B2Shape;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
@@ -11,13 +10,10 @@ import box2D.dynamics.B2Fixture;
 import box2D.dynamics.B2FixtureDef;
 import box2D.dynamics.B2World;
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
-import flixel.util.FlxDestroyUtil;
 import lycan.components.Component;
 import lycan.components.Entity;
-import box2D.collision.shapes.B2CircleShape;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -51,7 +47,11 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	private function set_angleDeg(angleDeg:Float):Float {body.setAngle(angleDeg * FlxAngle.TO_RAD); return angleDeg;}
 	
 	//public var enabled(default, set):Bool = false;
-	public var offset:FlxPoint;
+	//private function set_enabled(enabled:Bool):Bool { 
+	// TODO
+	//this.enabled = enabled;
+	//return enabled; 
+	//}
 	
 	/** Helper vec2 to reduce object instantiation */
 	private static var _vec2:B2Vec2 = new B2Vec2();
@@ -64,7 +64,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	private function get_linearVelocityY():Float return body.getLinearVelocity().y;
 	private function set_linearVelocityY(vel:Float):Float { body.setLinearVelocity(vec2(body.getLinearVelocity().x, vel)); return vel; }
 	
-	/** Multiplier on velocity per step. 1 = no drag */
+	/** Multiplier on velocity per step. 0 = no drag */
 	public var linearDamping(get, set):Float;
 	public function get_linearDamping():Float return body.getLinearDamping();
 	public function set_linearDamping(damping:Float):Float { body.setLinearDamping(damping); return damping; }
@@ -73,7 +73,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	public function get_angularVelocity():Float return body.getAngularVelocity();
 	public function set_angularVelocity(vel:Float):Float { body.setAngularVelocity(vel); return vel; }
 	
-	/** Multiplier on angular velocity on step. 1 = no drag */
+	/** Multiplier on angular velocity on step. 0 = no drag */
 	public var angularDamping(get, set):Float;
 	public function get_angularDamping():Float return body.getAngularDamping();
 	public function set_angularDamping(damping:Float):Float { body.setAngularDamping(damping); return damping; }
@@ -106,8 +106,6 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		
 		setPixelPosition(entity.entity_x, entity.entity_y);
 		
-		offset = FlxPoint.get();
-		
 		//this.enabled = enabled;
 		
 		FlxG.signals.postUpdate.add(update);
@@ -121,7 +119,6 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	@:append("destroy")
 	public function destroy():Void {
 		destroyPhysObjects();
-		offset = FlxDestroyUtil.put(offset);
 		FlxG.signals.postUpdate.remove(update);
 	}
 

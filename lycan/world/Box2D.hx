@@ -1,21 +1,125 @@
 package lycan.world;
 
+import box2D.collision.B2AABB;
 import box2D.collision.shapes.B2CircleShape;
 import box2D.collision.shapes.B2PolygonShape;
+import box2D.collision.shapes.B2Shape;
 import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
+import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2DebugDraw;
+import box2D.dynamics.B2Fixture;
 import box2D.dynamics.B2World;
+import box2D.dynamics.joints.B2MouseJoint;
+import box2D.dynamics.joints.B2MouseJointDef;
 import flash.display.BitmapData;
 import flash.geom.Matrix;
 import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
+import lycan.world.Box2D.Box2DInteractiveDebug;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import box2D.dynamics.B2BodyDef;
+
+/**
+ * Box2D debugging utility, lets you drag world bodies around with the mouse/manipulate with keyboard.
+ */
+class Box2DInteractiveDebug {
+	public function new() {
+	}
+	
+	private var mouseJoint:B2MouseJoint = null;
+	private var mouseX(get, never):Float;
+	private var mouseY(get, never):Float;
+	private var physicsMouseX(get, never):Float;
+	private var physicsMouseY(get, never):Float;
+	
+	public function update():Void {
+		handleMouse();
+		handleKeys();
+	}
+	
+	private function handleMouse():Void {
+		if (mouseJoint == null) {
+			if (FlxG.mouse.justPressed) {
+				var bodyAtMouse = getBodyAtMouse();
+				if (bodyAtMouse != null) {
+					_mouseJointDef.bodyA = Box2D.world.getGroundBody();
+					_mouseJointDef.bodyB = bodyAtMouse;
+					_mouseJointDef.target.set(physicsMouseX, physicsMouseY);
+					_mouseJointDef.collideConnected = true;
+					_mouseJointDef.maxForce = 300 * bodyAtMouse.getMass();
+					mouseJoint = cast Box2D.world.createJoint(_mouseJointDef);
+					
+					bodyAtMouse.setAwake(true);
+				}
+			}
+		} else {
+			if (mouseJoint != null) {
+				if (FlxG.mouse.justMoved) {
+					mouseJoint.setTarget(vec2(physicsMouseX, physicsMouseY));
+				}
+				if (FlxG.mouse.justReleased) {
+					Box2D.world.destroyJoint(mouseJoint);
+					mouseJoint = null;
+				}
+			}
+		}
+	}
+	
+	private function handleKeys():Void {
+		if(FlxG.keys.pressed.D) {
+			var body = getBodyAtMouse();
+			if (body != null) {
+				Box2D.world.destroyBody(body);
+			}
+		}
+	}
+	
+	private function getBodyAtMouse():B2Body {
+		// Make a small box around the mouse position
+		var mousePVec = vec2(physicsMouseX, physicsMouseY);
+		_aabb.lowerBound.set(physicsMouseX - 0.001, physicsMouseY - 0.001);
+		_aabb.upperBound.set(physicsMouseX + 0.001, physicsMouseY + 0.001);
+		var body:B2Body = null;
+		
+		// Query the world for overlapping shapes
+		var getBodyCallback = function(fixture:B2Fixture):Bool {
+			var shape:B2Shape = fixture.getShape();
+			if (shape.testPoint(fixture.getBody().getTransform(), mousePVec)) {
+				body = fixture.getBody();
+				return false;
+			}
+			return true;
+		}
+		Box2D.world.queryAABB(getBodyCallback, _aabb);
+		return body;
+	}
+	
+	private function get_mouseX():Float {
+		return FlxG.mouse.x;
+	}
+	private function get_mouseY():Float {
+		return FlxG.mouse.y;
+	}
+	private function get_physicsMouseX():Float {
+		return mouseX / Box2D.pixelsPerMeter;
+	}
+	private function get_physicsMouseY():Float {
+		return mouseY / Box2D.pixelsPerMeter;
+	}
+	
+	/** Helpers to reduce object instantiation */
+	private static var _vec2:B2Vec2 = new B2Vec2();
+	private static function vec2(x:Float, y:Float):B2Vec2 {
+		_vec2.set(x, y);
+		return _vec2;
+	}
+	private static var _aabb:B2AABB = new B2AABB();
+	private static var _mouseJointDef:B2MouseJointDef = new B2MouseJointDef();
+}
 
 class Box2D {	
 	public static var world:B2World;
@@ -30,10 +134,10 @@ class Box2D {
 	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
 	public static var pixelsPerMeter:Float = 30;
-	/** Whether to enable debug mouse-based item manipulation */
-	public static var debugManipulation:Bool = false;
 	/** Minimum size of shape in Box2D space (in meters), lower than this will result in warnings */
 	public static var minimumSize:Float = 0.1;
+	/** Optional debug mouse/keyboard-based body manipulator */
+	public static var debugManipulator:Box2DInteractiveDebug = null;
 	
 	#if !FLX_NO_DEBUG
 	private static var drawDebugButton:FlxSystemButton;
@@ -193,6 +297,10 @@ class Box2D {
 	public static function update():Void {
 		if (world != null && FlxG.elapsed > 0) {
 			world.step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
+			
+			if (debugManipulator != null) {
+				debugManipulator.update();
+			}
 		}
 	}
 
