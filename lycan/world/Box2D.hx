@@ -128,7 +128,22 @@ class Box2D {
 		debugRenderer.setLineThickness(1.5);
 		debugRenderer.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
 	
-		// Add a button to toggle debug shapes to the debugger
+		addDebugButton();
+		
+		drawDebug = false;
+		
+		#end
+	}
+	
+	#if !FLX_NO_DEBUG
+	/**
+	 * Adds a button to toggle debug shapes to the debugger.
+	 */
+	private static function addDebugButton():Void {
+		if (drawDebugButton != null) {
+			return;
+		}
+		
 		var icon:BitmapData = new BitmapData(11, 11, true, 0);
 		var text:TextField = new TextField();
 		text.text = "B2";
@@ -140,11 +155,8 @@ class Box2D {
 		drawDebugButton = FlxG.debugger.addButton(RIGHT, icon, function() {
 			drawDebug = !drawDebug;
 		}, true, true);
-		
-		drawDebug = false;
-		
-		#end
 	}
+	#end
 
 	/**
 	 * Creates simple walls around the game area - useful for prototying.
