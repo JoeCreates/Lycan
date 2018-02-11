@@ -1,4 +1,4 @@
-package lycan.world;
+package lycan.phys;
 
 import box2D.collision.B2AABB;
 import box2D.collision.shapes.B2CircleShape;
@@ -18,7 +18,7 @@ import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
-import lycan.world.Box2D.Box2DInteractiveDebug;
+import lycan.world.Phys.Box2DInteractiveDebug;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
@@ -46,12 +46,12 @@ class Box2DInteractiveDebug {
 			if (FlxG.mouse.justPressed) {
 				var bodyAtMouse = getBodyAtMouse();
 				if (bodyAtMouse != null) {
-					_mouseJointDef.bodyA = Box2D.world.getGroundBody();
+					_mouseJointDef.bodyA = Phys.world.getGroundBody();
 					_mouseJointDef.bodyB = bodyAtMouse;
 					_mouseJointDef.target.set(physicsMouseX, physicsMouseY);
 					_mouseJointDef.collideConnected = true;
 					_mouseJointDef.maxForce = 300 * bodyAtMouse.getMass();
-					mouseJoint = cast Box2D.world.createJoint(_mouseJointDef);
+					mouseJoint = cast Phys.world.createJoint(_mouseJointDef);
 					
 					bodyAtMouse.setAwake(true);
 				}
@@ -62,7 +62,7 @@ class Box2DInteractiveDebug {
 					mouseJoint.setTarget(vec2(physicsMouseX, physicsMouseY));
 				}
 				if (FlxG.mouse.justReleased) {
-					Box2D.world.destroyJoint(mouseJoint);
+					Phys.world.destroyJoint(mouseJoint);
 					mouseJoint = null;
 				}
 			}
@@ -73,7 +73,7 @@ class Box2DInteractiveDebug {
 		if(FlxG.keys.pressed.D) {
 			var body = getBodyAtMouse();
 			if (body != null) {
-				Box2D.world.destroyBody(body);
+				Phys.world.destroyBody(body);
 			}
 		}
 	}
@@ -94,7 +94,7 @@ class Box2DInteractiveDebug {
 			}
 			return true;
 		}
-		Box2D.world.queryAABB(getBodyCallback, _aabb);
+		Phys.world.queryAABB(getBodyCallback, _aabb);
 		return body;
 	}
 	
@@ -105,10 +105,10 @@ class Box2DInteractiveDebug {
 		return FlxG.mouse.y;
 	}
 	private function get_physicsMouseX():Float {
-		return mouseX / Box2D.pixelsPerMeter;
+		return mouseX / Phys.pixelsPerMeter;
 	}
 	private function get_physicsMouseY():Float {
-		return mouseY / Box2D.pixelsPerMeter;
+		return mouseY / Phys.pixelsPerMeter;
 	}
 	
 	/** Helpers to reduce object instantiation */
@@ -121,7 +121,7 @@ class Box2DInteractiveDebug {
 	private static var _mouseJointDef:B2MouseJointDef = new B2MouseJointDef();
 }
 
-class Box2D {	
+class Phys {	
 	public static var world:B2World;
 	
 	/** Iterations for resolving velocity (default 10) */
@@ -178,26 +178,26 @@ class Box2D {
 	public static function createRectangularShape(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2PolygonShape {
 		var rect = new B2PolygonShape();
 		
-		var width = pixelWidth / Box2D.pixelsPerMeter;
-		var height = pixelHeight / Box2D.pixelsPerMeter;
+		var width = pixelWidth / Phys.pixelsPerMeter;
+		var height = pixelHeight / Phys.pixelsPerMeter;
 
 		if (width < minimumSize || height < minimumSize) {
 			printSizeWarning();
 		}
 		
-		rect.setAsOrientedBox(width * 0.5, height * 0.5, vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));		
+		rect.setAsOrientedBox(width * 0.5, height * 0.5, vec2(pixelPositionX / Phys.pixelsPerMeter, pixelPositionY / Phys.pixelsPerMeter));		
 		return rect;
 	}
 	
 	public static function createCircleShape(pixelRadius:Float, pixelPositionX:Float = 0, pixelPositionY:Float = 0):B2CircleShape {
-		var radius = pixelRadius / Box2D.pixelsPerMeter;
+		var radius = pixelRadius / Phys.pixelsPerMeter;
 		var circle = new B2CircleShape(radius);
 		
 		if (radius * 2 < minimumSize) {
 			printSizeWarning();
 		}
 		
-		circle.setLocalPosition(vec2(pixelPositionX / Box2D.pixelsPerMeter, pixelPositionY / Box2D.pixelsPerMeter));
+		circle.setLocalPosition(vec2(pixelPositionX / Phys.pixelsPerMeter, pixelPositionY / Phys.pixelsPerMeter));
 		return circle;
 	}
 	
@@ -277,7 +277,7 @@ class Box2D {
 	}
 
 	private static function set_drawDebug(drawDebug:Bool):Bool {
-		if (drawDebug == Box2D.drawDebug) return drawDebug;
+		if (drawDebug == Phys.drawDebug) return drawDebug;
 		
 		#if !FLX_NO_DEBUG
 			if (drawDebug) {
@@ -291,7 +291,7 @@ class Box2D {
 			if (drawDebugButton != null) drawDebugButton.toggled = !drawDebug;
 		#end
 		
-		return Box2D.drawDebug = drawDebug;
+		return Phys.drawDebug = drawDebug;
 	}
 
 	public static function update():Void {

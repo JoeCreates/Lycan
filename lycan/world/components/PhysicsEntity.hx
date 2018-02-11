@@ -14,6 +14,7 @@ import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import lycan.components.Component;
 import lycan.components.Entity;
+import lycan.phys.Phys;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -99,10 +100,10 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		
 		var bd:B2BodyDef = new B2BodyDef();
 		bd.type = bodyType;
-		bd.position.set(entity.entity_x / Box2D.pixelsPerMeter, entity.entity_y / Box2D.pixelsPerMeter);
+		bd.position.set(entity.entity_x / Phys.pixelsPerMeter, entity.entity_y / Phys.pixelsPerMeter);
 		bd.userData = this;
 		bd.bullet = false;
-		body = Box2D.world.createBody(bd);
+		body = Phys.world.createBody(bd);
 		
 		setPixelPosition(entity.entity_x, entity.entity_y);
 		
@@ -165,18 +166,18 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		//}
 		//entity.centerOffsets(false);
 		
-		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight);
+		var rect = Phys.createRectangularShape(pixelWidth, pixelHeight);
 		var fixture = body.createFixture2(rect, density);
 		return fixture;
 	}
 	
 	public function addRectangularShapeAdv(pixelWidth:Float, pixelHeight:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
-		var rect = Box2D.createRectangularShape(pixelWidth, pixelHeight, pixelPositionX, pixelPositionY);
+		var rect = Phys.createRectangularShape(pixelWidth, pixelHeight, pixelPositionX, pixelPositionY);
 		return addFixture(rect, density, filter, friction, isSensor, restitution, userData);
 	}
 	
 	public function addCircleShapeAdv(pixelRadius:Float, pixelPositionX:Float, pixelPositionY:Float, density:Float, filter:B2FilterData, friction:Float, isSensor:Bool, restitution:Float, userData:Dynamic):B2Fixture {
-		var circle = Box2D.createCircleShape(pixelRadius, pixelPositionX, pixelPositionY);
+		var circle = Phys.createCircleShape(pixelRadius, pixelPositionX, pixelPositionY);
 		return addFixture(circle, density, filter, friction, isSensor, restitution, userData);
 	}
 	
@@ -200,14 +201,14 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	
 	//TODO from old flixel. origin is not correct
 	private function updatePosition():Void {
-		entity.entity_x = x * Box2D.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x;
-		entity.entity_y = y * Box2D.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y;
+		entity.entity_x = x * Phys.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x;
+		entity.entity_y = y * Phys.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y;
 	}
 	
 	// TODO enable/disable? :(
 	
 	public function setPixelPosition(x:Float = 0, y:Float = 0):Void {
-		body.setPosition(new B2Vec2(x / Box2D.pixelsPerMeter, y / Box2D.pixelsPerMeter));
+		body.setPosition(new B2Vec2(x / Phys.pixelsPerMeter, y / Phys.pixelsPerMeter));
 		updatePosition();
 	}
 	
