@@ -4,7 +4,7 @@ import haxe.macro.Expr;
 
 /*
 	Originally authord by deepnight
-	
+
 	BASIC USE: (see the static method "demo" for 2 examples)
 		var cm = new Cinematic();
 		cm.create({ INSTRUCTIONS; });
@@ -20,7 +20,7 @@ import haxe.macro.Expr;
 			player.say("Je suis arrivé !");
 			300;
 			player.laugh() > 500;
-			ennemy.move(5,5) > end;
+			enemy.move(5,5) > end;
 			player.die() > 500;
 			ennemy.laugh();
 			1000;
@@ -81,8 +81,6 @@ class Cinematic {
 	public var turbo(default,null)	: Bool; // vaut true pendant un skip()
 	public var onAllComplete		: Null< Void->Void >; // appelé à chaque fois que toutes les cinématiques sont terminées
 
-
-
 	#if (!CinematicDebug && flash)
 	/****************************************************/
 	public static function demo() {
@@ -112,24 +110,23 @@ class Cinematic {
 
 			1000;
 
-			if( true ) {
+			if ( true ) {
 				trace("5 true") > 500;
 				trace("6 true") > 500;
-			}
-			else {
+			} else {
 				trace("5 false") > 500;
 				trace("6 false") > 500;
 			}
 
 			foo = 1;
-			switch( foo ) {
+			switch ( foo ) {
 				case 0 : trace("switch 0") > 500;
 				case 1 : trace("switch 1") > 500 ;
 				case 2 : trace("switch 2") > 500;
 			}
 			trace("after switch") > 500;
 
-			for( i in 0...3 )
+			for ( i in 0...3 )
 				trace("loop "+i) > 500;
 			trace("after loop") > 500;
 		});
@@ -138,16 +135,12 @@ class Cinematic {
 	/****************************************************/
 	#end
 
-
-
-
 	// Private
-	var queues			: Array< Array<CinematicEvent> >;
+	var queues			: Array<Array<CinematicEvent>>;
 	var curQueue		: Null<Array<CinematicEvent>>;
 	var persistSignals	: Map<String,Bool>;
 	var fps				: Int;
 	#end
-
 
 	public function new(?fps=30) {
 		#if !macro
@@ -173,9 +166,9 @@ class Cinematic {
 	}
 
 	static function funName(e:Expr) {
-		switch(e.expr) {
+		switch (e.expr) {
 			case EConst(c) :
-				switch(c) {
+				switch (c) {
 					case CIdent(v) : return v;
 					default :
 				}
@@ -199,7 +192,7 @@ class Cinematic {
 	macro public function chainToLast(ethis:Expr, block:Expr) : Expr {
 		var r = __rchain(ethis, block);
 		r = macro {
-			if( $ethis.isEmpty() )
+			if ( $ethis.isEmpty() )
 				$ethis.__beginNewQueue();
 			$r;
 		}
@@ -207,155 +200,149 @@ class Cinematic {
 	}
 
 	static function __rchain(ethis:Expr, block:Expr) {
-		switch( block.expr ) {
-		case EBlock(el):
-			var exprs = [];
+		switch ( block.expr ) {
+			case EBlock(el):
+				var exprs = [];
 
-			for( e in el ) {
-				var preDelay = null;
-				var postDelay = macro 0;
-				var signal = null;
+				for ( e in el ) {
+					var preDelay = null;
+					var postDelay = macro 0;
+					var signal = null;
 
-				var topLevel = false;
+					var topLevel = false;
 
-				function parseSpecialExpr(de:Expr, strict:Bool) {
-					switch(de.expr) {
-						case ECall(f,params) : // END with signal name
-							if( funName(f)=="end" ) {
-								signal = params[0];
-								return macro null;
-							}
-							else if( strict )
-								error("unsupported expression", de.pos);
-						case EConst(c) :
-							switch(c) {
-								case CIdent(v) : // END general
-									if( v=="end" ) {
-										signal = macro "";
-										return macro null;
-									}
-									else
-										error("unexpected CIdent "+v, de.pos);
+					function parseSpecialExpr(de:Expr, strict:Bool) {
+						switch (de.expr) {
+							case ECall(f,params) : // END with signal name
+								if ( funName(f)=="end" ) {
+									signal = params[0];
+									return macro null;
+								} else if ( strict )
+									error("unsupported expression", de.pos);
+							case EConst(c) :
+								switch (c) {
+									case CIdent(v) : // END general
+										if ( v=="end" ) {
+											signal = macro "";
+											return macro null;
+										} else
+											error("unexpected CIdent "+v, de.pos);
 
-								case CInt(v) : // Time limit
-									postDelay = de;
+									case CInt(v) : // Time limit
+										postDelay = de;
 
-								default :
-									error("unexpected EConst "+c, de.pos);
-							}
-						default :
-							if( strict )
-								error("unsupported expression", de.pos);
-					}
-					return de;
-				}
-
-				function parseChainedMethod(ce:Expr, ?level=0) {
-					switch(ce.expr) {
-						case ECall(_), EConst(_) :
-
-						case EBlock(list) :
-							ce = __rchain(ethis, ce);
-
-						case EWhile(cond, b, classic) :
-							topLevel = true;
-							var mb = __rchain(ethis, b);
-							if( classic )
-								return macro while($cond) $mb;
-							else
-								return macro do {$mb;} while($cond);
-
-						case EVars(_) :
-							error("forbidden variable assignation (using new variable declaration WITHIN a cinematic will lead to unexpected results)", ce.pos);
-						//case EVars(_), EUnop(_), EThrow(_) :
-						case EUnop(_), EThrow(_) :
-							topLevel = true;
-
-						case EFunction(name, f) :
-							topLevel = true;
-							f.expr = __rchain(ethis, f.expr);
-
-						case EFor(it, b) :
-							topLevel = true;
-							b = __rchain(ethis, b);
-							return macro for($it) $b;
-
-						case ESwitch(es, cases, d) :
-							topLevel = true;
-							for( c in cases )
-								c.expr = __rchain(ethis, c.expr);
-							if( d!=null )
-								d = __rchain(ethis, d);
-							ce.expr = ESwitch(es, cases, d);
-
-						case EIf(econd, eif, eelse) : // condition
-							topLevel = true;
-							var mif = __rchain(ethis, eif);
-							if( eelse==null ) {
-								return macro if($econd) {$mif;}
-							}
-							else {
-								var melse = __rchain(ethis, eelse);
-								return macro if($econd) {$mif;} else {$melse;}
-							}
-
-						case EBinop(op,e1,e2):
-							//trace(op);
-							//if( op==OpAssign )
-								//error("assignation is not supported here", e.pos);
-							if( level>0 )
-								error("cannot combine multiple operators > or >>", e2.pos);
-							if( op == OpGt ) { // opérateur ">"
-								topLevel = true;
-								return __rchain( ethis,  macro {$e1; $e2;} );
-							}
-							if( op == OpShr ) { // opérateur ">>"
-								preDelay = e1;
-								switch(e2.expr) {
-									case ECall(_) :
-									default : error("Only function calls are supported here", e2.pos);
+									default :
+										error("unexpected EConst "+c, de.pos);
 								}
-								return parseChainedMethod(e2);
-							}
-
-						default:
-							error(Std.string(ce.expr).split("(")[0]+" is not supported in chain", ce.pos);
+							default :
+								if ( strict )
+									error("unsupported expression", de.pos);
+						}
+						return de;
 					}
-					return ce;
-				}
 
-				e = parseSpecialExpr(e, false);
-				e = parseChainedMethod(e);
-				if( topLevel )
-					exprs.push(e);
-				else
-					if( preDelay!=null )
+					function parseChainedMethod(ce:Expr, ?level=0) {
+						switch (ce.expr) {
+							case ECall(_), EConst(_) :
+
+							case EBlock(list) :
+								ce = __rchain(ethis, ce);
+
+							case EWhile(cond, b, classic) :
+								topLevel = true;
+								var mb = __rchain(ethis, b);
+								if ( classic )
+									return macro while ($cond) $mb;
+								else
+									return macro do {$mb;} while ($cond);
+
+							case EVars(_) :
+								error("forbidden variable assignation (using new variable declaration WITHIN a cinematic will lead to unexpected results)", ce.pos);
+							//case EVars(_), EUnop(_), EThrow(_) :
+							case EUnop(_), EThrow(_) :
+								topLevel = true;
+
+							case EFunction(name, f) :
+								topLevel = true;
+								f.expr = __rchain(ethis, f.expr);
+
+							case EFor(it, b) :
+								topLevel = true;
+								b = __rchain(ethis, b);
+								return macro for ($it) $b;
+
+							case ESwitch(es, cases, d) :
+								topLevel = true;
+								for ( c in cases )
+									c.expr = __rchain(ethis, c.expr);
+								if ( d!=null )
+									d = __rchain(ethis, d);
+								ce.expr = ESwitch(es, cases, d);
+
+							case EIf(econd, eif, eelse) : // condition
+								topLevel = true;
+								var mif = __rchain(ethis, eif);
+								if ( eelse==null ) {
+									return macro if ($econd) {$mif;}
+								} else {
+									var melse = __rchain(ethis, eelse);
+									return macro if ($econd) {$mif;} else {$melse;}
+								}
+
+							case EBinop(op,e1,e2):
+								//trace(op);
+								//if( op==OpAssign )
+								//error("assignation is not supported here", e.pos);
+								if ( level>0 )
+									error("cannot combine multiple operators > or >>", e2.pos);
+								if ( op == OpGt ) { // opérateur ">"
+									topLevel = true;
+									return __rchain( ethis,  macro {$e1; $e2;} );
+								}
+								if ( op == OpShr ) { // opérateur ">>"
+									preDelay = e1;
+									switch (e2.expr) {
+										case ECall(_) :
+										default : error("Only function calls are supported here", e2.pos);
+									}
+									return parseChainedMethod(e2);
+								}
+
+							default:
+								error(Std.string(ce.expr).split("(")[0]+" is not supported in chain", ce.pos);
+						}
+						return ce;
+					}
+
+					e = parseSpecialExpr(e, false);
+					e = parseChainedMethod(e);
+					if ( topLevel )
+						exprs.push(e);
+					else if ( preDelay!=null )
 						exprs.push( macro {
-							$ethis.__add( function() {
-								$ethis.__addParallel( function() { $e; }, $preDelay);
-							}, 0);
-						});
+						$ethis.__add( function() {
+							$ethis.__addParallel( function() { $e; }, $preDelay);
+						}, 0);
+					});
+					else if ( signal!=null )
+						exprs.push(macro $ethis.__add( function() { $e; }, $postDelay, $signal ));
 					else
-						if( signal!=null )
-							exprs.push(macro $ethis.__add( function() { $e; }, $postDelay, $signal ));
-						else
-							exprs.push(macro $ethis.__add( function() { $e; }, $postDelay ));
+						exprs.push(macro $ethis.__add( function() { $e; }, $postDelay ));
 
-			}
-			return {pos:block.pos, expr:EBlock(exprs)};
+				}
+				return {pos:block.pos, expr:EBlock(exprs)};
 			//return macro $a{exprs};
 			//return macro {$[exprs];};
-		default:
-			return __rchain(ethis, macro {$block;});
+			default:
+				return __rchain(ethis, macro {$block;});
 		}
 	}
-
 
 	#if !macro
 
 	public function signal(?s:String) {
-		for( q in queues )
-			if( q.length>0 && (q[0].s==s || q[0].s=="") )
+		for ( q in queues )
+			if ( q.length>0 && (q[0].s==s || q[0].s=="") )
 				runEvent( q.splice(0,1)[0] );
 	}
 
@@ -365,7 +352,7 @@ class Cinematic {
 	}
 
 	@:noCompletion public function __addParallel(cb:Void->Void, t:Int, ?signal:String) {
-		queues.push( [{f:cb, t:fps*t/1000, s:null }] );
+		queues.push( [ {f:cb, t:fps*t/1000, s:null }] );
 	}
 
 	@:noCompletion public function __add(cb:Void->Void, t:Int, ?signal:String) {
@@ -384,14 +371,14 @@ class Cinematic {
 	}
 
 	function runEvent(e:CinematicEvent) {
-		if( e.s!=null )
+		if ( e.s!=null )
 			persistSignals.remove(e.s);
 		e.f();
 	}
 
 	public function skip() {
 		turbo = true;
-		while( queues.length>0 )
+		while ( queues.length>0 )
 			update();
 		turbo = false;
 	}
@@ -404,22 +391,21 @@ class Cinematic {
 
 	public function update() {
 		var i = 0;
-		while( i<queues.length ) {
+		while ( i<queues.length ) {
 			var q = queues[i];
-			if( q.length>0 ) {
+			if ( q.length>0 ) {
 				q[0].t --;
-				while( q.length>0 && q[0].t<=0 && ( turbo || q[0].s==null || persistSignals.get(q[0].s) ) )
+				while ( q.length>0 && q[0].t<=0 && ( turbo || q[0].s==null || persistSignals.get(q[0].s) ) )
 					runEvent( q.splice(0,1)[0] );
 			}
-			if( q.length==0 ) {
+			if ( q.length==0 ) {
 				queues.splice(i,1);
-				if( isEmpty() && onAllComplete!=null )
+				if ( isEmpty() && onAllComplete!=null )
 					onAllComplete();
-			}
-			else
+			} else
 				i++;
 		}
-		if( curQueue!=null && curQueue.length==0 )
+		if ( curQueue!=null && curQueue.length==0 )
 			curQueue = null;
 	}
 
