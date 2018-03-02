@@ -17,6 +17,7 @@ import flixel.util.FlxColor;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.geom.Rectangle;
+import lycan.util.IsoTile;
 
 class GraphicUtil {
 	
@@ -43,37 +44,6 @@ class GraphicUtil {
 		var graph:FlxGraphic = FlxG.bitmap.add(asset);
 		sprite.frames = FlxTileFrames.fromGraphic(graph, FlxPoint.weak(tileWidth, tileHeight));
 		return sprite;
-	}
-	
-	public static function makePlaceholderIsoTile(spr:FlxSprite, width:Int, height:Int, depth:Int, color:FlxColor = FlxColor.WHITE):FlxSprite {
-		var gfxKey:String = "_isoTile" + width + "x" + height + "x" + depth + color.toHexString();
-		if (FlxG.bitmap.get(gfxKey) != null) {
-			spr.loadGraphic(gfxKey);
-			return spr;
-		}
-		
-		spr.makeGraphic(width, height + depth, FlxColor.TRANSPARENT, false, gfxKey);
-		
-		var top:FlxPoint = FlxPoint.get(width / 2, 0);
-		var left:FlxPoint = FlxPoint.get(0, height / 2);
-		var right:FlxPoint = FlxPoint.get(width, height / 2);
-		var bottom:FlxPoint = FlxPoint.get(width / 2, height);
-		var lowerLeft:FlxPoint = FlxPoint.get().copyFrom(left).add(0, depth);
-		var lowerBottom:FlxPoint = FlxPoint.get().copyFrom(bottom).add(0, depth);
-		var lowerRight:FlxPoint = FlxPoint.get().copyFrom(right).add(0, depth);
-		
-		var midColor:FlxColor = color.getDarkened(0.3);
-		var darkColor:FlxColor = color.getDarkened(0.7);
-		darkColor.hue = FlxMath.wrap(Std.int(darkColor.hue) - 20, 0, 360);
-		darkColor.saturation *= 0.8;
-		midColor.hue = FlxMath.wrap(Std.int(midColor.hue) - 10, 0, 360);
-		midColor.saturation *= 0.9;
-		
-		FlxSpriteUtil.drawPolygon(spr, [top, left, bottom, right], color);
-		FlxSpriteUtil.drawPolygon(spr, [left, bottom, lowerBottom, lowerLeft], darkColor);
-		FlxSpriteUtil.drawPolygon(spr, [right, lowerRight, lowerBottom, bottom], midColor);
-		
-		return spr;
 	}
 	
 	/**
@@ -107,6 +77,7 @@ class GraphicUtil {
 		
 		source.setPixels(sourceRect, sourceBytes);
 	}
+	
 	
 	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int, frameCount:Int = 1, color:FlxColor = FlxColor.WHITE):Void {
 		var bitmap:BitmapData = new BitmapData(width * frameCount, height, true, color);

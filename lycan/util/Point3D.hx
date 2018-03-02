@@ -31,6 +31,10 @@ class Point3D implements IFlxPooled {
 	private var _weak:Bool = false;
 	private var _inPool:Bool = false;
 	
+	public var x:Float;
+	public var y:Float;
+	public var z:Float;
+	
 	public var length(get, null):Float;
 	public var lengthSquared (get, null):Float;
 	
@@ -40,7 +44,7 @@ class Point3D implements IFlxPooled {
 		this.z = z;
 	}
 	
-	public function crossProduct(a:Point3D):Void {
+	public function crossProduct(a:Point3D):Point3D {
 		x = y * a.z - z * a.y;
 		y = z * a.x - x * a.z;
 		z = x * a.y - y * a.x;
@@ -61,7 +65,7 @@ class Point3D implements IFlxPooled {
 	public inline function add(x:Float = 0, y:Float = 0, z:Float = 0):Point3D {
 		this.x += x;
 		this.y += y;
-		this.x += z;
+		this.z += z;
 		return this;
 	}
 	
@@ -73,7 +77,7 @@ class Point3D implements IFlxPooled {
 		return add(a.x, a.y, a.z);
 	}
 	
-	public function subtractPoint():Point3D {
+	public function subtractPoint(a:Point3D):Point3D {
 		return subtract(a.x, a.y, a.z);
 	}
 	
@@ -88,6 +92,7 @@ class Point3D implements IFlxPooled {
 		x = Math.ffloor(x);
 		y = Math.ffloor(y);
 		z = Math.ffloor(z);
+		return this;
 	}
 	
 	public function copyFrom(p:Point3D):Point3D {
@@ -99,7 +104,7 @@ class Point3D implements IFlxPooled {
 	}
 	
 	public function copyTo(p:Point3D):Point3D {
-		p.copyFrom(this);
+		return p.copyFrom(this);
 	}
 	
 	public function scale(scale):Point3D {
@@ -115,12 +120,12 @@ class Point3D implements IFlxPooled {
 	}
 	
 	public function angleBetween(p:Point3D):Float {
-		var la = length;
-		var lb = b.length;
-		var dot = a.dotProduct(b);
+		var l = length;
+		var pl = p.length;
+		var dot = p.dotProduct(p);
 		
-		if (la != 0) dot /= length;
-		if (lb != 0) dot /= b.length;
+		if (l != 0) dot /= l;
+		if (pl != 0) dot /= pl;
 		
 		return Math.acos(dot);
 	}
