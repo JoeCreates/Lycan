@@ -1,10 +1,11 @@
-package lycan.util;
+package lycan.game3D;
 
 import flash.geom.Point;
 import flixel.util.FlxPool;
 import flixel.util.FlxPool.IFlxPooled;
 import flixel.util.FlxStringUtil;
 import openfl.geom.Matrix;
+import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
 
 class Point3D implements IFlxPooled {
@@ -45,10 +46,10 @@ class Point3D implements IFlxPooled {
 	}
 	
 	public function crossProduct(a:Point3D):Point3D {
-		x = y * a.z - z * a.y;
-		y = z * a.x - x * a.z;
-		z = x * a.y - y * a.x;
-		return this;
+		var nx = y * a.z - z * a.y;
+		var ny = z * a.x - x * a.z;
+		var nz = x * a.y - y * a.x;
+		return set(nx, ny, nz);
 	}
 	
 	public function dotProduct(a:Point3D):Float {
@@ -88,10 +89,10 @@ class Point3D implements IFlxPooled {
 		return this;
 	}
 	
-	public function floor():Point3D {
-		x = Math.ffloor(x);
-		y = Math.ffloor(y);
-		z = Math.ffloor(z);
+	public function floor(floorX:Bool = true, floorY:Bool = true, floorZ:Bool = true):Point3D {
+		if (floorX) x = Math.ffloor(x);
+		if (floorY) y = Math.ffloor(y);
+		if (floorZ) z = Math.ffloor(z);
 		return this;
 	}
 	
@@ -107,7 +108,7 @@ class Point3D implements IFlxPooled {
 		return p.copyFrom(this);
 	}
 	
-	public function scale(scale):Point3D {
+	public function scale(scale:Float):Point3D {
 		return this.set(x * scale, y * scale, z * scale);
 	}
 	
@@ -122,7 +123,7 @@ class Point3D implements IFlxPooled {
 	public function angleBetween(p:Point3D):Float {
 		var l = length;
 		var pl = p.length;
-		var dot = p.dotProduct(p);
+		var dot = dotProduct(p);
 		
 		if (l != 0) dot /= l;
 		if (pl != 0) dot /= pl;
@@ -154,6 +155,14 @@ class Point3D implements IFlxPooled {
 		return this;
 	}
 	
+	public function transform(m:Matrix3D):Point3D {
+		var rawData = m.rawData;
+		return
+			set((x * rawData[0] + y * rawData[4] + z * rawData[8] + rawData[12]),
+			(x * rawData[1] + y * rawData[5] + z * rawData[9] + rawData[13]),
+			(x * rawData[2] + y * rawData[6] + z * rawData[10] + rawData[14]));
+	}
+	
 	public function put():Void {
 		if (!_inPool) {
 			_inPool = true;
@@ -164,6 +173,14 @@ class Point3D implements IFlxPooled {
 	
 	public inline function putWeak():Void {
 		if (_weak) put();
+	}
+	
+	public inline function toString():String {
+		return FlxStringUtil.getDebugString([ 
+			LabelValuePair.weak("x", x),
+			LabelValuePair.weak("y", y),
+			LabelValuePair.weak("z", z)
+			]);
 	}
 	
 	public function destroy() {}

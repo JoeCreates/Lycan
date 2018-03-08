@@ -17,7 +17,6 @@ import flixel.util.FlxColor;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.geom.Rectangle;
-import lycan.util.IsoTile;
 
 class GraphicUtil {
 	

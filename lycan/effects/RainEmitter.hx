@@ -21,7 +21,7 @@ import flixel.system.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.helpers.FlxBounds;
 import lycan.util.ImageLoader;
-import lycan.components.entities.CameraEmitter;
+import lycan.entities.CameraEmitter;
 import lycan.util.MathUtil;
 import lycan.util.ParallaxUtil;
 

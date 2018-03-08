@@ -1,4 +1,4 @@
-package lycan.components.entities;
+package lycan.entities;
 
 import flixel.effects.particles.FlxEmitter;
 import lycan.components.CameraAttachable;
