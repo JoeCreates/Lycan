@@ -2,10 +2,10 @@ package lycan.leaderboards;
 
 #if gamecircleleaderboards
 
-import extension.gamecircle.gc.GameCircleListener;
-import extension.gamecircle.gc.GamesClient;
+import extension.gamecircle.GameCircleListener;
+import extension.gamecircle.GamesClient;
 import extension.gamecircle.GameCircle;
-import extension.gamecircle.gc.PopUpLocation;
+import extension.gamecircle.PopUpLocation;
 
 class GameCircleLeaderboards {
 	public static var get(default, never):GameCircleLeaderboards = new GameCircleLeaderboards();
