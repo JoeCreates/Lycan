@@ -40,6 +40,26 @@ class Box2DInteractiveDebug {
 		handleKeys();
 	}
 	
+	public function getBodyAtMouse():B2Body {
+		// Make a small box around the mouse position
+		var mousePVec = vec2(physicsMouseX, physicsMouseY);
+		_aabb.lowerBound.set(physicsMouseX - 0.001, physicsMouseY - 0.001);
+		_aabb.upperBound.set(physicsMouseX + 0.001, physicsMouseY + 0.001);
+		var body:B2Body = null;
+		
+		// Query the world for overlapping shapes
+		var getBodyCallback = function(fixture:B2Fixture):Bool {
+			var shape:B2Shape = fixture.getShape();
+			if (shape.testPoint(fixture.getBody().getTransform(), mousePVec)) {
+				body = fixture.getBody();
+				return false;
+			}
+			return true;
+		}
+		Phys.world.queryAABB(getBodyCallback, _aabb);
+		return body;
+	}
+	
 	private function handleMouse():Void {
 		if (mouseJoint == null) {
 			if (FlxG.mouse.justPressed) {
@@ -77,26 +97,6 @@ class Box2DInteractiveDebug {
 		}
 	}
 	
-	private function getBodyAtMouse():B2Body {
-		// Make a small box around the mouse position
-		var mousePVec = vec2(physicsMouseX, physicsMouseY);
-		_aabb.lowerBound.set(physicsMouseX - 0.001, physicsMouseY - 0.001);
-		_aabb.upperBound.set(physicsMouseX + 0.001, physicsMouseY + 0.001);
-		var body:B2Body = null;
-		
-		// Query the world for overlapping shapes
-		var getBodyCallback = function(fixture:B2Fixture):Bool {
-			var shape:B2Shape = fixture.getShape();
-			if (shape.testPoint(fixture.getBody().getTransform(), mousePVec)) {
-				body = fixture.getBody();
-				return false;
-			}
-			return true;
-		}
-		Phys.world.queryAABB(getBodyCallback, _aabb);
-		return body;
-	}
-	
 	private function get_mouseX():Float {
 		return FlxG.mouse.x;
 	}
@@ -120,7 +120,7 @@ class Box2DInteractiveDebug {
 	private static var _mouseJointDef:B2MouseJointDef = new B2MouseJointDef();
 }
 
-class Phys {	
+class Phys {
 	public static var world:B2World;
 	
 	/** Iterations for resolving velocity (default 10) */
@@ -184,7 +184,7 @@ class Phys {
 			printSizeWarning();
 		}
 		
-		rect.setAsOrientedBox(width * 0.5, height * 0.5, vec2(pixelPositionX / Phys.pixelsPerMeter, pixelPositionY / Phys.pixelsPerMeter));		
+		rect.setAsOrientedBox(width * 0.5, height * 0.5, vec2(pixelPositionX / Phys.pixelsPerMeter, pixelPositionY / Phys.pixelsPerMeter));
 		return rect;
 	}
 	
@@ -198,14 +198,6 @@ class Phys {
 		
 		circle.setLocalPosition(vec2(pixelPositionX / Phys.pixelsPerMeter, pixelPositionY / Phys.pixelsPerMeter));
 		return circle;
-	}
-	
-	public static function addWalls(thickness:Float = 50):Void {		
-		var width = FlxG.width;
-		var height = FlxG.height;
-		
-		var wall:B2PolygonShape= new B2PolygonShape();
-		var wallBd:B2BodyDef = new B2BodyDef();
 	}
 	
 	private static function printSizeWarning():Void {
