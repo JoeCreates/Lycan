@@ -56,6 +56,7 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	
 	/** Helper vec2 to reduce object instantiation */
 	private static var _vec2:B2Vec2 = new B2Vec2();
+	private static var _vec2b:B2Vec2 = new B2Vec2();
 	
 	public var linearVelocityX(get, set):Float;
 	private function get_linearVelocityX():Float return body.getLinearVelocity().x;
@@ -210,6 +211,13 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	public function setPixelPosition(x:Float = 0, y:Float = 0):Void {
 		body.setPosition(vec2(x / Phys.pixelsPerMeter, y / Phys.pixelsPerMeter));
 		updatePosition();
+	}
+	
+	public function applyImpulse(impulseX:Float, impulseY:Float, ?x:Float, ?y:Float):Void {
+		if (x == null) x = this.x;
+		if (y == null) y = this.y;
+		_vec2b.set(x, y);
+		body.applyImpulse(vec2(impulseX, impulseY), _vec2b);
 	}
 	
 	private static inline function vec2(x:Float, y:Float):B2Vec2 {
