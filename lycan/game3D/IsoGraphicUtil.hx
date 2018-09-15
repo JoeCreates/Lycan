@@ -15,7 +15,7 @@ import flixel.util.FlxSpriteUtil;
 import lycan.game3D.components.Position3D;
 import lycan.game3D.Point3D;
 
-class IsoGraphic {
+class IsoGraphicUtil {
 	public static function makeBox(spr:FlxSprite, iso:IsoProjection, box:IsoBox,
 		colorTop:FlxColor = FlxColor.WHITE, ?colorLeft:FlxColor, ?colorRight:FlxColor):FlxSprite
 	{
@@ -64,9 +64,6 @@ class IsoGraphic {
 		}
 		
 		spr.makeGraphic(Std.int(maxX - minX), Std.int(maxY - minY), FlxColor.TRANSPARENT, true);
-		
-		spr.offset.y = -minY;
-		spr.offset.x = -minX;
 		
 		//TODO split into triangles?
 		//TODO better lighting + specular

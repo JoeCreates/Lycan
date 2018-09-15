@@ -37,7 +37,7 @@ class BatchScreenGrab {
 			#if next
 			Lib.application.window.resize(Std.int(originalResolution.x), Std.int(originalResolution.y));
 			#else
-			Lib.current.stage.resize(Std.int(originalResolution.x), Std.int(originalResolution.y));
+			//Lib.current.stage.resize(Std.int(originalResolution.x), Std.int(originalResolution.y));
 			#end
 			return;
 		}
@@ -46,7 +46,7 @@ class BatchScreenGrab {
 			#if next
 			Lib.application.window.resize(Std.int(resolutions[currentScreenshot].x), Std.int(resolutions[currentScreenshot].y));
 			#else
-			Lib.current.stage.resize(Std.int(resolutions[currentScreenshot].x), Std.int(resolutions[currentScreenshot].y));
+			//Lib.current.stage.resize(Std.int(resolutions[currentScreenshot].x), Std.int(resolutions[currentScreenshot].y));
 			#end
 		} else {
 			saveScreenshot();

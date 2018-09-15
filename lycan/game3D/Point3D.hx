@@ -109,7 +109,11 @@ class Point3D implements IFlxPooled {
 	}
 	
 	public function scale(scale:Float):Point3D {
-		return this.set(x * scale, y * scale, z * scale);
+		return set(x * scale, y * scale, z * scale);
+	}
+	
+	public function entrywiseProduct(p:Point3D):Point3D {
+		return set(x * p.x, y * p.y, z * p.z);
 	}
 	
 	public function distanceTo(p:Point3D):Float {

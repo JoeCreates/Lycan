@@ -35,6 +35,8 @@ class CameraSprite extends FlxSprite {
 		if (FlxG.renderTile) {
 			sourceCamera.clearDrawStack();
 			sourceCamera.canvas.graphics.clear();
+		} else {
+			sourceCamera.fill(0, false);
 		}
 		group.draw();
 		if (FlxG.renderTile) {

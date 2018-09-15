@@ -5,11 +5,13 @@ import lycan.game3D.DirectionMask3D;
 import lycan.game3D.Box;
 import lycan.game3D.components.Position3D;
 import lycan.game3D.Point3D;
+import lycan.components.Entity;
+import lycan.components.Component;
 
 interface Physics3D extends Entity {
 	public var phys:Physics3DComponent;
 	public var pos3D:Position3DComponent;
-	//@:relaxed public var exists(get, set):Bool;
+	@:relaxed public var exists(get, set):Bool;
 }
 
 @:tink

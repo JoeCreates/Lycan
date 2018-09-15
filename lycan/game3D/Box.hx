@@ -48,6 +48,9 @@ class Box implements IFlxPooled {
 	@:calc var maxX:Float = pos.x + width;
 	@:calc var maxY:Float = pos.y + height;
 	@:calc var maxZ:Float = pos.z + depth;
+	@:calc var midX:Float = pos.x + width / 2;
+	@:calc var midY:Float = pos.y + height / 2;
+	@:calc var midZ:Float = pos.z + depth / 2;
 	
 	public function new(x:Float = 0, y:Float = 0, z:Float = 0, w:Float = 0, h:Float = 0, d:Float = 0) {
 		pos = Point3D.get(x, y, z);

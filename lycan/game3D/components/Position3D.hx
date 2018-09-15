@@ -1,6 +1,8 @@
-package lycan.game3D.components;
+package lycan.game3D.components;
 
 import lycan.game3D.Point3D;
+import lycan.components.Entity;
+import lycan.components.Component;
 
 interface Position3D extends Entity {
 	public var pos3D:Position3DComponent;

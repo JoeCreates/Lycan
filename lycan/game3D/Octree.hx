@@ -222,7 +222,7 @@ class Octree extends Box {
 		// Add an object
 		else {
 			_object = (cast objectOrGroup:Physics3D).phys;
-			if (_object.exists && _object.allowCollisions != FlxObject.NONE) {
+			if (_object.entity.exists && _object.allowCollisions != FlxObject.NONE) {
 				_objectMinX = _object.hitBox.minX;
 				_objectMaxX = _object.hitBox.maxX;
 				_objectMinY = _object.hitBox.minY;
@@ -350,7 +350,7 @@ class Octree extends Box {
 				} else {
 					_iterator = iterator.next;
 				}
-				if (_object != null && _object.exists && _object.allowCollisions > 0 &&
+				if (_object != null && _object.entity.exists && _object.allowCollisions > 0 &&
 						_iterator != null && _iterator.object != null && overlapNode()) {
 					overlapProcessed = true;
 				}
@@ -390,11 +390,11 @@ class Octree extends Box {
 
 		//Walk the list and check for overlaps
 		var overlapProcessed:Bool = false;
-		var checkObject:FlxObject;
+		var checkObject:Physics3D;
 
 		while (_iterator != null) {
 			checkObject = _iterator.object;
-			if (_object == checkObject || !checkObject.exists || checkObject.allowCollisions <= 0) {
+			if (_object == checkObject || !checkObject.entity.exists || checkObject.allowCollisions <= 0) {
 				_iterator = _iterator.next;
 				continue;
 			}

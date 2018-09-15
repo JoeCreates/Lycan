@@ -5,7 +5,7 @@ import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
-import lycan.components.IsoEntity;
+import lycan.game3D.components.IsoEntity;
 import lycan.game3D.components.Position3D;
 import lycan.game3D.Point3D;
 
@@ -50,17 +50,23 @@ class IsoProjection {
 	}
 	
 	public function sortByDepth(group:FlxTypedGroup<FlxObject>):Void {
-		group.sort(byDepth, FlxSort.DESCENDING);
+		//group.sort(byDepth, FlxSort.DESCENDING);
 	}
 	
-	public static function byDepth(order:Int, oo1:FlxObject, oo2:FlxObject):Int {
-		var o1:IsoEntity = cast oo1;
-		var o2:IsoEntity = cast oo2;
-		//o1.iso.
-		var orderout = FlxSort.byValues(order, o1.pos3D.z, o2.pos3D.z);
-		if (orderout != 0) return orderout;
-		var o1xy:Float = o1.pos3D.x + o1.pos3D.y;
-		var o2xy:Float = o2.pos3D.x + o2.pos3D.y;
-		return FlxSort.byValues(order, o1xy, o2xy) * -1;
+	public static function byDepth(oo1:FlxObject, oo2:FlxObject):Int {
+		var o1:IsoTile = cast oo1;
+		var o2:IsoTile = cast oo2;
+		
+		// TODO this is a mess, doesnt use sprites iso
+		// Also need to remove 3d z
+		var p1:FlxPoint = FlxPoint.get();
+		var p2:FlxPoint = FlxPoint.get();
+		var p3d:Point3D = Point3D.get();
+		var o1xy:Float = iso.toCart(p1, p3d.copyFrom(o1.pos3D.point).addPoint(o1.parent.pos3D.point)).y - (o1.pos3D.z + o1.parent.pos3D.z) * iso.depth;
+		var o2xy:Float = iso.toCart(p2, p3d.copyFrom(o2.pos3D.point).addPoint(o2.parent.pos3D.point)).y - (o2.pos3D.z + o2.parent.pos3D.z) * iso.depth;
+		p1.put();
+		p2.put();
+		p3d.put();
+		return FlxSort.byValues(FlxSort.ASCENDING, o1xy, o2xy);
 	}
 }
