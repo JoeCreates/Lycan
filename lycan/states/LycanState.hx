@@ -107,7 +107,7 @@ class LycanState extends FlxSubState {
 		if (zoomTween != null) {
 			zoomTween.cancel();
 		}
-		zoomTween = FlxTween.tween(this, { worldZoom: zoom }, duration, { type: FlxTween.ONESHOT, ease: ease } );
+		zoomTween = FlxTween.tween(this, { worldZoom: zoom }, duration, { type: FlxTweenType.ONESHOT, ease: ease } );
 		return zoomTween;
 	}
 
