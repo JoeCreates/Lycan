@@ -1,33 +1,20 @@
 package lycan.states;
 
-import flixel.FlxCamera;
-import flixel.FlxG;
 import flixel.FlxState;
-import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import haxe.io.Path;
-import lycan.ui.core.DebugRenderer;
-import lycan.ui.core.UIApplicationRoot;
-import lycan.util.screenshot.BatchScreenGrab;
-import openfl.events.KeyboardEvent;
+import lycan.util.BatchScreenGrab;
 import openfl.Lib;
+import openfl.events.KeyboardEvent;
 
 class LycanRootState extends FlxState {
 	
 	public static var get:LycanRootState;
 	
-	public var uiRoot(default, null) = new UIApplicationRoot();
-	
-	#if debug
-	//private var	debugUiRenderer:DebugRenderer;
-	//private var stateStackText:FlxSpriteGroup;
-	#end
-
 	private function new() {
 		super();
 		
+		// TODO move this somewhere better
 		#if (debug && cpp && enablesceenshots)
 			// Batch screenshots
 			Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, function(evt:KeyboardEvent) {
@@ -58,49 +45,14 @@ class LycanRootState extends FlxState {
 
 	override public function create():Void {
 		super.create();
-
-		#if debug	//TODO I think this stuff was making things very slow	
-		//debugUiRenderer = new DebugRenderer(uiRoot);
-		//stateStackText = new FlxSpriteGroup();
-		//stateStackText.scrollFactor.set(0, 0);
-		//
-		//FlxG.signals.postDraw.add(debugPostDraw);
-		#end
 		
 		// Set static reference to this root state
 		LycanRootState.get = this;
 	}
 
 	override public function destroy():Void {
-		//#if debug TODO
-		//FlxG.signals.postDraw.remove(debugPostDraw);
-		//#end
 		super.destroy();
 	}
-	
-	//#if debug
-	//private function updateStateVisualisation():Void {
-		//stateStackText.clear();
-		//
-		//var y = 0;
-		//var makeText = function(o:Dynamic):FlxText {
-			//var str = Type.getClassName(Type.getClass(o));
-			//var text = new FlxText(0, y, 0, str, 16);
-			//text.color = FlxColor.WHITE;
-			//text.borderSize = 1;
-			//text.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 2);
-			//y += 30;
-			//return text;
-		//}
-		//
-		//var child = subState;
-		//stateStackText.add(makeText(this));
-		//while (child != null) {
-			//stateStackText.add(makeText(child));
-			//child = child.subState;
-		//}
-	//}
-	//#end
 	
 	// Returns the first state of type T in the state stack, throws if there isn't one of that type
 	public static function getFirstStateOfType<T>(type:Class<T>):T {
@@ -116,13 +68,4 @@ class LycanRootState extends FlxState {
 
 		throw "Failed to find a substate of type " + Type.getClassName(type) + " in current states...";
 	}
-
-	#if debug
-	// TODO this is super slow, perhaps add another flag to enable?
-	//private function debugPostDraw():Void {
-		//debugUiRenderer.draw();
-		//updateStateVisualisation();
-		//stateStackText.draw();
-	//}
-	#end
 }

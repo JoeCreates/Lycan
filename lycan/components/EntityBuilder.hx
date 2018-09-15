@@ -1,22 +1,24 @@
-package components;
+package lycan.components;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.ExprTools;
+import haxe.macro.Printer;
 import haxe.macro.Type;
 import haxe.macro.TypeTools;
 import tink.macro.ClassBuilder;
 import tink.macro.Exprs;
+import tink.macro.Member;
 import tink.macro.Types;
 
-import components.Component;
+using tink.MacroApi;
 
 /**
  * TODO
  * - Remove need to override new (will need to add a new field to classes that miss one)
- * - Add append and prepend metadatas to inject method calls into entity methods
  * - Identify component field with metadata? Not sure about this one.
- * - Allow dummy fields to be named in metadata
+ * - Allow dummy fields to be named in metadata (instead of default "entity_")
+ * 
  * 
  * Documentation
  * Using append to destroy components in entity's detroy method
@@ -25,9 +27,20 @@ import components.Component;
 
 class EntityBuilder {
 	
-	public static var packagePath:Array<String> = ["components"];
+	public static var packagePath:Array<String> = ["lycan", "components"];
 	public static var entityPath:TypePath = {pack: packagePath, name: "Entity"};
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
+	
+	/** change this to get conditional output when building */
+	static function shouldTrace() {return false;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
+	
+	/** Conditional trace for debugging */
+	static function traceIf(string:String):Void {
+		#if debug
+			if (!shouldTrace()) return;
+			trace(string);
+		#end
+	}
 	
 	public static function build():Array<Field> {
 		var fields:Array<Field> = Context.getBuildFields();
@@ -49,6 +62,7 @@ class EntityBuilder {
 				if (rt.get().isInterface)
 					return buildComponentInterface(classType, fields);
 				else 
+					traceIf("Building class " + classType.name);
 					return buildComponentClass(classType, fields);
 			case _:
 				return fields;
@@ -83,11 +97,14 @@ class EntityBuilder {
 		// Get list of interfaces on this class which extend Entity
 		var componentInterfaces:Array<ClassType> = getComponentInterfaces();
 		
+		traceIf("Has components: " + componentInterfaces.map(function(c){return c.name; }));
+		traceIf("Build fields: " + fields.map(function(f){return f.name; }));
+		
 		// Add components field
-		if (!hasField(classType, "components")) {
+		if (!hasFieldIncludingBuildFields(classType, "components", fields)) {
 			var c = macro class {
 				// TODO make it possible to customise this name
-				public var components:Array<components.Component<Dynamic>> = [];
+				public var components:Array<lycan.components.Component<Dynamic>>;
 			}
 			fields.push(c.fields[0]);
 		}
@@ -96,8 +113,10 @@ class EntityBuilder {
 		// for each field that isn't the component field
 		for (dummyField in getDummyPropertyFields(componentInterfaces)) {
 			
+			traceIf("Dummy field: " + dummyField.name);
+			
 			// Skip adding dummy field if class already has field with the same name
-			if (hasField(classType, dummyField.name)) {
+			if (hasFieldIncludingBuildFields(classType, dummyField.name, fields)) {
 				continue;
 			}
 			
@@ -116,7 +135,7 @@ class EntityBuilder {
 			
 			// Check we actually have a field for the dummy field to refer to
 			var dummySourceFieldName:String = dummyField.name.substring(7, dummyField.name.length);
-			if (!hasField(classType, dummySourceFieldName)) {
+			if (!hasFieldIncludingBuildFields(classType, dummySourceFieldName, fields)) {
 				throw("Field " + dummySourceFieldName + " ("+ dummyField.name+") required by component interface is missing in " + classType.name);
 			}
 			
@@ -154,14 +173,17 @@ class EntityBuilder {
 		
 		// Prepend component instantiation to constructor
 		var componentFields:Map<String, {field:ClassField, componentInterface:ClassType}> = getComponentFields(componentInterfaces);
-		
-		var prependComponentInstantiation:Expr->TypePath->Expr = function(e:Expr, c:TypePath) {
+		traceIf("Component fields: " + [for (f in componentFields) f.field.name]);
+
+		var makeComponent:TypePath->Expr = function(c:TypePath) {
 			var field = componentFields.get(c.name).field;
-			if (hasField(classType, field.name)) {
+			if (hasFieldIncludingBuildFields(classType, field.name, fields)) {
 				throw("Class " + classType.pack + "." + classType.name + " has field " +
 					field.name + ", which must not be declared as it is required by " + c.name);
 			}
 			
+			traceIf("Adding component field: " + field.name);
+
 			// If we do not have a field for the component, create one
 			fields.push({
 				name: field.name,
@@ -174,36 +196,46 @@ class EntityBuilder {
 			
 			return macro {
 				$i{field.name} = new $c(this);
-				components.push($i{field.name});// TODO is the components array useful?
-				${e};
+				if (components == null) components = [];
+				components.push($i{field.name});// TODO make map?
 			}
 		}
 		
-		// TODO potential big issue here because superclass needs to be built before subclasses
-		for (field in fields) {
-			switch (field.kind) {
-				// In the constructor...
-				case FFun(func) if (field.name == "new"):
-					// For each component field, add if it hasn't been added by a superclass
-					for (componentField in componentFields) {
-						if (classType.superClass != null) {
-							// Do not re-add components that have already been added by a superclass
-							if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
-								continue;
-							}
-						}
-						// Finally, add the component instantation
-						func.expr = prependComponentInstantiation(func.expr,
-							{pack: componentField.componentInterface.pack, name: TypeTools.getClass(componentField.field.type).name} );
-					}
-				case _:
+		var cb:ClassBuilder = new ClassBuilder();
+		var hadConstructor:Bool = cb.hasConstructor();
+		var constructor:Constructor = cb.getConstructor();
+		
+		// For each component field, add if it hasn't been added by a superclass
+		for (componentField in componentFields) {
+			traceIf("checking component field: " + componentField.field.name);
+			if (classType.superClass != null) {
+				// Do not re-add components that have already been added by a superclass
+				if (hasAddedComponent(classType.superClass.t.get(), getTypePath(componentField.componentInterface))) {
+					continue;
+				}
+			}
+			// Finally, add the component instantation
+			var cType:ClassType = TypeTools.getClass(componentField.field.type);
+			constructor.addStatement(makeComponent({pack: componentField.componentInterface.pack, name: cType.name}), true);
+		}
+		
+		if (hadConstructor) {
+			for (field in fields) {
+				if (field.name == "new") {
+					fields.remove(field);
+					break;
+				}
 			}
 		}
+		
+		fields.push(constructor.toHaxe());
+		
+		
+		
 		
 		// Handle :append and :prepend metadata
-		//TODO
 		// Once we've found the "component field", for each of its fields look for the :prepend and :append metadata then handle them
-		// For the mofidied field, use findField to see if it already exists
+		// For the modified field, use findField to see if it already exists
 		// If it does exist, check if it is in the current class in order to determine if override should be marked
 		// Check the metadata for arguments(
 		// For each component
@@ -211,7 +243,7 @@ class EntityBuilder {
 			var componentClass:ClassType = TypeTools.getClass(componentField.field.type);
 			// For each field in the component, look for the metadata
 			for (field in componentClass.fields.get()) {
-				var meta:MetadataEntry;
+				var meta:MetadataEntry; 
 				if (field.meta.has(":prepend")) {
 					meta = field.meta.extract(":prepend")[0];
 				} else if (field.meta.has(":append")) {
@@ -220,20 +252,12 @@ class EntityBuilder {
 					continue;
 				}
 				
-				var componentFuncArgs:Array<{t:Type, opt:Bool, name:String}>;
-				switch (Types.reduce(field.type)) {
-					case TFun(args, _):
-						componentFuncArgs = args;
-					case _:
-						throw("Prepend/append metadata may only be used on a function");
-				}
-				
 				if (meta.params.length != 1) {
 					throw("Prepend/append metadata must have exactly one parameter");
 				}
 				var targetMethodName:String = ExprTools.getValue(meta.params[0]);
 				var targetFunc:Function = null;
-					
+				
 				// Find the entity field that requires code injection
 				for (field in fields) {
 					switch (field.kind) {
@@ -243,9 +267,34 @@ class EntityBuilder {
 					}
 				}
 				
-				// Error if there is no such field
+				// If target function isn't in the entity...
 				if (targetFunc == null) {
-					throw(classType.name + " has no function " + targetMethodName + ", required by " + componentClass.name);
+					// Try to get it from a super class
+					var targetField:ClassField = getField(classType, targetMethodName);
+					
+					// If it's not in a super class, throw an error
+					if (targetField == null) {
+						throw(classType.name + " has no function " + targetMethodName +
+							", required by " + componentClass.name);
+					}
+					
+					// Get the super function
+					var func:Function;
+					switch (Context.getTypedExpr(targetField.expr()).expr) {
+						case EFunction(_, f): func = f;
+						case _:
+							throw("Tried to override " + targetMethodName + ", but it is not a function");
+					}
+					
+					// Create the super call expression
+					func.expr = ("super." + targetMethodName).resolve().call(func.getArgIdents());
+					
+					// Override the function
+					var mem:Member = Member.method(targetMethodName, null, null, func);
+					mem.overrides = true;
+					fields.push(mem);
+					
+					targetFunc = func;
 				}
 				
 				// Create the method call expressions
@@ -257,7 +306,6 @@ class EntityBuilder {
 				var componentFuncName:String = field.name;
 				var expr = {pos: Context.currentPos(), expr: ECall(macro $i{componentField.field.name}.$componentFuncName, params)};
 				
-				trace("append or prepend?" + meta.name);
 				targetFunc.expr = switch(meta.name) {
 					case ":prepend":
 						macro {
@@ -273,6 +321,7 @@ class EntityBuilder {
 			}
 		}
 		
+		traceIf("Final fields: " + fields.map(function(f){return f.name; }));
 		return fields;
 	}
 	
@@ -312,7 +361,6 @@ class EntityBuilder {
 				case _:
 			}
 		}
-		
 		return fields;
 		
 	}
@@ -360,7 +408,7 @@ class EntityBuilder {
 					case _:
 				}
 			} else {
-				throw("Component interface " + i.name + " is missing a field for the component");
+				throw("Component interface " + i.name + " is missing field for the component");
 			}
 		}
 		return componentFields;
@@ -384,20 +432,40 @@ class EntityBuilder {
 		return null;
 	}
 	
+	
+	/** Recursively check if build field or inherited field */
+	public static function hasFieldIncludingBuildFields(type:ClassType, fieldName:String, fields:Array<Field>):Bool {
+		for (field in fields) {
+			// Check if this Field is the required field
+			if (field.name == fieldName) {
+				return true;
+			}
+		}
+		// If not, check the super class if there is one
+		if (type.superClass != null) {
+			return hasField(type.superClass.t.get(), fieldName);
+		}
+		return false;
+	}
+	
 	/** Recursively check if given ClassType has a field */
-    public static function hasField(type:ClassType, fieldName:String):Bool {
-        for (field in type.fields.get()) {
-            // Check if this Field is the required field
-            if (field.name == fieldName) {
-                return true;
-            }
-        }
-        // If not, check the super class if there is one
-        if (type.superClass != null) {
-            return hasField(type.superClass.t.get(), fieldName);
-        }
-        return false;
-    }
+	public static function hasField(type:ClassType, fieldName:String):Bool {
+		return getField(type, fieldName) != null;
+	}
+		
+	public static function getField(type:ClassType, fieldName:String):ClassField {
+		for (field in type.fields.get()) {
+			// Check if this Field is the required field
+			if (field.name == fieldName) {
+				return field;
+			}
+		}
+		// If not, check the super class if there is one
+		if (type.superClass != null) {
+			return getField(type.superClass.t.get(), fieldName);
+		}
+		return null;
+	}
 	
 	/** Recursively check if given interface has a field */
 	public static function interfaceHasField(i:ClassType, fieldName:String):Bool {
@@ -489,6 +557,12 @@ class EntityBuilder {
 	public static function getTypePath(type:ClassType):TypePath {
 		// TODO not sure what sub is or how to obtain it, but it's probably not necessary right now?
 		// params, too :P
-		return {pack: type.pack, name: type.name};
+		var params:Array<TypeParam> = [];
+		if (type.params != null && type.params.length > 0) {
+			for (t in type.params) {
+				params.push(TypeParam.TPType(TypeTools.toComplexType(t.t)));
+			}
+		}
+		return {pack: type.pack, name: type.name, params: params};
 	}
 }

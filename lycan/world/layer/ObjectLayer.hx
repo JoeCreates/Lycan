@@ -9,7 +9,6 @@ import flixel.addons.editors.tiled.TiledObject;
 import flixel.group.FlxGroup;
 import haxe.ds.StringMap;
 import lycan.world.World;
-import lycan.world.components.NapeComponent;
 import lycan.world.layer.ILayer.LayerType;
 import lycan.world.layer.TileLayer;
 
@@ -68,10 +67,10 @@ class ObjectLayer extends FlxGroup implements ILayer {
 				var o:FlxObject = cast m;
 				// TODO badness. uses setPosition because this is required for FlxNapeSprite
 				o.setPosition(o.x * world.scale.x, o.y * world.scale.y);
-				if (o.components.has("nape")) {
-					var nape:NapeComponent = cast o.components.get("nape");
-					nape.setPosition(o.x, o.y);
-				}
+				//if (o.components.has("nape")) {
+					//var nape:NapeComponent = cast o.components.get("nape");
+					//nape.setPosition(o.x, o.y);
+				//}
 				
 			}
 		}

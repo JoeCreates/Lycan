@@ -1,7 +1,6 @@
 import massive.munit.TestSuite;
 
-import lycan.util.PrefixTrieTest;
-import LycanTest;
+import ExampleTest;
 
 /**
  * Auto generated Test Suite for MassiveUnit.
@@ -15,7 +14,6 @@ class TestSuite extends massive.munit.TestSuite
 	{
 		super();
 
-		add(lycan.util.PrefixTrieTest);
-		add(LycanTest);
+		add(ExampleTest);
 	}
 }

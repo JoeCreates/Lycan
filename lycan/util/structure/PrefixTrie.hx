@@ -1,6 +1,6 @@
 package lycan.util.structure;
 
-using lycan.core.StringExtensions;
+using lycan.util.StringUtil;
 
 // Unoptimized prefix trie
 class PrefixTrie {

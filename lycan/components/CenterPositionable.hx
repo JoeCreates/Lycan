@@ -1,4 +1,4 @@
-package components;
+package lycan.components;
 
 interface CenterPositionable extends Entity {
 	public var center:CenterPositionableComponent;
@@ -6,7 +6,6 @@ interface CenterPositionable extends Entity {
 	@:relaxed public var y(get, set):Float;
 	@:relaxed public var width(get, set):Float;
 	@:relaxed public var height(get, set):Float;
-	public var val:Int;
 }
 
 class CenterPositionableComponent extends Component<CenterPositionable> {
@@ -15,16 +14,6 @@ class CenterPositionableComponent extends Component<CenterPositionable> {
 	
 	public function new(entity:CenterPositionable) {
 		super(entity);
-	}
-	
-	// TODO potential flaw here... what if something has happened to the parameter? e.g. modified before call
-	@:prepend("update") public function preupdate(dt:Float):Void {
-		trace("Pre Updated with dt = " + dt + " " + entity.val);
-		entity.val = 22;
-	}
-	@:append("update") public function postupdate(dt:Float):Void {
-		trace("Post Updated with dt = " + dt + " " + entity.val);
-		entity.val = 100;
 	}
 	
 	private function set_x(x:Float):Float {

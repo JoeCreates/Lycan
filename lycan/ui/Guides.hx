@@ -11,6 +11,7 @@ import flixel.util.FlxSpriteUtil;
 class Guides extends FlxSprite {
 
 	// TODO offsets, major and minor grid lines, options or when to show text
+	// TODO could be rewritten as a component
 	public var verticalLineSpacing:Float = 100;
 	public var horizontalLineSpacing:Float = 100;
 	
@@ -21,7 +22,7 @@ class Guides extends FlxSprite {
 		scrollFactor.set();
 		makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT, true, "guidesprite");
 		
-		text = new FlxText(0, 0, 0, "testing");
+		text = new FlxText(0, 0, 0, "");
 		alpha = 0.4;
 	}
 	

@@ -18,10 +18,6 @@ import lycan.util.MasterCamera;
 
 // Base state for all substates in a game
 class LycanState extends FlxSubState {
-	#if debug
-	private var updatesWithoutLateUpdates:Int = 0; // Double check lateupdate is being called // TODO remove
-	#end
-
 	public var uiGroup(default, null):FlxSpriteGroup;
 	public var uiCamera(default, null):FlxCamera;
 	public var worldCamera(default, null):MasterCamera;
@@ -51,9 +47,9 @@ class LycanState extends FlxSubState {
 		exclusiveTweens = new Map<String, FlxTween>();
 		
 		// Cameras TODO messy removal of original camera
-		worldCamera = new MasterCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), 
+		worldCamera = new MasterCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y),
 		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
-		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y), 
+		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y),
 		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
 		FlxG.cameras.remove(FlxG.camera);

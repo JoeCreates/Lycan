@@ -1,6 +1,5 @@
 package lycan.loading.tasks;
 
-import lycan.util.queue.IPrioritizable;
 import msignal.Signal.Signal1;
 import msignal.Signal.Signal2;
 

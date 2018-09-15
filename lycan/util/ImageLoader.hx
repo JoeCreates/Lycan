@@ -5,7 +5,6 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import msignal.Signal.Signal1;
 import openfl.Assets;
 
 // TODO no need for this to be static, could pass params via c'tor - can always stick it on a singleton anyway...
@@ -22,11 +21,6 @@ class ImageLoader {
 	 * Base path for searching for loose assets.
 	 */
 	public static var looseBasePath:String = "";
-	
-	/**
-	 * Fires when a search path is added.
-	 */
-	public static var signal_searchPathAdded(default, null) = new Signal1<String>();
 	
 	/**
 	 * Whether to use packed textures.
@@ -49,7 +43,6 @@ class ImageLoader {
 	 */
 	public static function addSearchPath(path:String):Void {
 		searchPaths.insert(0, path);
-		signal_searchPathAdded.dispatch(path);
 	}
 	
 	/**
@@ -63,7 +56,6 @@ class ImageLoader {
 	 */
 	public static function loadAtlas(fileName:String, atlasPath:String, atlasFileExt:String, sheetDataPath:String, sheetDataFileExt:String):FlxAtlasFrames {
 		var frames = FlxAtlasFrames.fromTexturePackerJson(atlasPath + fileName + atlasFileExt, Assets.getText(sheetDataPath + fileName + sheetDataFileExt));
-		Sure.sure(frames != null);
 		atlases.push(frames);
 		return frames;
 	}
@@ -77,8 +69,6 @@ class ImageLoader {
 	 * @return	A new FlxSprite for the given parameters.
 	 */
 	public static function getSprite(x:Null<Float> = 0.0, y:Null<Float> = 0.0, fileName:String):FlxSprite {
-		Sure.sure(fileName != null && fileName.length > 0);
-		
 		for (searchPath in searchPaths) {
 			if (!useTexturePacker) {
 				
@@ -107,8 +97,6 @@ class ImageLoader {
 	 * @return	A new FlxGraphicAsset for the given parameters.
 	 */
 	public static function getGraphicAsset(fileName:String):FlxGraphicAsset {
-		Sure.sure(fileName != null && fileName.length > 0);
-		
 		for (searchPath in searchPaths) {
 			if (!useTexturePacker) {
 				if (!Assets.exists(looseBasePath + searchPath + fileName)) {
