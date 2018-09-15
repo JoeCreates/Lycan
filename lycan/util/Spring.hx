@@ -1,3 +1,5 @@
+package lycan.util;
+
 class Spring extends FlxBasic {
 	public var restValue:Float;
 	public var value:Float;
