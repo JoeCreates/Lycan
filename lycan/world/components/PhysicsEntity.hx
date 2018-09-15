@@ -208,11 +208,11 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	// TODO enable/disable? :(
 	
 	public function setPixelPosition(x:Float = 0, y:Float = 0):Void {
-		body.setPosition(new B2Vec2(x / Phys.pixelsPerMeter, y / Phys.pixelsPerMeter));
+		body.setPosition(vec2(x / Phys.pixelsPerMeter, y / Phys.pixelsPerMeter));
 		updatePosition();
 	}
 	
-	private static function vec2(x:Float, y:Float):B2Vec2 {
+	private static inline function vec2(x:Float, y:Float):B2Vec2 {
 		_vec2.set(x, y);
 		return _vec2;
 	}

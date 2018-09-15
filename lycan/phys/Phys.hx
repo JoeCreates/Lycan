@@ -18,7 +18,6 @@ import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
-import lycan.world.Phys.Box2DInteractiveDebug;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;

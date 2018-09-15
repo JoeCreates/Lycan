@@ -78,7 +78,14 @@ class GraphicUtil {
 	}
 	
 	
-	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int, frameCount:Int = 1, color:FlxColor = FlxColor.WHITE):Void {
+	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int,
+		anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE):Void
+	{
+		var frameCount:Int = 0;
+		for (a in anims) {
+			frameCount += a.frameCount;
+		}
+		
 		var bitmap:BitmapData = new BitmapData(width * frameCount, height, true, color);
 		spr.loadGraphic(bitmap, frameCount > 1, width, height);
 		
@@ -91,12 +98,14 @@ class GraphicUtil {
 		mat.translate(2, 2);
 		var rect:Rectangle = new Rectangle(1, 1, width - 2, height - 2);
 		var bgColor:FlxColor = color.getDarkened(0.7);
-		for (i in 0...frameCount) {
-			txt.text = name + "\n" + i;
-			bitmap.fillRect(rect, bgColor);
-			bitmap.draw(txt, mat, null, null, rect);
-			mat.translate(width, 0);
-			rect.x += width;
+		for (a in anims) {
+			for (i in 0...a.frameCount) {
+				txt.text = name + "\n" + a.name + "["+ i + "]";
+				bitmap.fillRect(rect, bgColor);
+				bitmap.draw(txt, mat, null, null, rect);
+				mat.translate(width, 0);
+				rect.x += width;
+			}
 		}
 	}
 	
