@@ -10,7 +10,7 @@ import lycan.game3D.components.IsoEntity;
 import lycan.game3D.components.Position3D;
 import lycan.game3D.components.Physics3D;
 
-class IsoSprite extends FlxObject implements Position3D implements Physics3D implements IsoEntity {
+class IsoSprite extends FlxObject implements IsoEntity implements Physics3D implements Position3D {
 	private static var isoBox:IsoBox = new IsoBox();
 	public function new(width:Float = 1, height:Float = 1, depth:Float = 1, ?graphicColor:FlxColor, ?isoProjection:IsoProjection) {
 		super();

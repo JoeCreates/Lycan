@@ -271,6 +271,7 @@ class MenuFactory {
 		});
 		
 		menu.select(menu.getFirstExisting());
+		menu.defaultItem = menu.getFirstExisting();
 		//TODO menu onfocus moves to default
 		return menu;
 	}

@@ -11,7 +11,7 @@ class LycanRootState extends FlxState {
 	
 	public static var get:LycanRootState;
 	
-	private function new() {
+	public function new() {
 		super();
 		
 		// TODO move this somewhere better

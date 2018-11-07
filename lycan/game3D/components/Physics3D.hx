@@ -66,7 +66,7 @@ class Physics3DComponent extends Component<Physics3D> {
 		var inf:Float = Math.POSITIVE_INFINITY;
 		maxVelocity = Point3D.get(inf, inf, inf);
 		
-		last = Point3D.get(x, y, z);
+		last = Point3D.get();
 		
 		_point = Point3D.get();
 	}

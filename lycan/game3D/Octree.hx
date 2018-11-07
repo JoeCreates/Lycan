@@ -3,6 +3,7 @@ package lycan.game3D;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import haxe.ds.Vector;
 import lycan.game3D.Box;
@@ -14,7 +15,7 @@ class Octree extends Box {
 	public static inline var A_LIST:Int = 0;
 	public static inline var B_LIST:Int = 1;
 	/** Granularity */
-	public static var divisions:Int
+	public static var divisions:Int;
 	public var exists:Bool;
 
 	private var _canSubdivide:Bool;
@@ -54,8 +55,8 @@ class Octree extends Box {
 	
 	private static var _list:Int;
 	private static var _useBothLists:Bool;
-	private static var _processingCallback:FlxObject->FlxObject->Bool;
-	private static var _notifyCallback:FlxObject->FlxObject->Void;
+	private static var _processingCallback:Physics3D->Physics3D->Bool;
+	private static var _notifyCallback:Physics3D->Physics3D->Void;
 	private static var _iterator:LinkedList;
 
 	private static var _objectHullX:Float;
@@ -77,7 +78,7 @@ class Octree extends Box {
 	private static var _cachedTreesHead:Octree;
 	private var next:Octree;
 
-	private function new(x:Float, y:Float, z:Float, width:Float, height:Float, depth:Float ?parent:Octree) {
+	private function new(x:Float, y:Float, z:Float, width:Float, height:Float, depth:Float, ?parent:Octree) {
 		super();
 		trees = new Vector<Octree>(8);
 		reset(x, y, z, width, height, depth, parent);
@@ -88,10 +89,10 @@ class Octree extends Box {
 			var cachedTree:Octree = _cachedTreesHead;
 			_cachedTreesHead = _cachedTreesHead.next;
 			cachedTreeCount--;
-			cachedTree.reset(x, y, width, height, parent);
+			cachedTree.reset(x, y, z, width, height, depth, parent);
 			return cachedTree;
 		} else
-			return new Octree(x, y, width, height, parent);
+			return new Octree(x, y, z, width, height, depth, parent);
 	}
 	
 	public static function clearCache():Void {
@@ -182,7 +183,7 @@ class Octree extends Box {
 	 * @param NotifyCallback	A function with the form myFunction(Object1:FlxObject,Object2:FlxObject):void that is called whenever two objects are found to overlap in world space, and either no ProcessCallback is specified, or the ProcessCallback returns true.
 	 * @param ProcessCallback	A function with the form myFunction(Object1:FlxObject,Object2:FlxObject):Boolean that is called whenever two objects are found to overlap in world space.  The NotifyCallback is only called if this function returns true.  See FlxObject.separate().
 	 */
-	public function load(ObjectOrGroup1:FlxBasic, ?ObjectOrGroup2:FlxBasic, ?NotifyCallback:FlxObject->FlxObject->Void, ?ProcessCallback:FlxObject->FlxObject->Bool):Void {
+	public function load(ObjectOrGroup1:FlxBasic, ?ObjectOrGroup2:FlxBasic, ?NotifyCallback:Physics3D->Physics3D->Void, ?ProcessCallback:Physics3D->Physics3D->Bool):Void {
 		add(ObjectOrGroup1, A_LIST);
 		if (ObjectOrGroup2 != null) {
 			add(ObjectOrGroup2, B_LIST);
@@ -222,7 +223,7 @@ class Octree extends Box {
 		// Add an object
 		else {
 			_object = (cast objectOrGroup:Physics3D).phys;
-			if (_object.entity.exists && _object.allowCollisions != FlxObject.NONE) {
+			if (_object.entity.entity_exists && _object.allowCollisions != FlxObject.NONE) {
 				_objectMinX = _object.hitBox.minX;
 				_objectMaxX = _object.hitBox.maxX;
 				_objectMinY = _object.hitBox.minY;
@@ -240,71 +241,115 @@ class Octree extends Box {
 	 */
 	private function addObject():Void {
 		//If this quad (not its children) lies entirely inside this object, add it here
-		if (!_canSubdivide || (minX >= _objectMinX && maxX <= _objectMaxX && minY >= _objectMinY && maxY <= _objectMaxY)) {
+		if (!_canSubdivide || (
+			minX >= _objectMinX && maxX <= _objectMaxX &&
+			minY >= _objectMinY && maxY <= _objectMaxY &&
+			minZ >= _objectMinZ && maxZ <= _objectMaxZ))
+		{
 			addToList();
 			return;
 		}
-
+		
 		//See if the selected object fits completely inside any of the quadrants
 		if ((_objectMinX > minX) && (_objectMaxX < _midpointX)) {
 			if ((_objectMinY > minY) && (_objectMaxY < _midpointY)) {
-				if (treeLowerNorthWest == null) {
-					treeLowerNorthWest = Octree.recycle(minX, minY, _halfWidth, _halfHeight, this);
+				if ((_objectMinZ > minZ) && (_objectMaxZ < _midpointZ)) {
+					if (treeLowerNorthWest == null) treeLowerNorthWest =
+						Octree.recycle(minX, minY, minZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeLowerNorthWest.addObject();
+					return;
 				}
-				treeLowerNorthWest.addObject();
-				return;
+				if ((_objectMinZ > _midpointZ) && (_objectMaxZ < maxZ)) {
+					if (treeUpperNorthWest == null) treeUpperNorthWest =
+						Octree.recycle(minX, minY, _midpointZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeUpperNorthWest.addObject();
+					return;
+				}
 			}
 			if ((_objectMinY > _midpointY) && (_objectMaxY < maxY)) {
-				if (treeLowerSouthWest == null) {
-					treeLowerSouthWest = Octree.recycle(minX, _midpointY, _halfWidth, _halfHeight, this);
+				if ((_objectMinZ > minZ) && (_objectMaxZ < _midpointZ)) {
+					if (treeLowerSouthWest == null) treeLowerSouthWest =
+						Octree.recycle(minX, _midpointY, minZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeLowerSouthWest.addObject();
+					return;
 				}
-				treeLowerSouthWest.addObject();
-				return;
+				if ((_objectMinZ > _midpointZ) && (_objectMaxZ < maxZ)) {
+					if (treeUpperSouthWest == null) treeUpperSouthWest =
+						Octree.recycle(minX, _midpointY, _midpointZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeUpperSouthWest.addObject();
+					return;
+				}
 			}
 		}
 		if ((_objectMinX > _midpointX) && (_objectMaxX < maxX)) {
 			if ((_objectMinY > minY) && (_objectMaxY < _midpointY)) {
-				if (treeLowerNorthEast == null) {
-					treeLowerNorthEast = Octree.recycle(_midpointX, minY, _halfWidth, _halfHeight, this);
+				if ((_objectMinZ > minZ) && (_objectMaxZ < _midpointZ)) {
+					if (treeLowerNorthEast == null) treeLowerNorthEast =
+						Octree.recycle(_midpointX, minY, minZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeLowerNorthEast.addObject();
+					return;
 				}
-				treeLowerNorthEast.addObject();
-				return;
+				if ((_objectMinZ > _midpointZ) && (_objectMaxZ < maxZ)) {
+					if (treeUpperNorthEast == null) treeUpperNorthEast =
+						Octree.recycle(_midpointX, minY, _midpointZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeUpperNorthEast.addObject();
+					return;
+				}
 			}
 			if ((_objectMinY > _midpointY) && (_objectMaxY < maxY)) {
-				if (treeLowerSouthEast == null) {
-					treeLowerSouthEast = Octree.recycle(_midpointX, _midpointY, _halfWidth, _halfHeight, this);
+				if ((_objectMinZ > minZ) && (_objectMaxZ < _midpointZ)) {
+					if (treeLowerSouthEast == null) treeLowerSouthEast =
+						Octree.recycle(_midpointX, _midpointY, minZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeLowerSouthEast.addObject();
+					return;
 				}
-				treeLowerSouthEast.addObject();
-				return;
+				if ((_objectMinZ > _midpointZ) && (_objectMaxZ < maxZ)) {
+					if (treeUpperSouthEast == null) treeUpperSouthEast =
+						Octree.recycle(_midpointX, _midpointY, _midpointZ, _halfWidth, _halfHeight, _halfDepth, this);
+					treeUpperSouthEast.addObject();
+					return;
+				}
 			}
 		}
 
 		
 		//If it wasn't completely contained we have to check out the partial overlaps
-		if ((_objectMaxX > minX) && (_objectMinX < _midpointX) && (_objectMaxY > minY) && (_objectMinY < _midpointY)) {
-			if (treeLowerNorthWest == null) {
-				treeLowerNorthWest = Octree.recycle(minX, minY, _halfWidth, _halfHeight, this);
-			}
-			treeLowerNorthWest.addObject();
+		var x, x2, y, y2, z, z2:Float;
+		
+		inline function lowerX() {x = minX; x2 = _midpointX; }
+		inline function upperX() {x = _midpointX; x2 = maxX; }
+		inline function lowerY() {y = minY; y2 = _midpointY; }
+		inline function upperY() {y = _midpointY; y2 = maxY; }
+		inline function lowerZ() {z = minZ; z2 = _midpointZ; }
+		inline function upperZ() {z = _midpointZ; z2 = maxZ; }
+
+		
+		inline function checkIntersection():Bool {
+			return (_objectMaxX > x && _objectMinX < x2 &&
+				_objectMaxY > y && _objectMinX < y2 &&
+				_objectMaxZ > z && _objectMinZ < z2);
 		}
-		if ((_objectMaxX > _midpointX) && (_objectMinX < maxX) && (_objectMaxY > minY) && (_objectMinY < _midpointY)) {
-			if (treeLowerNorthEast == null) {
-				treeLowerNorthEast = Octree.recycle(_midpointX, minY, _halfWidth, _halfHeight, this);
-			}
-			treeLowerNorthEast.addObject();
+		
+		inline function recycleTree(tree:Octree):Octree {
+			return tree == null? Octree.recycle(x, y, z, _halfWidth, _halfHeight, _halfDepth, this) : tree;
 		}
-		if ((_objectMaxX > _midpointX) && (_objectMinX < maxX) && (_objectMaxY > _midpointY) && (_objectMinY < maxY)) {
-			if (treeLowerSouthEast == null) {
-				treeLowerSouthEast = Octree.recycle(_midpointX, _midpointY, _halfWidth, _halfHeight, this);
-			}
-			treeLowerSouthEast.addObject();
-		}
-		if ((_objectMaxX > minX) && (_objectMinX < _midpointX) && (_objectMaxY > _midpointY) && (_objectMinY < maxY)) {
-			if (treeLowerSouthWest == null) {
-				treeLowerSouthWest = Octree.recycle(minX, _midpointY, _halfWidth, _halfHeight, this);
-			}
-			treeLowerSouthWest.addObject();
-		}
+		
+		lowerX(); lowerY(); lowerZ();
+		if (checkIntersection()) treeLowerNorthWest = recycleTree(treeLowerNorthWest);
+		upperZ();
+		if (checkIntersection()) treeUpperNorthWest = recycleTree(treeUpperNorthWest);
+		upperY(); lowerZ();
+		if (checkIntersection()) treeLowerSouthWest = recycleTree(treeLowerSouthWest);
+		upperZ();
+		if (checkIntersection()) treeUpperSouthWest = recycleTree(treeUpperSouthWest);
+		upperX(); lowerY(); lowerZ();
+		if (checkIntersection()) treeLowerNorthEast = recycleTree(treeLowerNorthEast);
+		upperZ();
+		if (checkIntersection()) treeUpperNorthEast = recycleTree(treeUpperNorthEast);
+		upperY(); lowerZ();
+		if (checkIntersection()) treeLowerSouthEast = recycleTree(treeLowerSouthEast);
+		upperZ();
+		if (checkIntersection()) treeUpperSouthEast = recycleTree(treeUpperSouthEast);
 	}
 	
 	private function addToList():Void {
@@ -350,7 +395,8 @@ class Octree extends Box {
 				} else {
 					_iterator = iterator.next;
 				}
-				if (_object != null && _object.entity.exists && _object.allowCollisions > 0 &&
+				
+				if (_object != null && _object.entity.entity_exists && _object.allowCollisions != 0 &&
 						_iterator != null && _iterator.object != null && overlapNode()) {
 					overlapProcessed = true;
 				}
@@ -359,18 +405,7 @@ class Octree extends Box {
 		}
 
 		//Advance through the tree by calling overlap on each child
-		if ((treeLowerNorthWest != null) && treeLowerNorthWest.execute()) {
-			overlapProcessed = true;
-		}
-		if ((treeLowerNorthEast != null) && treeLowerNorthEast.execute()) {
-			overlapProcessed = true;
-		}
-		if ((treeLowerSouthEast != null) && treeLowerSouthEast.execute()) {
-			overlapProcessed = true;
-		}
-		if ((treeLowerSouthWest != null) && treeLowerSouthWest.execute()) {
-			overlapProcessed = true;
-		}
+		for (t in trees) if (t != null && t.execute()) overlapProcessed = true;
 
 		return overlapProcessed;
 	}
@@ -381,42 +416,46 @@ class Octree extends Box {
 	 */
 	private function overlapNode():Bool {
 		//Calculate bulk hull for _object
-		_objectHullX = (_object.x < _object.last.x) ? _object.x : _object.last.x;
-		_objectHullY = (_object.y < _object.last.y) ? _object.y : _object.last.y;
-		_objectHullWidth = _object.x - _object.last.x;
-		_objectHullWidth = _object.width + ((_objectHullWidth > 0) ? _objectHullWidth : -_objectHullWidth);
-		_objectHullHeight = _object.y - _object.last.y;
-		_objectHullHeight = _object.height + ((_objectHullHeight > 0) ? _objectHullHeight : -_objectHullHeight);
+		_objectHullX = Math.min(_object.x, _object.last.x);
+		_objectHullY = Math.min(_object.y, _object.last.y);
+		_objectHullZ = Math.min(_object.z, _object.last.z);
+		_objectHullWidth = _object.hitBox.width + Math.abs(_object.x - _object.last.x);
+		_objectHullHeight = _object.hitBox.height + Math.abs(_object.y - _object.last.y);
+		_objectHullDepth = _object.hitBox.depth + Math.abs(_object.z - _object.last.z);
 
 		//Walk the list and check for overlaps
 		var overlapProcessed:Bool = false;
-		var checkObject:Physics3D;
+		var checkObject:Physics3DComponent;
 
 		while (_iterator != null) {
 			checkObject = _iterator.object;
-			if (_object == checkObject || !checkObject.entity.exists || checkObject.allowCollisions <= 0) {
+			if (_object == checkObject || !checkObject.entity.entity_exists || checkObject.allowCollisions == 0) {
 				_iterator = _iterator.next;
 				continue;
 			}
 
 			//Calculate bulk hull for checkObject
-			_checkObjectHullX = (checkObject.x < checkObject.last.x) ? checkObject.x : checkObject.last.x;
-			_checkObjectHullY = (checkObject.y < checkObject.last.y) ? checkObject.y : checkObject.last.y;
-			_checkObjectHullWidth = checkObject.x - checkObject.last.x;
-			_checkObjectHullWidth = checkObject.width + ((_checkObjectHullWidth > 0) ? _checkObjectHullWidth : -_checkObjectHullWidth);
-			_checkObjectHullHeight = checkObject.y - checkObject.last.y;
-			_checkObjectHullHeight = checkObject.height + ((_checkObjectHullHeight > 0) ? _checkObjectHullHeight : -_checkObjectHullHeight);
+			_checkObjectHullX = Math.min(checkObject.x, checkObject.last.x);
+			_checkObjectHullY = Math.min(checkObject.y, checkObject.last.y);
+			_checkObjectHullZ = Math.min(checkObject.z, checkObject.last.z);
+			_checkObjectHullWidth = checkObject.hitBox.width + Math.abs(checkObject.x - checkObject.last.x);
+			_checkObjectHullHeight = checkObject.hitBox.height + Math.abs(checkObject.y - checkObject.last.y);
+			_checkObjectHullDepth = checkObject.hitBox.depth + Math.abs(checkObject.z - checkObject.last.z);
 
 			//Check for intersection of the two hulls
-			if ((_objectHullX + _objectHullWidth > _checkObjectHullX) &&
+			if (
+					(_objectHullX + _objectHullWidth > _checkObjectHullX) &&
 					(_objectHullX < _checkObjectHullX + _checkObjectHullWidth) &&
 					(_objectHullY + _objectHullHeight > _checkObjectHullY) &&
-					(_objectHullY < _checkObjectHullY + _checkObjectHullHeight)) {
+					(_objectHullY < _checkObjectHullY + _checkObjectHullHeight) &&
+					(_objectHullZ + _objectHullDepth > _checkObjectHullZ) &&
+					(_objectHullZ < _checkObjectHullZ + _checkObjectHullDepth)
+				) {
 				//Execute callback functions if they exist
-				if (_processingCallback == null || _processingCallback(_object, checkObject)) {
+				if (_processingCallback == null || _processingCallback(_object.entity, checkObject.entity)) {
 					overlapProcessed = true;
 					if (_notifyCallback != null) {
-						_notifyCallback(_object, checkObject);
+						_notifyCallback(_object.entity, checkObject.entity);
 					}
 				}
 			}
@@ -431,8 +470,7 @@ class Octree extends Box {
 
 // Ugly linkedlist implementation copied from HaxeFlixel 
 // Should probably rewrite everything to remove this
-private class LinkedList implements IFlxDestroyable
-{
+private class LinkedList implements IFlxDestroyable {
 	/**
 	 * Pooling mechanism, when LinkedLists are destroyed, they get added
 	 * to this collection, and when they get recycled they get removed.
@@ -443,10 +481,8 @@ private class LinkedList implements IFlxDestroyable
 	/**
 	 * Recycle a cached Linked List, or creates a new one if needed.
 	 */
-	public static function recycle():LinkedList
-	{
-		if (_cachedListsHead != null)
-		{
+	public static function recycle():LinkedList {
+		if (_cachedListsHead != null) {
 			var cachedList:LinkedList = _cachedListsHead;
 			_cachedListsHead = _cachedListsHead.next;
 			_NUM_CACHED_FLX_LIST--;
@@ -463,11 +499,9 @@ private class LinkedList implements IFlxDestroyable
 	 * Clear cached List nodes. You might want to do this when loading new levels
 	 * (probably not though, no need to clear cache unless you run into memory problems).
 	 */
-	public static function clearCache():Void 
-	{
+	public static function clearCache():Void {
 		// null out next pointers to help out garbage collector
-		while (_cachedListsHead != null)
-		{
+		while (_cachedListsHead != null) {
 			var node = _cachedListsHead;
 			_cachedListsHead = _cachedListsHead.next;
 			node.object = null;
@@ -495,15 +529,13 @@ private class LinkedList implements IFlxDestroyable
 	/**
 	 * Clean up memory.
 	 */
-	public function destroy():Void
-	{
+	public function destroy():Void {
 		// ensure we haven't been destroyed already
 		if (!exists)
 			return;
 		
 		object = null;
-		if (next != null)
-		{
+		if (next != null) {
 			next.destroy();
 		}
 		exists = false;
