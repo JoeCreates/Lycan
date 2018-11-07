@@ -15,17 +15,14 @@ class ConditionalEventManager extends FlxTypedGroup<ConditionalEvent> {
 		for (event in members) {
 			if (event != null && event.queueRemoval) {
 				remove(event);
+				event.destroy();
 			}
 		}
 		super.update(dt);
 	}
 	
 	public function cancelAll():Void {
-		forEachExists(cancel);
-	}
-	
-	private function cancel(event:ConditionalEvent):Void {
-		event.cancel();
+		forEachExists((e)->{e.cancel(); });
 	}
 }
 
@@ -34,7 +31,7 @@ class ConditionalEvent extends FlxBasic {
 	public var condition:Void->Bool;
 	public var callback:ConditionalEvent->Void;
 	
-	private function new(condition:Void->Bool, callback:ConditionalEvent->Void) {
+	public function new(condition:Void->Bool, callback:ConditionalEvent->Void) {
 		super();
 		this.queueRemoval = false;
 		this.condition = condition;

@@ -1,9 +1,15 @@
 package lycan.util;
 
+#if !macro
+import flixel.FlxBasic;
+import lycan.util.ConditionalEvent;
+#end
 import haxe.macro.Expr;
+
 
 /*
 	Originally authord by deepnight
+	Adapted and extended by Joe Williamson (JoeCreates)
 
 	BASIC USE: (see the static method "demo" for 2 examples)
 		var cm = new Cinematic();
@@ -74,40 +80,47 @@ private typedef CinematicEvent = {
 	s : Null<String>,
 }
 
+#if macro
 class Cinematic {
-	#if !macro
+#end
+#if !macro
+class Cinematic extends FlxBasic {
 
 	// Public
+	public var conditionalEventManager:ConditionalEventManager;
 	public var turbo(default,null)	: Bool; // vaut true pendant un skip()
 	public var onAllComplete		: Null< Void->Void >; // appelé à chaque fois que toutes les cinématiques sont terminées
 
-	#if (!CinematicDebug && flash)
+	#if (!CinematicDebug)
 	/****************************************************/
-	public static function demo() {
+	public static function demo():Cinematic {
 		var cm = new Cinematic();
 
-		var foo;
+		var foo= 1;
+		var a = 0;
+		var t = function() {trace("uhoh... oh wait it's okay!"); };
 		cm.create({
-			trace("1") > 1000; // wait 1000ms after the trace
+			trace("1") > 100; // wait 1000ms after the trace
+			a = 2;
+			trace(a); // trace without delay
+			t();
+			100; // wait 1000ms
 
-			trace("2"); // trace without delay
-
-			1000; // wait 1000ms
-
-			function test() {
+			100 >> function() {
 				trace("3");
 				cm.signal("mySignal");
-			}
-			1000 >> test(); // do test() in parallel in 1000ms
+			}(); // do test() in parallel in 1000ms
 			end("mySignal"); // attente d'un appel quelconque à signal()
 
-			function test() {
+			0 >> function() {
 				trace("4");
 				cm.signal();
-			}
-			1000 >> test(); // do test() in parallel in 1000ms
+			}(); // do test() in parallel in 1000ms
 			end; // wait for any signal
-
+			
+			wait({trace("foo: " + foo); foo++; foo > 100; }, cm.signal());
+			end;
+			
 			1000;
 
 			if ( true ) {
@@ -118,19 +131,20 @@ class Cinematic {
 				trace("6 false") > 500;
 			}
 
-			foo = 1;
+			foo += 100;
+			if (foo > 10) trace("foo is greater than 10");
 			switch ( foo ) {
-				case 0 : trace("switch 0") > 500;
-				case 1 : trace("switch 1") > 500 ;
-				case 2 : trace("switch 2") > 500;
-			}
+				case 0 : trace("switch 0 " + foo) > 500;
+				case 1 : trace("switch 1 " + foo) > 500 ;
+				case 2 : trace("switch 2 " + foo) > 500;
+			};
 			trace("after switch") > 500;
 
 			for ( i in 0...3 )
 				trace("loop "+i) > 500;
 			trace("after loop") > 500;
 		});
-		flash.Lib.current.addEventListener( flash.events.Event.ENTER_FRAME, function(_) cm.update() );
+		return cm;
 	}
 	/****************************************************/
 	#end
@@ -139,23 +153,25 @@ class Cinematic {
 	var queues			: Array<Array<CinematicEvent>>;
 	var curQueue		: Null<Array<CinematicEvent>>;
 	var persistSignals	: Map<String,Bool>;
-	var fps				: Int;
 	#end
 
-	public function new(?fps=30) {
+	public function new() {
 		#if !macro
-		this.fps = fps;
+		super();
 		turbo = false;
 		queues = new Array();
 		persistSignals = new Map();
+		conditionalEventManager = new ConditionalEventManager();
 		#end
 	}
 
 	#if !macro
-	public function destroy() {
+	override public function destroy() {
+		super.destroy();
 		queues = null;
 		curQueue = null;
 		onAllComplete = null;
+		conditionalEventManager.destroy();
 	}
 	#end
 
@@ -217,6 +233,14 @@ class Cinematic {
 								if ( funName(f)=="end" ) {
 									signal = params[0];
 									return macro null;
+								} if ( funName(f)=="wait" ) {
+									return macro $ethis.conditionalEventManager.wait(
+										function() {
+											return ${params[0]};
+										}, function(c:ConditionalEvent) {
+											${params[1]};
+										}
+									);
 								} else if ( strict )
 									error("unsupported expression", de.pos);
 							case EConst(c) :
@@ -352,11 +376,11 @@ class Cinematic {
 	}
 
 	@:noCompletion public function __addParallel(cb:Void->Void, t:Int, ?signal:String) {
-		queues.push( [ {f:cb, t:fps*t/1000, s:null }] );
+		queues.push( [ {f:cb, t: t, s:null }] );
 	}
 
 	@:noCompletion public function __add(cb:Void->Void, t:Int, ?signal:String) {
-		curQueue.push({f:cb, t:fps*t/1000, s:signal});
+		curQueue.push({f:cb, t: t, s:signal});
 	}
 
 	@:noCompletion public function __beginNewQueue() {
@@ -379,7 +403,7 @@ class Cinematic {
 	public function skip() {
 		turbo = true;
 		while ( queues.length>0 )
-			update();
+			update(0);
 		turbo = false;
 	}
 
@@ -389,12 +413,16 @@ class Cinematic {
 		persistSignals = new Map();
 	}
 
-	public function update() {
+	override public function update(dt:Float):Void {
+		super.update(dt);
+		conditionalEventManager.update(dt);
+		
 		var i = 0;
+		
 		while ( i<queues.length ) {
 			var q = queues[i];
 			if ( q.length>0 ) {
-				q[0].t --;
+				q[0].t -= dt * 1000;
 				while ( q.length>0 && q[0].t<=0 && ( turbo || q[0].s==null || persistSignals.get(q[0].s) ) )
 					runEvent( q.splice(0,1)[0] );
 			}
