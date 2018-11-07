@@ -1,7 +1,7 @@
 package lycan.game3D.components;
 
 import flixel.math.FlxVelocity;
-import lycan.game3D.DirectionMask3D;
+import lycan.game3D.DirectionField3D;
 import lycan.game3D.Box;
 import lycan.game3D.components.Position3D;
 import lycan.game3D.Point3D;
@@ -42,10 +42,10 @@ class Physics3DComponent extends Component<Physics3D> {
 	//public var angularAcceleration:Point3D;//TODO
 	//public var angularDrag:Point3D;//TODO
 	//public var maxAngular:Point3D;
-	public var touching:DirectionMask3D;
-	public var wasTouching:DirectionMask3D;
-	public var allowCollisions:DirectionMask3D;
-	public var followMovementSurfaces:DirectionMask3D;
+	public var touching:DirectionField3D;
+	public var wasTouching:DirectionField3D;
+	public var allowCollisions:DirectionField3D;
+	public var followMovementSurfaces:DirectionField3D;
 	//TODO debug drawing
 	
 	private var _point:Point3D;
@@ -55,10 +55,10 @@ class Physics3DComponent extends Component<Physics3D> {
 		
 		hitBox = new Box();
 		
-		touching = DirectionMask3D.NONE;
-		wasTouching = DirectionMask3D.NONE;
-		allowCollisions = DirectionMask3D.ANY;
-		followMovementSurfaces = DirectionMask3D.BOTTOM;
+		touching = DirectionField3D.NONE;
+		wasTouching = DirectionField3D.NONE;
+		allowCollisions = DirectionField3D.ANY;
+		followMovementSurfaces = DirectionField3D.BOTTOM;
 		
 		velocity = Point3D.get();
 		acceleration = Point3D.get();
@@ -86,7 +86,7 @@ class Physics3DComponent extends Component<Physics3D> {
 		}
 		
 		wasTouching = touching;
-		touching = DirectionMask3D.NONE;
+		touching = DirectionField3D.NONE;
 	}
 	
 	//TODO
@@ -94,16 +94,16 @@ class Physics3DComponent extends Component<Physics3D> {
 		
 	}
 	
-	public inline function justTouched(direction:DirectionMask3D):Bool {
+	public inline function justTouched(direction:DirectionField3D):Bool {
 		return !wasTouching.getFlag(direction) && touching.getFlag(direction);
 	}
 	
 	private inline function get_solid():Bool {
-		return (allowCollisions & DirectionMask3D.ANY) != DirectionMask3D.NONE;
+		return (allowCollisions & DirectionField3D.ANY) != DirectionField3D.NONE;
 	}
 	
 	private function set_solid(solid:Bool):Bool {
-		allowCollisions = solid ? DirectionMask3D.ANY : DirectionMask3D.NONE;
+		allowCollisions = solid ? DirectionField3D.ANY : DirectionField3D.NONE;
 		return solid;
 	}
 }
