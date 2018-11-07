@@ -32,7 +32,7 @@ import haxe.macro.Expr;
 			1000;
 			gameOver();
 		});
-		flash.Lib.current.addEventListener( flash.events.Event.ENTER_FRAME, function(_) cm.update() );
+		add(cm);
 
 	SYNTAX :
 		// Immediate call :
