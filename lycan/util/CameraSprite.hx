@@ -8,6 +8,9 @@ import flixel.group.FlxGroup;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 
+/**
+ * Warning: Strange behavior if you add this sprite to multiple cameras
+**/
 class CameraSprite extends FlxSprite {
 	public var sourceCamera:FlxCamera;
 	public var group:CameraGroup;
@@ -54,6 +57,18 @@ class CameraSprite extends FlxSprite {
 		
 		group.update(dt);
 		super.update(dt);
+	}
+	
+	override function set_x(x:Float):Float {
+		getScreenPosition(_point, camera);
+		camera.x = _point.x;
+		return super.set_x(x);
+	}
+	
+	override function set_y(y:Float):Float {
+		getScreenPosition(_point, camera);
+		camera.y = _point.y;
+		return super.set_y(y);
 	}
 }
 
