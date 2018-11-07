@@ -5,7 +5,10 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
-class Text extends FlxText {
+/**
+ * A simple text element which can show text for a limited time with a transition in and out
+**/
+class MessageText extends FlxText {
 
 	var tween:FlxTween;
 	
