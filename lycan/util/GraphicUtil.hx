@@ -17,6 +17,8 @@ import flixel.util.FlxColor;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.geom.Rectangle;
+import openfl.display.Graphics;
+import openfl.display.Sprite;
 
 class GraphicUtil {
 	
@@ -79,12 +81,14 @@ class GraphicUtil {
 	
 	
 	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int,
-		anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE):Void
+		?anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE):Void
 	{
 		var frameCount:Int = 0;
+		if (anims == null) anims = [];
 		for (a in anims) {
 			frameCount += a.frameCount;
 		}
+		if (frameCount == 0) frameCount = 1;
 		
 		var bitmap:BitmapData = new BitmapData(width * frameCount, height, true, color);
 		spr.loadGraphic(bitmap, frameCount > 1, width, height);
@@ -107,6 +111,52 @@ class GraphicUtil {
 				rect.x += width;
 			}
 		}
+	}
+	
+	public static function makeArrowBitmap(triangleWidth:Float, triangleLength:Float, lineWidth:Float, lineLength:Float,
+		solidTriangle:Bool = true, triangleInset:Float = 0, color:FlxColor = FlxColor.WHITE, ?lineStyle:LineStyle, ?drawStyle:DrawStyle):BitmapData
+	{
+		if (lineStyle != null) lineStyle.color = color;
+		
+		var tempSprite:FlxSprite = new FlxSprite();
+		var width:Float = Math.max(triangleWidth, lineWidth);
+		var height:Float = triangleLength + lineLength;
+		var mid:Float = width / 2;
+		var triangleX:Float = mid - triangleWidth / 2;
+		var lineX:Float = mid - lineWidth / 2;
+		if (!solidTriangle && triangleInset == 0) triangleInset = triangleLength; 
+		tempSprite.makeGraphic(Std.int(width), Std.int(height), 0, true);
+		
+		// Draw triangle
+		var triPoints:Array<FlxPoint> = [
+			FlxPoint.get(triangleX, triangleLength),
+			FlxPoint.get(mid, 0),
+			FlxPoint.get(triangleX + triangleWidth, triangleLength)
+		];
+		if (triangleInset > 0) triPoints.push(FlxPoint.get(mid, triangleLength - triangleInset));
+		if (solidTriangle) triPoints.push(triPoints[0]);
+		
+		//var mat:Matrix = new Matrix();
+		//mat.identity();
+		//mat.rotate();
+		
+		FlxSpriteUtil.drawPolygon(tempSprite, triPoints, solidTriangle ? color : 0, lineStyle, drawStyle);
+		
+		for (p in triPoints) p.put();
+		
+		// Draw line
+		if (lineWidth > 0 || lineLength > 0) {
+			trace("Make rect: " + lineX + ", " + (triangleLength - triangleInset) + " " + lineWidth);
+			FlxSpriteUtil.drawRect(tempSprite, lineX, triangleLength - triangleInset, lineWidth,
+				lineLength + triangleInset, color, lineStyle, drawStyle);
+		}
+		
+		var out:BitmapData = new BitmapData(Std.int(width), Std.int(height), true, 0);
+		out.draw(tempSprite.pixels);
+		
+		tempSprite.destroy();
+		
+		return out;
 	}
 	
 }
