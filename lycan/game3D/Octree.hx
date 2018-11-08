@@ -10,6 +10,7 @@ import lycan.game3D.Box;
 import lycan.game3D.components.Physics3D;
 
 /** Based on Octree */
+@:tink
 class Octree extends Box {
 	
 	public static inline var A_LIST:Int = 0;
@@ -28,6 +29,7 @@ class Octree extends Box {
 
 	/** Internal, governs and assists with the formation of the tree. */
 	private static var _min:Int;
+	
 	@:prop(trees[0], trees[0] = param) var treeLowerNorthWest:Octree;
 	@:prop(trees[1], trees[1] = param) var treeLowerNorthEast:Octree;
 	@:prop(trees[2], trees[2] = param) var treeLowerSouthEast:Octree;
@@ -141,9 +143,9 @@ class Octree extends Box {
 				}
 			}
 		} else {
-			_min = Math.floor((width + height) / (2 * divisions));
+			_min = Math.floor((width + height + depth) / (3 * divisions));
 		}
-		_canSubdivide = (width > _min) || (height > _min);
+		_canSubdivide = width > _min || height > _min || depth > _min;
 
 		//Set up comparison/sort helpers
 		for (i in 0...8) trees[i] = null;
@@ -205,25 +207,25 @@ class Octree extends Box {
 	@:access(flixel.group.FlxTypedGroup.resolveGroup)
 	public function add(objectOrGroup:FlxBasic, list:Int):Void {
 		_list = list;
-
+		
 		var group = FlxTypedGroup.resolveGroup(objectOrGroup);
 		// Add a group
 		if (group != null) {
 			var i:Int = 0;
 			var basic:FlxBasic;
 			var members:Array<FlxBasic> = group.members;
-			var l:Int = group.length;
-			while (i < l) {
+			while (i < group.length) {
 				basic = members[i++];
 				if (basic != null && basic.exists) {
-					add(group, list);
+					add(basic, list);
 				}
 			}
 		}
 		// Add an object
 		else {
-			_object = (cast objectOrGroup:Physics3D).phys;
-			if (_object.entity.entity_exists && _object.allowCollisions != FlxObject.NONE) {
+			var physEntity:Physics3D = cast objectOrGroup;
+			_object = physEntity.phys;
+			if (_object.entity.entity_exists && _object.allowCollisions != 0) {
 				_objectMinX = _object.hitBox.minX;
 				_objectMaxX = _object.hitBox.maxX;
 				_objectMinY = _object.hitBox.minY;
@@ -314,24 +316,26 @@ class Octree extends Box {
 
 		
 		//If it wasn't completely contained we have to check out the partial overlaps
-		var x, x2, y, y2, z, z2:Float;
+		var x1, x2, y1, y2, z1, z2:Float;
 		
-		inline function lowerX() {x = minX; x2 = _midpointX; }
-		inline function upperX() {x = _midpointX; x2 = maxX; }
-		inline function lowerY() {y = minY; y2 = _midpointY; }
-		inline function upperY() {y = _midpointY; y2 = maxY; }
-		inline function lowerZ() {z = minZ; z2 = _midpointZ; }
-		inline function upperZ() {z = _midpointZ; z2 = maxZ; }
+		inline function lowerX() {x1 = minX; x2 = _midpointX; }
+		inline function upperX() {x1 = _midpointX; x2 = maxX; }
+		inline function lowerY() {y1 = minY; y2 = _midpointY; }
+		inline function upperY() {y1 = _midpointY; y2 = maxY; }
+		inline function lowerZ() {z1 = minZ; z2 = _midpointZ; }
+		inline function upperZ() {z1 = _midpointZ; z2 = maxZ; }
 
 		
 		inline function checkIntersection():Bool {
-			return (_objectMaxX > x && _objectMinX < x2 &&
-				_objectMaxY > y && _objectMinX < y2 &&
-				_objectMaxZ > z && _objectMinZ < z2);
+			return (_objectMaxX > x1 && _objectMinX < x2 &&
+				_objectMaxY > y1 && _objectMinX < y2 &&
+				_objectMaxZ > z1 && _objectMinZ < z2);
 		}
 		
 		inline function recycleTree(tree:Octree):Octree {
-			return tree == null? Octree.recycle(x, y, z, _halfWidth, _halfHeight, _halfDepth, this) : tree;
+			var out:Octree = tree == null? Octree.recycle(x1, y1, z1, _halfWidth, _halfHeight, _halfDepth, this) : tree;
+			out.addObject();
+			return out;
 		}
 		
 		lowerX(); lowerY(); lowerZ();
@@ -361,8 +365,7 @@ class Octree extends Box {
 				ot.next = _tailA;
 			}
 			_tailA.object = _object;
-		} else
-		{
+		} else {
 			if (_tailB.object != null) {
 				ot = _tailB;
 				_tailB = LinkedList.recycle();
@@ -373,8 +376,8 @@ class Octree extends Box {
 		if (!_canSubdivide) {
 			return;
 		}
-		for (t in trees) {
-			if (t != null) t.addToList;
+		for (i in 0...8) {
+			if (trees[i] != null) trees[i].addToList();
 		}
 	}
 
