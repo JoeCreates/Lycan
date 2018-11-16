@@ -84,7 +84,7 @@ class GraphicUtil {
 		?anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE):Void
 	{
 		var frameCount:Int = 0;
-		if (anims == null) anims = [];
+		if (anims == null) anims = [{name: "", frameCount: 1}];
 		for (a in anims) {
 			frameCount += a.frameCount;
 		}
