@@ -285,11 +285,11 @@ class Phys {
 
 	public static function update():Void {
 		if (world != null && FlxG.elapsed > 0) {
-			world.step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
-			
 			if (debugManipulator != null) {
 				debugManipulator.update();
 			}
+			
+			world.step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
 		}
 	}
 	
