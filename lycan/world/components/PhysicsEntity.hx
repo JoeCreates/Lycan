@@ -202,8 +202,8 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 	
 	//TODO from old flixel. origin is not correct
 	private function updatePosition():Void {
-		entity.entity_x = x * Phys.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x;
-		entity.entity_y = y * Phys.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y;
+		entity.entity_x = Math.floor(x * Phys.pixelsPerMeter - entity.entity_origin.x * entity.entity_scale.x);
+		entity.entity_y = Math.floor(y * Phys.pixelsPerMeter - entity.entity_origin.y * entity.entity_scale.y);
 	}
 	
 	// TODO enable/disable? :(
