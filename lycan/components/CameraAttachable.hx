@@ -1,6 +1,7 @@
 package lycan.components;
 
 import flixel.FlxCamera;
+import flixel.FlxG;
 
 interface CameraAttachable extends Entity {
 	public var cameraAttachable:CameraAttachableComponent;
@@ -20,10 +21,17 @@ class CameraAttachableComponent extends Component<CameraAttachable> {
 		super(entity);
 		x = 0;
 		y = 0;
+		
+		FlxG.signals.postUpdate.add(updatePosition);
 	}
     
-     @:append("update") public function update(dt:Float):Void {
+    public function update(dt:Float):Void {
 		updatePosition();
+	}
+	
+	@:append("destroy")
+	public function destroy():Void {
+		FlxG.signals.postUpdate.remove(updatePosition);
 	}
 	
 	public function setPosition(x:Float, y:Float):Void {
