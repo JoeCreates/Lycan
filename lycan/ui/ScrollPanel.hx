@@ -16,6 +16,7 @@ typedef SnapPoint = {
 
 /**
  * @author Joe Williamson
+ * TODO use camerasprite?
  */
 class ScrollPanel extends FlxSprite {
 	
