@@ -26,14 +26,17 @@ import openfl.text.TextFormat;
  * Box2D debugging utility, lets you drag world bodies around with the mouse/manipulate with keyboard.
  */
 class Box2DInteractiveDebug {
+	private static var _aabb:B2AABB = new B2AABB();
+	private static var _mouseJointDef:B2MouseJointDef = new B2MouseJointDef();
+	
+	public var mouseJoint:B2MouseJoint = null;
+	public var mouseX(get, never):Float;
+	public var mouseY(get, never):Float;
+	public var physicsMouseX(get, never):Float;
+	public var physicsMouseY(get, never):Float;
+	
 	public function new() {
 	}
-	
-	private var mouseJoint:B2MouseJoint = null;
-	private var mouseX(get, never):Float;
-	private var mouseY(get, never):Float;
-	private var physicsMouseX(get, never):Float;
-	private var physicsMouseY(get, never):Float;
 	
 	public function update():Void {
 		handleMouse();
@@ -76,14 +79,11 @@ class Box2DInteractiveDebug {
 				}
 			}
 		} else {
-			if (mouseJoint != null) {
-				if (FlxG.mouse.justMoved) {
-					mouseJoint.setTarget(vec2(physicsMouseX, physicsMouseY));
-				}
-				if (FlxG.mouse.justReleased) {
-					Phys.world.destroyJoint(mouseJoint);
-					mouseJoint = null;
-				}
+			if (!FlxG.mouse.pressed) {
+				Phys.world.destroyJoint(mouseJoint);
+				mouseJoint = null;
+			} else if (FlxG.mouse.justMoved) {
+				mouseJoint.setTarget(vec2(physicsMouseX, physicsMouseY));
 			}
 		}
 	}
@@ -116,8 +116,6 @@ class Box2DInteractiveDebug {
 		_vec2.set(x, y);
 		return _vec2;
 	}
-	private static var _aabb:B2AABB = new B2AABB();
-	private static var _mouseJointDef:B2MouseJointDef = new B2MouseJointDef();
 }
 
 class Phys {
@@ -132,7 +130,7 @@ class Phys {
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
-	public static var pixelsPerMeter:Float = 30;
+	public static var pixelsPerMeter(default, set):Float = 30;
 	/** Minimum size of shape in Box2D space (in meters), lower than this will result in warnings */
 	public static var minimumSize:Float = 0.1;
 	/** Optional debug mouse/keyboard-based body manipulator */
@@ -218,7 +216,7 @@ class Phys {
 		
 		// Set up debug renderer
 		debugRenderer.setSprite(debugSprite);
-		debugRenderer.setDrawScale(30.0);
+		debugRenderer.setDrawScale(pixelsPerMeter);//TODO
 		debugRenderer.setFillAlpha(0.3);
 		debugRenderer.setLineThickness(1.5);
 		debugRenderer.setFlags(B2DebugDraw.e_shapeBit | B2DebugDraw.e_jointBit);
@@ -310,5 +308,15 @@ class Phys {
 		
 		FlxG.camera.transformObject(sprite);
 		#end
+	}
+	
+	private static function set_pixelsPerMeter(pixels:Float):Float {
+		Phys.pixelsPerMeter = pixels;
+		#if debug
+			if (debugRenderer != null) {
+				debugRenderer.setDrawScale(pixels);
+			}
+		#end
+		return pixels;
 	}
 }
