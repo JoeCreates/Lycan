@@ -144,7 +144,7 @@ import flixel.FlxG;
 	override public function update(dt:Float):Void {
 		super.update(dt);
 		
-		if (evolves) {
+		if (evolves && rootPoint != null) {
 			rootPoint.updateDisplacement(startPoint, endPoint, displacementPerPixel * length, displaceTime.start, displaceTime.end, dt);
 		}
 
