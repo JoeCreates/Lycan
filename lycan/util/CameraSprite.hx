@@ -31,6 +31,8 @@ class CameraSprite extends FlxSprite {
 		
 		group = new CameraGroup();
 		group.camera = sourceCamera;
+		
+		updateCameraPos();
 	}
 	
 	@:access(flixel.FlxCamera)
@@ -59,15 +61,20 @@ class CameraSprite extends FlxSprite {
 		super.update(dt);
 	}
 	
+	function updateCameraPos():Void {
+		if (scrollFactor != null) {
+			getScreenPosition(_point);
+			sourceCamera.setPosition(_point.x, _point.y);
+		}
+	}
+	
 	override function set_x(x:Float):Float {
-		getScreenPosition(_point, camera);
-		camera.x = _point.x;
+		updateCameraPos();
 		return super.set_x(x);
 	}
 	
 	override function set_y(y:Float):Float {
-		getScreenPosition(_point, camera);
-		camera.y = _point.y;
+		updateCameraPos();
 		return super.set_y(y);
 	}
 }
