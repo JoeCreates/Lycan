@@ -9,6 +9,7 @@ import box2D.dynamics.B2Body;
 import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2DebugDraw;
 import box2D.dynamics.B2Fixture;
+import box2D.dynamics.B2FixtureDef;
 import box2D.dynamics.B2World;
 import box2D.dynamics.joints.B2MouseJoint;
 import box2D.dynamics.joints.B2MouseJointDef;
@@ -18,9 +19,11 @@ import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
 import flixel.util.FlxColor;
+import lime.math.Rectangle;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import box2D.dynamics.B2BodyType;
 
 /**
  * Box2D debugging utility, lets you drag world bodies around with the mouse/manipulate with keyboard.
@@ -261,8 +264,24 @@ class Phys {
 	 * @param   thickness   How thick the walls are. 10 by default.
 	 * @param   material    The Material to use for the physics body of the walls.
 	 */
-	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10):B2Body {
-		return null;// TODO
+	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 50):B2Body {
+		var bd = new B2BodyDef();
+		bd.type = B2BodyType.STATIC_BODY;
+		bd.position.set(minX / Phys.pixelsPerMeter, minY / Phys.pixelsPerMeter);
+		bd.userData = null;
+		bd.bullet = false;
+		var body = Phys.world.createBody(bd);
+		
+		inline function addRect(x:Float, y:Float, width:Float, height:Float) {
+			body.createFixture2(createRectangularShape(width, height, x + width / 2, y + height / 2));
+		}
+		
+		addRect(minX - thickness, minY - thickness, maxX - minX + thickness * 2, thickness);
+		addRect(minX - thickness, maxY, maxX - minX + thickness * 2, thickness);
+		addRect(minX - thickness, minY, thickness, maxY - minY);
+		addRect(maxX, minY, thickness, maxY - minY);
+		
+		return body;
 	}
 
 	private static function set_drawDebug(drawDebug:Bool):Bool {
