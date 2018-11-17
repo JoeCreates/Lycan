@@ -66,7 +66,7 @@ class Box2DInteractiveDebug {
 		return body;
 	}
 	
-	private function handleMouse():Void {
+	public function handleMouse():Void {
 		if (mouseJoint == null) {
 			if (FlxG.mouse.justPressed) {
 				var bodyAtMouse = getBodyAtMouse();
@@ -91,13 +91,8 @@ class Box2DInteractiveDebug {
 		}
 	}
 	
-	private function handleKeys():Void {
-		if(FlxG.keys.pressed.D) {
-			var body = getBodyAtMouse();
-			if (body != null) {
-				Phys.world.destroyBody(body);
-			}
-		}
+	public function handleKeys():Void {
+
 	}
 	
 	private function get_mouseX():Float {
