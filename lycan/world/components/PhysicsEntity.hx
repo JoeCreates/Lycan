@@ -196,7 +196,9 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		updatePosition();
 		
 		if (!body.isFixedRotation()) {
-			entity.entity_angle = angleDeg;
+			// Update angle, normalize to (0-360)
+			var angle:Float = angleDeg % 360;
+			entity.entity_angle = angle < 0 ? angle + 360 : angle;
 		}
 	}
 	
