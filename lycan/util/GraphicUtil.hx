@@ -7,6 +7,7 @@ import flash.utils.ByteArray;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.animation.FlxAnimation;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxMath;
@@ -81,7 +82,7 @@ class GraphicUtil {
 	
 	
 	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int,
-		?anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE):Void
+		?anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE, ?frameRate:Float):Void
 	{
 		var frameCount:Int = 0;
 		if (anims == null) anims = [{name: "", frameCount: 1}];
@@ -109,6 +110,14 @@ class GraphicUtil {
 				bitmap.draw(txt, mat, null, null, rect);
 				mat.translate(width, 0);
 				rect.x += width;
+			}
+		}
+		
+		if (frameRate != null) {
+			var curFrame:Int = 0;
+			for (a in anims) {
+				spr.animation.add(a.name, [for (i in curFrame...curFrame + a.frameCount) i], cast frameRate, true);
+				curFrame += a.frameCount;
 			}
 		}
 	}
