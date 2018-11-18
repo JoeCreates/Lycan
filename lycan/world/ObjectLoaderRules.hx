@@ -9,8 +9,7 @@ import flixel.addons.editors.tiled.TiledObjectLayer;
 typedef ObjectLoaderPrecondition = TiledObject->TiledObjectLayer->Bool;
 typedef ObjectLoader = TiledObject->ObjectLayer->FlxBasic;
 
-// Pairs techniques for finding tiled map objects to functions for loading them into the world
-// Pairs objects with custom loading functions based on preconditions
+// Represents a collection of functions for loading objects from a Tiled map and into a World
 class ObjectLoaderRules {
     private var handlers:ArraySet<{ precondition: ObjectLoaderPrecondition, loader: ObjectLoader }> = [];
 
