@@ -7,12 +7,9 @@ import flixel.addons.editors.tiled.TiledPropertySet;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.addons.editors.tiled.TiledObject;
 import flixel.group.FlxGroup;
-import haxe.ds.StringMap;
 import lycan.world.World;
 import lycan.world.layer.ILayer.LayerType;
 import lycan.world.layer.TileLayer;
-
-typedef ObjectLoader = TiledObject->ObjectLayer->FlxBasic;
 
 class ObjectLayer extends FlxGroup implements ILayer {
 	public var layerType(default, null):LayerType = LayerType.OBJECT;
@@ -28,7 +25,7 @@ class ObjectLayer extends FlxGroup implements ILayer {
 		return this;
 	}
 	
-	public function load(tiledLayer:TiledObjectLayer, objectLoaders:StringMap<ObjectLoader>):ObjectLayer {
+	public function load(tiledLayer:TiledObjectLayer, objectLoaders:ObjectLoaderRules):ObjectLayer {
 		
 		this.properties = tiledLayer.properties;
 		
@@ -38,15 +35,15 @@ class ObjectLayer extends FlxGroup implements ILayer {
 		return this;
 	}
 	
-	private function loadObjects(tiledLayer:TiledObjectLayer, objectLoaders:StringMap<ObjectLoader>):ObjectLayer {
+	private function loadObjects(tiledLayer:TiledObjectLayer, objectLoaders:ObjectLoaderRules):ObjectLayer {
 		for (o in tiledLayer.objects) {
-			if (!objectLoaders.exists(o.type)) {
-				FlxG.log.warn("Error loading world. Unknown object type: " + o.type);
+			if (objectLoaders.getHandler(o, tiledLayer) == null) {
+				FlxG.log.warn("Error loading world. Object with this type has no loading handler: " + o.type);
 				continue;
 			}
 			
 			// Call the loader function for the given object
-			var object:FlxBasic = objectLoaders.get(o.type)(o, this);
+			var object:FlxBasic = objectLoaders.getHandler(o, tiledLayer)(o, this);
 			
 			// Insert the object into the named objects map
 			if (o.name != null && o.name != "") {

@@ -18,7 +18,6 @@ import flixel.system.FlxAssets;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxBitmapDataUtil;
-import haxe.ds.StringMap;
 import haxe.io.Path;
 import lycan.world.layer.ILayer;
 import openfl.display.BitmapData;
@@ -80,7 +79,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoaders:StringMap<ObjectLoader>):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoaders:ObjectLoaderRules):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
@@ -115,7 +114,7 @@ class World extends FlxGroup {
 		return layer;
 	}
 	
-	public function loadObjectLayer(tiledLayer:TiledObjectLayer, objectLoaders:StringMap<ObjectLoader>):ILayer {
+	public function loadObjectLayer(tiledLayer:TiledObjectLayer, objectLoaders:ObjectLoaderRules):ILayer {
 		var layer:ObjectLayer = new ObjectLayer(this).load(tiledLayer, objectLoaders);
 		add(layer);
 		namedLayers.set(tiledLayer.name, layer);
