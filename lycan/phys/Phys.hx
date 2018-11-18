@@ -66,7 +66,7 @@ class Box2DInteractiveDebug {
 		return body;
 	}
 	
-	private function handleMouse():Void {
+	public function handleMouse():Void {
 		if (mouseJoint == null) {
 			if (FlxG.mouse.justPressed) {
 				var bodyAtMouse = getBodyAtMouse();
@@ -91,13 +91,8 @@ class Box2DInteractiveDebug {
 		}
 	}
 	
-	private function handleKeys():Void {
-		if(FlxG.keys.pressed.D) {
-			var body = getBodyAtMouse();
-			if (body != null) {
-				Phys.world.destroyBody(body);
-			}
-		}
+	public function handleKeys():Void {
+
 	}
 	
 	private function get_mouseX():Float {
@@ -133,7 +128,7 @@ class Phys {
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
 	/** Scale factor for mapping pixel coordinates to Box2D coordinates */
-	public static var pixelsPerMeter(default, set):Float = 30;
+	public static var pixelsPerMeter(default, set):Float = 100;
 	/** Minimum size of shape in Box2D space (in meters), lower than this will result in warnings */
 	public static var minimumSize:Float = 0.1;
 	/** Optional debug mouse/keyboard-based body manipulator */
@@ -156,6 +151,8 @@ class Phys {
 		if (world != null) return;
 		
 		world = new B2World(new B2Vec2(0, 3), true);
+		
+		world.getGravity().set(0, 20);
 		
 		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
