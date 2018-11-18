@@ -50,6 +50,7 @@ class GraphicUtil {
 	
 	/**
 	 * Masks the `source` BitmapData (in place) using alpha data from `alphaMask`.
+	 * //TODO shader version for real time stuff
 	 * 
 	 * Note: `source` and `alphaMask` must be of the same size.
 	 * 
@@ -80,6 +81,20 @@ class GraphicUtil {
 		source.setPixels(sourceRect, sourceBytes);
 	}
 	
+	public function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData {
+		scale = Math.abs(scale);
+		
+		var width:Int = Std.int(bitmapData.width * scale);
+		var height:Int = Std.int(bitmapData.height * scale);
+		var transparent:Boolean = bitmapData.transparent;
+		var result:BitmapData = new BitmapData(width, height, transparent);
+		
+		var matrix:Matrix = Matrix();
+		matrix.scale(scale, scale);
+		result.draw(bitmapData, matrix);
+		
+		return result;
+	}
 	
 	public static function makePlaceholderGraphic(spr:FlxSprite, name:String, width:Int, height:Int,
 		?anims:Array<{name:String, frameCount:Int}>, color:FlxColor = FlxColor.WHITE, ?frameRate:Float):Void
