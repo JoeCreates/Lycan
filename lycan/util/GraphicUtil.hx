@@ -86,10 +86,10 @@ class GraphicUtil {
 		
 		var width:Int = Std.int(bitmapData.width * scale);
 		var height:Int = Std.int(bitmapData.height * scale);
-		var transparent:Boolean = bitmapData.transparent;
+		var transparent:Bool = bitmapData.transparent;
 		var result:BitmapData = new BitmapData(width, height, transparent);
 		
-		var matrix:Matrix = Matrix();
+		var matrix:Matrix = new Matrix();
 		matrix.scale(scale, scale);
 		result.draw(bitmapData, matrix);
 		
