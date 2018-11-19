@@ -81,7 +81,7 @@ class GraphicUtil {
 		source.setPixels(sourceRect, sourceBytes);
 	}
 	
-	public function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData {
+	public static function scaleBitmapData(bitmapData:BitmapData, scale:Float):BitmapData {
 		scale = Math.abs(scale);
 		
 		var width:Int = Std.int(bitmapData.width * scale);
