@@ -1,5 +1,6 @@
 package lycan.world.layer;
 
+import flash.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -12,6 +13,9 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import lycan.world.layer.ILayer.LayerType;
 import flixel.math.FlxPoint;
+import lycan.util.GraphicUtil;
+import flixel.graphics.FlxGraphic;
+import flixel.system.FlxAssets;
 
 class TileLayer extends FlxTilemap implements ILayer {
 	
@@ -38,8 +42,17 @@ class TileLayer extends FlxTilemap implements ILayer {
 	
 	public function load(tiledLayer:TiledTileLayer):TileLayer {
 		
-		loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, world.combinedTileset,
-			Std.int(tiledLayer.map.tileWidth), Std.int(tiledLayer.map.tileHeight), FlxTilemapAutoTiling.OFF, 1, 1, 1);
+		//TODO do this with flag in map
+		var auto:Bool = true;
+		//TODO read this from the map?
+		var autoTiles:BitmapData = GraphicUtil.scaleBitmapData(FlxAssets.getBitmapFromClass(GraphicAutoFull), 2);
+		if (auto) {
+			
+		}
+		
+		//TODO hacked in scale
+		loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, autoTiles,
+			Std.int(tiledLayer.map.tileWidth) * 2, Std.int(tiledLayer.map.tileHeight) * 2, FlxTilemapAutoTiling.FULL, 1, 1, 1);
 		
 		scale.copyFrom(world.scale);
 		tileWidth = tiledLayer.map.tileWidth;
