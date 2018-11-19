@@ -37,25 +37,30 @@ class ObjectLayer extends FlxGroup implements ILayer {
 	
 	private function loadObjects(tiledLayer:TiledObjectLayer, objectLoaders:ObjectLoaderRules):ObjectLayer {
 		for (o in tiledLayer.objects) {
-			if (objectLoaders.getHandler(o, tiledLayer) == null) {
+			if (objectLoaders.getHandler(o) == null) {
 				FlxG.log.warn("Error loading world. Object with this type has no loading handler: " + o.type);
 				continue;
 			}
 			
-			// Call the loader function for the given object
-			var object:FlxBasic = objectLoaders.getHandler(o, tiledLayer)(o, this);
+			// Call the loader functions
 			
-			// Insert the object into the named objects map
-			if (o.name != null && o.name != "") {
-				if (world.namedObjects.exists(o.name)) {
-					throw("Error loading world. Object names must be unique: " + o.name);
+			for (loader in objectLoaders.handlers) {
+				if (!loader.precondition(o)) continue;
+				
+				var object:FlxBasic = loader.loader(o, this);
+				
+				if (object != null) {
+					// Insert the object into the named objects map
+					if (o.name != null && o.name != "") {
+						if (world.namedObjects.exists(o.name)) {
+							throw("Error loading world. Object names must be unique: " + o.name);
+						}
+						world.namedObjects.set(o.name, object);
+					}
+					
+					// Add the basic to the layer if it exists
+					add(object);
 				}
-				world.namedObjects.set(o.name, object);
-			}
-			
-			// Add the basic to the layer if it exists
-			if (object != null) {
-				add(object);
 			}
 		}
 		

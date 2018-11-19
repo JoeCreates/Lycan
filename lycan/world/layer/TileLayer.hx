@@ -45,14 +45,14 @@ class TileLayer extends FlxTilemap implements ILayer {
 		//TODO do this with flag in map
 		var auto:Bool = true;
 		//TODO read this from the map?
-		var autoTiles:BitmapData = GraphicUtil.scaleBitmapData(FlxAssets.getBitmapFromClass(GraphicAutoFull), 2);
+		var autoTiles:BitmapData = GraphicUtil.scaleBitmapData(FlxAssets.getBitmapFromClass(GraphicAutoFull), 1);
 		if (auto) {
 			
 		}
 		
 		//TODO hacked in scale
 		loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, autoTiles,
-			Std.int(tiledLayer.map.tileWidth) * 2, Std.int(tiledLayer.map.tileHeight) * 2, FlxTilemapAutoTiling.FULL, 1, 1, 1);
+			Std.int(tiledLayer.map.tileWidth), Std.int(tiledLayer.map.tileHeight), FlxTilemapAutoTiling.FULL, 1, 1, 1);
 		
 		scale.copyFrom(world.scale);
 		tileWidth = tiledLayer.map.tileWidth;
