@@ -77,10 +77,20 @@ class LycanState extends FlxSubState {
 		onEnter = new FlxTypedSignal<LycanState->Void>();
 		onExit = new FlxTypedSignal<LycanState->Void>();
 	}
+
+	override public function destroy():Void {
+		super.destroy();
+
+		// TODO fix camera setup - make sure we don't cause mem leaks by leaving refs to cameras on state + on FlxG
+		FlxG.cameras.remove(worldCamera);
+		FlxG.cameras.remove(uiCamera);
+
+		FlxCamera.defaultCameras = [];
+
+	}
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
-		
 	}
 	
 	override public function switchTo(state:FlxState):Bool {
