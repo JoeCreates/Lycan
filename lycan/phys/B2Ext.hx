@@ -5,7 +5,7 @@ import box2D.dynamics.B2World;
 import box2D.dynamics.B2Body;
 
 abstract B2WorldExt(B2World) to B2World from B2World {
-	
+	// TODO Convex cast
 	
 }
 

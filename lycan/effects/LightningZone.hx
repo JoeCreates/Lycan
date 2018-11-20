@@ -44,7 +44,7 @@ import flash.display.BitmapDataChannel;
 		super();
 		if (width == null) width = FlxG.width;
 		if (height == null) width = FlxG.height;
-		makeGraphic(width, height, 0);
+		makeGraphic(width, height, 0, true);
 		
 		group = new FlxTypedGroup<Lightning>();
 		

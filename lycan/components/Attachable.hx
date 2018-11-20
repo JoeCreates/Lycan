@@ -1,5 +1,6 @@
 package lycan.components;
 
+import flixel.util.FlxSignal;
 import flixel.FlxG;
 import flixel.system.frontEnds.SignalFrontEnd;
 
