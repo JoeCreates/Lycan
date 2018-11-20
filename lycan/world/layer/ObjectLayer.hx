@@ -44,12 +44,17 @@ class ObjectLayer extends FlxGroup implements ILayer {
 			
 			// Call the loader functions
 			
+			// TODO simplify and renamed "loader" terms to "handler"
+			// TODO we could essentially just add the handlers to a signal then!!!
+			// TODO conditions can be added in many ways, but a function that returns a conditionless handler wrapped in a conditonal handler
 			for (loader in objectLoaders.handlers) {
 				if (!loader.precondition(o)) continue;
 				
+				// TODO no need for retruns, make the handler responsible
 				var object:FlxBasic = loader.loader(o, this);
 				
 				if (object != null) {
+					// TODO the named objects stuff should be done by overriding add
 					// Insert the object into the named objects map
 					if (o.name != null && o.name != "") {
 						if (world.namedObjects.exists(o.name)) {
@@ -58,6 +63,7 @@ class ObjectLayer extends FlxGroup implements ILayer {
 						world.namedObjects.set(o.name, object);
 					}
 					
+					// TODO Remove this, when the handlers deal with it
 					// Add the basic to the layer if it exists
 					add(object);
 				}
