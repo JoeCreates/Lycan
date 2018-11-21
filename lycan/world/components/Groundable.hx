@@ -3,12 +3,15 @@ package lycan.world.components;
 import flixel.FlxObject;
 import lycan.components.Component;
 import lycan.components.Entity;
+import flixel.util.FlxSignal;
 
 interface Groundable extends Entity {
 	public var groundable:GroundableComponent;
 }
 
 class GroundableComponent extends Component<Groundable> {
+	public static var clearGroundsSignal:FlxSignal = new FlxSignal();
+	
 	private var currentGrounds:Map<FlxObject, Bool>;
 	private var currentGroundCount:Int;
 	
@@ -34,6 +37,9 @@ class GroundableComponent extends Component<Groundable> {
 		if (!currentGrounds.exists(object)) {
 			currentGrounds.set(object, true);
 			currentGroundCount++;
+			clearGroundsSignal.addOnce(()->{
+				remove(object);
+			});
 		}
 	}
 	
