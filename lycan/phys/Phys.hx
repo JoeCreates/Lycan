@@ -153,7 +153,7 @@ class Phys {
 	}
 	
 	private static function destroyDebug():Void {
-		#if !Flx_NO_DEBUG
+		#if !FLX_NO_DEBUG
 		drawDebug = false;
 		enableDebugManipulator = false;
 		debugManipulator = null;
@@ -182,10 +182,12 @@ class Phys {
 		#end
 	}
 	
+	#if !FLX_NO_DEBUG
 	private static function set_enableDebugManipulator(enable:Bool):Bool {
 		if (enable && debugManipulator == null) {
 			debugManipulator = new DebugManipulator();
 		}
 		return Phys.enableDebugManipulator = enable;
 	}
+	#end
 }
