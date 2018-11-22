@@ -15,6 +15,7 @@ import nape.shape.Polygon;
 import nape.space.Space;
 import flixel.FlxSprite;
 import flixel.util.FlxDestroyUtil;
+import lycan.core.LG;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -60,17 +61,17 @@ interface PhysicsEntity extends Entity {
 			createRectangularBody();
 		}
 		this.enabled = enabled;
-		FlxG.signals.postUpdate.add(update);
+		LG.lateUpdate.add(update);
 	}
 	
 	@:append("destroy")
 	public function destroy():Void {
 		destroyPhysObjects();
-		FlxG.signals.postUpdate.remove(update);
+		LG.lateUpdate.remove(update);
 		offset = FlxDestroyUtil.put(offset);
 	}
 
-	public function update():Void {
+	public function update(dt:Float):Void {
 		if (!entity.entity_alive) return;
 		
 		if (body != null && entity.entity_moves) {
@@ -150,6 +151,12 @@ interface PhysicsEntity extends Entity {
 		}
 	}
 	
+	//TODO from old flixel. origin is not correct
+	public function updatePosition():Void {
+		entity.entity_x = Math.floor(position.x - entity.entity_origin.x * entity.entity_scale.x);
+		entity.entity_y = Math.floor(position.y - entity.entity_origin.y * entity.entity_scale.y);
+	}
+	
 	public inline function setDrag(linearDrag:Float = 1, angularDrag:Float = 1):Void {
 		this.linearDrag	= linearDrag;
 		this.angularDrag = angularDrag;
@@ -172,12 +179,6 @@ interface PhysicsEntity extends Entity {
 			body.velocity.x *= linearDrag;
 			body.velocity.y *= linearDrag;
 		}
-	}
-	
-	//TODO from old flixel. origin is not correct
-	private function updatePosition():Void {
-		entity.entity_x = Math.floor(position.x - entity.entity_origin.x * entity.entity_scale.x);
-		entity.entity_y = Math.floor(position.y - entity.entity_origin.y * entity.entity_scale.y);
 	}
 	
 	public function setBody(body:Body):Void {

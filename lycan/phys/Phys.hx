@@ -48,7 +48,7 @@ class Phys {
 		space = new Space(Vec2.weak(0, 3));
 		space.gravity.y = 2000;
 		
-		FlxG.signals.postUpdate.add(update);
+		FlxG.signals.preUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		FlxG.signals.stateSwitched.add(onStateSwitch);
 		
@@ -67,7 +67,7 @@ class Phys {
 		
 		space = null;
 		
-		FlxG.signals.postUpdate.remove(update);
+		FlxG.signals.preUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
 		FlxG.signals.stateSwitched.remove(onStateSwitch);
 		
