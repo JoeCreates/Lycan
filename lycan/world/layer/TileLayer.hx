@@ -40,7 +40,7 @@ class TileLayer extends FlxTilemap implements ILayer {
 		super.update(dt);
 	}
 	
-	public function load(tiledLayer:TiledTileLayer):TileLayer {
+	public function load(tiledLayer:TiledTileLayer):Void {
 		
 		//TODO do this with flag in map
 		var auto:Bool = true;
@@ -62,11 +62,9 @@ class TileLayer extends FlxTilemap implements ILayer {
 		processProperties(tiledLayer);
 		
 		loaded.dispatch(tiledLayer);
-		
-		return this;
 	}
 	
-	public function processProperties(tiledLayer:TiledLayer):TileLayer {
+	public function processProperties(tiledLayer:TiledLayer):Void {
 		if (tiledLayer.properties.contains("collides")) {
 			solid = true;
 			world.collidableTilemaps.push(this);
@@ -77,8 +75,6 @@ class TileLayer extends FlxTilemap implements ILayer {
 		if (tiledLayer.properties.contains("hidden")) {
 			visible = false;
 		}
-		
-		return this;
 	}
 	
 	private function get_tileWidth():Float {

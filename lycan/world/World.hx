@@ -79,7 +79,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoaders:ObjectLoaderRules):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<TiledObject->Void>):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
@@ -93,7 +93,7 @@ class World extends FlxGroup {
 		var layersLoaded:Float = 0;
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
-				case TiledLayerType.OBJECT: loadObjectLayer(cast tiledLayer, objectLoaders);
+				case TiledLayerType.OBJECT: loadObjectLayer(cast tiledLayer, objectLoadingHandlers);
 				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer);
 				default:
 					trace("Encountered unknown TiledLayerType");
@@ -108,14 +108,16 @@ class World extends FlxGroup {
 	}
 	
 	public function loadTileLayer(tiledLayer:TiledTileLayer):ILayer {
-		var layer:TileLayer = cast new TileLayer(this).load(tiledLayer);
+		var layer:TileLayer = cast new TileLayer(this);
+		layer.load(tiledLayer);
 		add(layer);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
 	}
 	
-	public function loadObjectLayer(tiledLayer:TiledObjectLayer, objectLoaders:ObjectLoaderRules):ILayer {
-		var layer:ObjectLayer = new ObjectLayer(this).load(tiledLayer, objectLoaders);
+	public function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->Void>):ILayer {
+		var layer:ObjectLayer = new ObjectLayer(this);
+		layer.load(tiledLayer, handlers);
 		add(layer);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
