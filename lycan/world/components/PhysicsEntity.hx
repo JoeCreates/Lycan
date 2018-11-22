@@ -60,7 +60,7 @@ interface PhysicsEntity extends Entity {
 			createRectangularBody();
 		}
 		this.enabled = enabled;
-		FlxG.signals.preUpdate.add(update);
+		FlxG.signals.postUpdate.add(update);
 	}
 	
 	@:append("destroy")

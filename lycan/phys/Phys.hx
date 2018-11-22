@@ -34,12 +34,12 @@ class Phys {
 	public static var drawDebug(default, set):Null<Bool> = null;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
-	/** Optional debug mouse/keyboard-based body manipulator */
-	//TODO public static var debugManipulator:Box2DInteractiveDebug = null;
 	
 	#if !FLX_NO_DEBUG
 	public static var shapeDebug(default, null):ShapeDebug;
 	private static var drawDebugButton:FlxSystemButton;
+	public static var debugManipulator:DebugManipulator;
+	public static var enableDebugManipulator(default, set):Bool = false;
 	#end
 	
 	public static function init():Void {
@@ -48,23 +48,31 @@ class Phys {
 		space = new Space(Vec2.weak(0, 3));
 		space.gravity.y = 2000;
 		
-		FlxG.signals.preUpdate.add(update);
+		FlxG.signals.postUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
 		FlxG.signals.stateSwitched.add(onStateSwitch);
+		
+		#if !FLX_NO_DEBUG
+		// Add a button to toggle Nape debug shapes to the debugger
+		drawDebugButton = FlxG.debugger.addButton(RIGHT, new GraphicNapeDebug(0, 0), function() {
+			drawDebug = !drawDebug;
+		}, true, true);
+		drawDebug = false;
+		#end
 	}
 	
 	public static function destroy():Void {
 		
-		#if !FLX_NO_DEBUG
-		drawDebug = false;
-		#end
+		destroyDebug();
+		
 		space = null;
 		
-		FlxG.signals.preUpdate.remove(update);
+		FlxG.signals.postUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
 		FlxG.signals.stateSwitched.remove(onStateSwitch);
 		
 		GroundableComponent.clearGroundsSignal.removeAll();
+		
 	}
 
 	/**
@@ -84,10 +92,11 @@ class Phys {
 		
 		var walls:Body = new Body(BodyType.STATIC);
 		
-		walls.shapes.add(new Polygon(Polygon.rect(minX - thickness, minY, thickness, maxY + Math.abs(minY))));
-		walls.shapes.add(new Polygon(Polygon.rect(maxX, minY, thickness, maxY + Math.abs(minY))));
-		walls.shapes.add(new Polygon(Polygon.rect(minX, minY - thickness, maxX + Math.abs(minX), thickness)));
-		walls.shapes.add(new Polygon(Polygon.rect(minX, maxY, maxX + Math.abs(minX), thickness)));
+		// Left, right, top, bottom
+		walls.shapes.add(new Polygon(Polygon.rect(minX - thickness, minY, thickness, maxY - minY)));
+		walls.shapes.add(new Polygon(Polygon.rect(maxX, minY, thickness, maxY - minY)));
+		walls.shapes.add(new Polygon(Polygon.rect(minX - thickness, minY - thickness, maxX - minX + thickness * 2, thickness)));
+		walls.shapes.add(new Polygon(Polygon.rect(minX - thickness, maxY, maxX - minX + thickness * 2, thickness)));
 
 		walls.space = space;
 		walls.setShapeMaterials(material);
@@ -122,9 +131,10 @@ class Phys {
 
 	public static function update():Void {
 		if (space != null && FlxG.elapsed > 0) {
-			// if (debugManipulator != null) {
-			// 	debugManipulator.update();
-			// }
+			
+			#if !FLX_NO_DEBUG
+			if (debugManipulator != null && enableDebugManipulator) debugManipulator.update();
+			#end
 			
 			// TODO better method or location for this?
 			GroundableComponent.clearGroundsSignal.dispatch();
@@ -139,9 +149,14 @@ class Phys {
 			space = null; // resets atributes like gravity.
 		}
 		
-		#if !FLX_NO_DEBUG
+		destroyDebug();
+	}
+	
+	private static function destroyDebug():Void {
+		#if !Flx_NO_DEBUG
 		drawDebug = false;
-		
+		enableDebugManipulator = false;
+		debugManipulator = null;
 		if (drawDebugButton != null) {
 			FlxG.debugger.removeButton(drawDebugButton);
 			drawDebugButton = null;
@@ -165,5 +180,12 @@ class Phys {
 		sprite.x = -FlxG.camera.scroll.x * zoom;
 		sprite.y = -FlxG.camera.scroll.y * zoom;
 		#end
+	}
+	
+	private static function set_enableDebugManipulator(enable:Bool):Bool {
+		if (enable && debugManipulator == null) {
+			debugManipulator = new DebugManipulator();
+		}
+		return Phys.enableDebugManipulator = enable;
 	}
 }
