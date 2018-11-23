@@ -110,7 +110,7 @@ class World extends FlxGroup {
 	public function loadTileLayer(tiledLayer:TiledTileLayer):ILayer {
 		var layer:TileLayer = cast new TileLayer(this);
 		layer.load(tiledLayer);
-		add(layer);
+		add(layer.tilemap);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
 	}
