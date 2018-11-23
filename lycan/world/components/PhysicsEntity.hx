@@ -152,9 +152,22 @@ interface PhysicsEntity extends Entity {
 	}
 	
 	//TODO from old flixel. origin is not correct
-	public function updatePosition():Void {
-		entity.entity_x = Math.floor(position.x - entity.entity_origin.x * entity.entity_scale.x);
-		entity.entity_y = Math.floor(position.y - entity.entity_origin.y * entity.entity_scale.y);
+	public function snapEntityToBody():Void {
+		entity.entity_x = position.x - entity.entity_origin.x * entity.entity_scale.x;
+		entity.entity_y = position.y - entity.entity_origin.y * entity.entity_scale.y;
+		
+		if (body.allowRotation) {
+			entity.entity_angle = body.rotation * FlxAngle.TO_DEG;
+		}
+	}
+	
+	public function snapBodyToEntity():Void {
+		position.x = entity.entity_x + entity.entity_origin.x * entity.entity_scale.x;
+		position.y = entity.entity_y + entity.entity_origin.y * entity.entity_scale.y;
+		
+		if (body.allowRotation) {
+			body.rotation = entity.entity_angle * FlxAngle.TO_RAD;
+		}
 	}
 	
 	public inline function setDrag(linearDrag:Float = 1, angularDrag:Float = 1):Void {
@@ -167,11 +180,7 @@ interface PhysicsEntity extends Entity {
 	 * Things that are updated: Position, angle, angular and linear drag.
 	 */
 	private function updatePhysObjects():Void {
-		updatePosition();
-		
-		if (body.allowRotation) {
-			entity.entity_angle = body.rotation * FlxAngle.TO_DEG;
-		}
+		snapEntityToBody();
 		
 		// Applies custom physics drag.
 		if (linearDrag < 1 || angularDrag < 1) {
@@ -183,7 +192,7 @@ interface PhysicsEntity extends Entity {
 	
 	public function setBody(body:Body):Void {
 		this.body = body;
-		this.enabled = enabled;//TODO make it so this isn't necessary
+		this.enabled = enabled;
 	}
 	
 	private function set_enabled(value:Bool):Bool {

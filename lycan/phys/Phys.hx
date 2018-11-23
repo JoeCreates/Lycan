@@ -88,7 +88,7 @@ class Phys {
 	public static function createWalls(minX:Float = 0, minY:Float = 0, maxX:Float = 0, maxY:Float = 0, thickness:Float = 10, ?material:Material):Body {
 		if (maxX == 0) 	maxX = FlxG.width;
 		if (maxY == 0)	maxY = FlxG.height;
-		if (material == null) material = new Material(0, 0.2, 0.38, 0.7);
+		if (material == null) material = new Material();
 		
 		var walls:Body = new Body(BodyType.STATIC);
 		
