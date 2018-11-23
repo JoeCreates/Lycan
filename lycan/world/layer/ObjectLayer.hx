@@ -27,7 +27,7 @@ class ObjectLayer extends FlxGroup implements ILayer {
 		return this;
 	}
 	
-	public function load(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->Void>):Void {
+	public function load(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):Void {
 		this.properties = tiledLayer.properties;
 		
 		loadObjects(tiledLayer, handlers);
@@ -38,9 +38,9 @@ class ObjectLayer extends FlxGroup implements ILayer {
 		return super.add(object);
 	}
 	
-	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->Void>):Void {
+	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):Void {
 		for (o in tiledLayer.objects) {
-			handlers.dispatch(o);
+			handlers.dispatch(o, this);
 		}
 	}
 	

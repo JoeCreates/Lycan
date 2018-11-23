@@ -79,7 +79,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<TiledObject->Void>):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
@@ -115,7 +115,7 @@ class World extends FlxGroup {
 		return layer;
 	}
 	
-	public function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->Void>):ILayer {
+	public function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):ILayer {
 		var layer:ObjectLayer = new ObjectLayer(this);
 		layer.load(tiledLayer, handlers);
 		add(layer);
