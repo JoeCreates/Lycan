@@ -146,7 +146,7 @@ class Phys {
 	private static function onStateSwitch():Void {
 		if (space != null) {
 			space.clear();
-			space = null; // resets atributes like gravity.
+			space = null; // resets attributes like gravity.
 		}
 		
 		destroyDebug();
