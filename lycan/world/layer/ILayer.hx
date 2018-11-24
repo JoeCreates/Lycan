@@ -10,6 +10,6 @@ enum LayerType {
 
 interface ILayer {
 	public var type(default, null):LayerType;
-	public var world(default, null):World;
 	public var properties(default, null):TiledPropertySet;
+	public var world(default, null):World;
 }

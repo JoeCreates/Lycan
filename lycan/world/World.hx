@@ -16,16 +16,17 @@ import flixel.math.FlxPoint;
 import flixel.system.FlxAssets;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxSignal.FlxTypedSignal;
+import haxe.ds.Map;
 import haxe.io.Path;
 import lycan.world.ObjectLoader.ObjectHandler;
+import lycan.world.TileLayerLoader.TileLayerHandler;
 import lycan.world.layer.ILayer;
 import lycan.world.layer.ObjectLayer;
 import lycan.world.layer.TileLayer;
 import openfl.display.BitmapData;
-import lycan.world.TileLayerLoader.TileLayerHandler;
 
 // A 2D world built from Tiled maps
-// Consists of TileLayers and FlxGroups of game objects
+// Consists of TileLayers of tiles and ObjectLayers containing game objects
 class World extends FlxGroup {
 	public var name:String;
 	public var width(default, null):Int;
@@ -56,13 +57,13 @@ class World extends FlxGroup {
 		updateSpeed = 1;
 		namedObjects = new Map<String, FlxBasic>();
 		namedLayers = new Map<String, ILayer>();
+		namedTilesets = new Map<String, TiledTileSet>();
 		collidableTilemaps = new Array<FlxTilemap>();
 		
 		onLoadingProgressed = new FlxTypedSignal<Float->Void>();
 	}
 	
-	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void,
-			?processCallback:FlxObject->FlxObject->Bool):Bool {
+	public function collideWithLevel<T, U>(obj:FlxBasic, ?notifyCallback:T->U->Void, ?processCallback:FlxObject->FlxObject->Bool):Bool {
 		if (collidableTilemaps == null) {
 			return false;
 		}
@@ -77,14 +78,13 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<ObjectHandler>, tileLayerLoadingHandlers:FlxTypedSignal<TileLayerHandler>):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<ObjectHandler>, tileLayerLoadingHandler:TileLayerHandler):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
 		height = tiledMap.fullHeight;
 		
 		updateCameraAndWorldBounds();
-		processProperties(tiledMap);
 		loadTilesets(tiledMap);
 		
 		// Load layers
@@ -92,7 +92,7 @@ class World extends FlxGroup {
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
 				case TiledLayerType.OBJECT: loadObjectLayer(cast tiledLayer, objectLoadingHandlers);
-				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer, tileLayerLoadingHandlers);
+				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer, tileLayerLoadingHandler);
 				default:
 					trace("Encountered unknown TiledLayerType");
 			}
@@ -105,9 +105,9 @@ class World extends FlxGroup {
 		return this;
 	}
 	
-	public function loadTileLayer(tiledLayer:TiledTileLayer, tileLayerLoadingHandlers:FlxTypedSignal<TileLayerHandler>):ILayer {
+	public function loadTileLayer(tiledLayer:TiledTileLayer, handler:TileLayerHandler):ILayer {
 		var layer:TileLayer = new TileLayer(this);
-		layer.load(tiledLayer, tileLayerLoadingHandlers);
+		layer.load(tiledLayer, handler);
 		add(layer.tilemap);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
@@ -119,10 +119,6 @@ class World extends FlxGroup {
 		add(layer.group);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
-	}
-	
-	public function processProperties(tiledMap:TiledMap):World {
-		return this;
 	}
 
 	override public function update(dt:Float):Void {

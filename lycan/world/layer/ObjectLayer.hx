@@ -27,7 +27,6 @@ class ObjectLayer implements ILayer {
 		this.properties = tiledLayer.properties;
 		
 		loadObjects(tiledLayer, handlers);
-		processProperties(tiledLayer);
 	}
 
 	public function add(object:FlxBasic):FlxBasic {
@@ -38,9 +37,5 @@ class ObjectLayer implements ILayer {
 		for (o in tiledLayer.objects) {
 			handlers.dispatch(o, this);
 		}
-	}
-	
-	private function processProperties(tiledLayer:TiledObjectLayer):Void {
-
 	}
 }
