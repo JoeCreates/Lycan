@@ -1,30 +1,28 @@
 package lycan.world;
 
-import flixel.addons.editors.tiled.TiledMap.FlxTiledMapAsset;
-import flixel.addons.editors.tiled.TiledPropertySet;
-import flixel.addons.editors.tiled.TiledTileSet;
-import flixel.addons.editors.tiled.TiledLayer;
-import flixel.addons.editors.tiled.TiledTileLayer;
-import flixel.addons.editors.tiled.TiledMap;
-import flixel.addons.editors.tiled.TiledObjectLayer;
-import flixel.addons.editors.tiled.TiledObject;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
+import flixel.addons.editors.tiled.TiledLayer.TiledLayerType;
+import flixel.addons.editors.tiled.TiledMap;
+import flixel.addons.editors.tiled.TiledMap.FlxTiledMapAsset;
+import flixel.addons.editors.tiled.TiledObjectLayer;
+import flixel.addons.editors.tiled.TiledPropertySet;
+import flixel.addons.editors.tiled.TiledTileLayer;
+import flixel.addons.editors.tiled.TiledTileSet;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxAssets;
-import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
-import flixel.util.FlxBitmapDataUtil;
+import flixel.util.FlxSignal.FlxTypedSignal;
 import haxe.io.Path;
+import lycan.world.ObjectLoader.ObjectHandler;
 import lycan.world.layer.ILayer;
-import openfl.display.BitmapData;
-import lycan.world.layer.TileLayer;
 import lycan.world.layer.ObjectLayer;
 import lycan.world.layer.TileLayer;
-import flixel.util.FlxSignal;
+import openfl.display.BitmapData;
+import lycan.world.TileLayerLoader.TileLayerHandler;
 
 // A 2D world built from Tiled maps
 // Consists of TileLayers and FlxGroups of game objects
@@ -79,7 +77,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):World {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:FlxTypedSignal<ObjectHandler>, tileLayerLoadingHandlers:FlxTypedSignal<TileLayerHandler>):World {
 		var tiledMap = new TiledMap(tiledLevel);
 		
 		width = tiledMap.fullWidth;
@@ -94,7 +92,7 @@ class World extends FlxGroup {
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
 				case TiledLayerType.OBJECT: loadObjectLayer(cast tiledLayer, objectLoadingHandlers);
-				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer);
+				case TiledLayerType.TILE: loadTileLayer(cast tiledLayer, tileLayerLoadingHandlers);
 				default:
 					trace("Encountered unknown TiledLayerType");
 			}
@@ -107,18 +105,18 @@ class World extends FlxGroup {
 		return this;
 	}
 	
-	public function loadTileLayer(tiledLayer:TiledTileLayer):ILayer {
-		var layer:TileLayer = cast new TileLayer(this);
-		layer.load(tiledLayer);
+	public function loadTileLayer(tiledLayer:TiledTileLayer, tileLayerLoadingHandlers:FlxTypedSignal<TileLayerHandler>):ILayer {
+		var layer:TileLayer = new TileLayer(this);
+		layer.load(tiledLayer, tileLayerLoadingHandlers);
 		add(layer.tilemap);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
 	}
 	
-	public function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<TiledObject->ObjectLayer->Void>):ILayer {
+	public function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:FlxTypedSignal<ObjectHandler>):ILayer {
 		var layer:ObjectLayer = new ObjectLayer(this);
 		layer.load(tiledLayer, handlers);
-		add(layer);
+		add(layer.group);
 		namedLayers.set(tiledLayer.name, layer);
 		return layer;
 	}
