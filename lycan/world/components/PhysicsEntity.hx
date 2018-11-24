@@ -43,8 +43,8 @@ interface PhysicsEntity extends Entity {
 	
 	public var offset:FlxPoint;
 	
-	private var linearDrag:Float = 1;
-	private var angularDrag:Float = 1;
+	public var linearDrag:Float = 1;
+	public var angularDrag:Float = 1;
 	
 	public function new(entity:PhysicsEntity) {
 		super(entity);
@@ -54,12 +54,12 @@ interface PhysicsEntity extends Entity {
 		if (bodyType == null) bodyType = BodyType.DYNAMIC;
 		
 		body = new Body(bodyType);
-		body.space = Phys.space;
 		offset = FlxPoint.get();
 		
 		if (createRectBody) {
 			createRectangularBody();
 		}
+		
 		this.enabled = enabled;
 		LG.lateUpdate.add(update);
 	}
@@ -184,9 +184,9 @@ interface PhysicsEntity extends Entity {
 		
 		// Applies custom physics drag.
 		if (linearDrag < 1 || angularDrag < 1) {
-			body.angularVel *= angularDrag;
-			body.velocity.x *= linearDrag;
-			body.velocity.y *= linearDrag;
+			// body.angularVel *= angularDrag;
+			// body.velocity.x *= linearDrag;
+			// body.velocity.y *= linearDrag;
 		}
 	}
 	
