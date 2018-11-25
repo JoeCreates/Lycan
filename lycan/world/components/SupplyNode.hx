@@ -1,15 +1,15 @@
 package lycan.world.components;
 
-import entities.Player;
 import lycan.components.Entity;
 import lycan.components.Component;
 import lycan.components.Attachable;
+imoprt haxe.ds.Map;
 
-interface SupplyNode extends Entity {
+interface SupplyNetwork extends Entity {
 	public var supplyNode:SupplyNodeComponent;
 }
 
-class SupplyNodeComponent extends Component<SupplyNode> {
+class SupplyNetworkComponent extends Component<SupplyNode> {
 	private var dirty:Bool;
 	
 	public function new(entity:SupplyNode) {
