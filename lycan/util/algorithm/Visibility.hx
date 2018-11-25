@@ -2,7 +2,7 @@
 // Copyright 2012 Red Blob Games
 // License: Apache v2
 
-/* 
+/*
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -53,7 +53,7 @@
    https://github.com/polygonal/polygonal/blob/master/LICENSE
 */
 
-package lycan.world;
+package lycan.util.algorithm;
 
 import de.polygonal.ds.DLL;
 
@@ -139,13 +139,13 @@ import de.polygonal.ds.DLL;
         // the map needs to be broken up into smaller segments.
     }
 
-    
+
     // Load a set of square blocks, plus any other line segments
     public function loadMap(size, margin, blocks:Array<Block>, walls:Array<Segment>) {
         segments.clear();
         endpoints.clear();
         loadEdgeOfMap(size, margin);
-        
+
         for (block in blocks) {
             var x = block.x;
             var y = block.y;
@@ -192,7 +192,7 @@ import de.polygonal.ds.DLL;
     public function setLightLocation(x:Float, y:Float) {
         center.x = x;
         center.y = y;
-        
+
         for (segment in segments) {
             var dx = 0.5 * (segment.p1.x + segment.p2.x) - x;
             var dy = 0.5 * (segment.p1.y + segment.p2.y) - y;
@@ -257,7 +257,7 @@ import de.polygonal.ds.DLL;
     static private function interpolate(p:Point, q:Point, f:Float):Point {
         return new Point(p.x*(1-f) + q.x*f, p.y*(1-f) + q.y*f);
     }
-    
+
     // Helper: do we know that segment a is in front of b?
     // Implementation not anti-symmetric (that is to say,
     // _segment_in_front_of(a, b) != (!_segment_in_front_of(b, a)).
@@ -286,7 +286,7 @@ import de.polygonal.ds.DLL;
         if (A1 == A2 && A2 == A3) return true;
         if (A1 == A2 && A2 != A3) return false;
         if (B1 == B2 && B2 == B3) return false;
-        
+
         // If A1 != A2 and B1 != B2 then we have an intersection.
         // Expose it for the GUI to show a message. A more robust
         // implementation would split segments at intersections so
@@ -299,7 +299,7 @@ import de.polygonal.ds.DLL;
         // you're on a grid and the segments are similarly sized, then
         // using distance will be a simpler and faster implementation.
     }
-    
+
 
     // Run the algorithm, sweeping over all or part of the circle to find
     // the visible area, represented as a set of triangles
@@ -307,7 +307,7 @@ import de.polygonal.ds.DLL;
         output = [];  // output set of triangles
         demo_intersectionsDetected = [];
         endpoints.sort(_endpoint_compare, true);
-        
+
         open.clear();
         var beginAngle = 0.0;
 
@@ -323,9 +323,9 @@ import de.polygonal.ds.DLL;
                     // Early exit for the visualization to show the sweep process
                     break;
                 }
-                
+
                 var current_old = open.isEmpty()? null : open.head.val;
-                
+
                 if (p.begin) {
                     // Insert into the right place in the list
                     var node = open.head;
@@ -341,7 +341,7 @@ import de.polygonal.ds.DLL;
                 else {
                     open.remove(p.segment);
                 }
-                
+
                 var current_new = open.isEmpty()? null : open.head.val;
                 if (current_old != current_new) {
                     if (pass == 1) {
@@ -360,8 +360,8 @@ import de.polygonal.ds.DLL;
             / ((p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y));
         return new Point(p1.x + s * (p2.x - p1.x), p1.y + s * (p2.y - p1.y));
     }
-    
-            
+
+
     private function addTriangle(angle1:Float, angle2:Float, segment:Segment) {
         var p1:Point = center;
         var p2:Point = new Point(center.x + Math.cos(angle1), center.y + Math.sin(angle1));
@@ -382,7 +382,7 @@ import de.polygonal.ds.DLL;
             p4.x = center.x + Math.cos(angle2) * 500;
             p4.y = center.y + Math.sin(angle2) * 500;
         }
-    
+
         var pBegin = lineIntersection(p3, p4, p1, p2);
 
         p2.x = center.x + Math.cos(angle2);

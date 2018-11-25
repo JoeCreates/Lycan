@@ -1,9 +1,6 @@
 package lycan.world.layer;
 
-import flixel.FlxBasic;
 import flixel.addons.editors.tiled.TiledPropertySet;
-import flixel.group.FlxGroup;
-import flixel.tile.FlxTilemap;
 
 enum LayerType {
 	TILE;
@@ -12,7 +9,7 @@ enum LayerType {
 }
 
 interface ILayer {
-	public var layerType(default, null):LayerType;
-	public var world(default, null):World;
+	public var type(default, null):LayerType;
 	public var properties(default, null):TiledPropertySet;
+	public var world(default, null):World;
 }
