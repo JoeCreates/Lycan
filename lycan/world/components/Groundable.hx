@@ -20,12 +20,15 @@ class GroundableComponent extends Component<Groundable> {
 	/** Whether to force grounded checks to return true */
 	public var forceGrounded:Bool;
 	
+	public var groundedAngleLimit:Float;
+	
 	public function new(entity:Groundable) {
 		super(entity);
 		currentGrounds = new Map<FlxObject, Bool>();
 		currentGroundCount = 0;
 		wasGrounded = false;
 		forceGrounded = false;
+		groundedAngleLimit = 50;
 	}
 	
 	@:append("update")

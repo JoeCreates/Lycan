@@ -373,7 +373,7 @@ class SignalHolder {
 		lastPropagation = propagation;
 		lastSignalOn = signalOn;
 		updatePropagationTimeline(inputTimeline);
-		updateOutputs(propagationTimeline);
+		//updateOutputs(propagationTimeline);
 	}
 	
 	public function addSignal():Void {
@@ -413,12 +413,12 @@ class SignalHolder {
 			dt = nextT - t;
 			
 			// Figure out when signalOn next changes (propagation == 1 || 0)
-			if (!inputOn && currentProp < 1) {
+			if (inputOn && currentProp < 1) {
 				// when does currentProp + dt / propagationTime = 1
 				onTime = t + (1 - currentProp) * propagationTime;
 				if (onTime <= currentDt) signalOn = true;
 				currentProp += dt / propagationTime;
-			} else if (inputOn && currentProp > 0) {
+			} else if (!inputOn && currentProp > 0) {
 				// when does currentProp - dt / depropagationTime = 0
 				var offTime = t + currentProp * depropagationTime;
 				if (offTime <= currentDt) signalOn = false;

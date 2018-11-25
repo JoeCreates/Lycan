@@ -60,6 +60,8 @@ interface PhysicsEntity extends Entity {
 			createRectangularBody();
 		}
 		
+		body.userData.entity = entity;
+		
 		this.enabled = enabled;
 		LG.lateUpdate.add(update);
 	}
