@@ -2,8 +2,6 @@ package lycan.world;
 
 import flixel.addons.editors.tiled.TiledMap;
 
-typedef TileSetHandler = TiledMap->Void;
-
-class TileSetLoader {
-
+@:callable
+abstract TileSetHandler(TiledMap->Void) from (TiledMap->Void) {
 }
