@@ -46,8 +46,6 @@ class LycanRootState extends FlxState {
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
-		
-		LG.lateUpdate.dispatch(dt);
 	}
 
 	override public function create():Void {

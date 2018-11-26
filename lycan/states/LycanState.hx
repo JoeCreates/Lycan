@@ -15,6 +15,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSignal;
 import lycan.util.MasterCamera;
+import lycan.core.LG;
 
 // Base state for all substates in a game
 class LycanState extends FlxSubState {
@@ -91,6 +92,7 @@ class LycanState extends FlxSubState {
 	
 	override public function update(dt:Float):Void {
 		super.update(dt);
+		LG.lateUpdate.dispatch(dt);
 	}
 	
 	override public function switchTo(state:FlxState):Bool {
