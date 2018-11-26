@@ -1,5 +1,6 @@
 package lycan.phys;
 
+import flixel.FlxG;
 import nape.callbacks.PreCallback;
 import nape.callbacks.PreListener;
 import nape.callbacks.InteractionCallback;
@@ -18,10 +19,10 @@ class PlatformerPhysics {
 	
 	public static var collisionType:CbType = new CbType();
 	public static var groundableType:CbType = new CbType();
+	public static var characterType:CbType = new CbType();
 	public static var onewayType:CbType = new CbType();
 	
 	public static function setupPlatformerPhysics():Void {
-		trace("Setting up platforming physics");
 		// Landing on ground
 		Phys.space.listeners.add(
 			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
@@ -47,16 +48,32 @@ class PlatformerPhysics {
 			)
 		);
 		
+		// Character controller drop-through one way
+		Phys.space.listeners.add(
+			new PreListener(InteractionType.COLLISION, characterType, onewayType,
+				function(ic:PreCallback):PreFlag {
+					var body:Body = ic.int1.castBody;
+					var p:Player = cast body.userData.entity;//TODO get controller component
+					if (p.dropThrough) {
+						return PreFlag.IGNORE;
+					} else {
+						return PreFlag.ACCEPT_ONCE;
+					}
+				}
+			)
+		);
+		
 		// One way platforms
 		// TODO should use accept/ignore_once?
+		// TODO don't hardcode the angles
 		Phys.space.listeners.push(
 			new PreListener(InteractionType.COLLISION, CbType.ANY_BODY, onewayType,
-			function(ic:PreCallback):PreFlag {
+				function(ic:PreCallback):PreFlag {
 					var groundable:Groundable = ic.int1.userData.sprite;
 					var arbiter:CollisionArbiter = cast ic.arbiter;
 					var angle:Float = FlxAngle.TO_DEG * arbiter.normal.angle;
 					if (angle >= 45 && angle <= 135 ) {
-						return PreFlag.ACCEPT;
+						return null;
 					}
 					return PreFlag.IGNORE;
 				}
