@@ -13,6 +13,7 @@ import lycan.world.components.Groundable;
 import nape.phys.Body;
 import nape.dynamics.CollisionArbiter;
 import flixel.math.FlxAngle;
+import lycan.world.components.CharacterController;
 
 // TODO could be PhysicsPresets?
 class PlatformerPhysics {
@@ -53,8 +54,8 @@ class PlatformerPhysics {
 			new PreListener(InteractionType.COLLISION, characterType, onewayType,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
-					var p:Player = cast body.userData.entity;//TODO get controller component
-					if (p.dropThrough) {
+					var p:CharacterController = cast body.userData.entity;
+					if (p.characterController.dropThrough) {
 						return PreFlag.IGNORE;
 					} else {
 						return PreFlag.ACCEPT_ONCE;
