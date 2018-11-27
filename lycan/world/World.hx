@@ -17,6 +17,7 @@ import lycan.world.ObjectHandler;
 import lycan.world.TileLayerHandler;
 import lycan.world.layer.ObjectLayer;
 import lycan.world.layer.TileLayer;
+import lycan.world.ObjectHandler.ObjectHandlers;
 
 // A 2D world built from Tiled maps
 class World extends FlxGroup {
@@ -27,12 +28,8 @@ class World extends FlxGroup {
 	public var updateSpeed:Float;
 	
 	public var onLoadedTileSets(default, null) = new FlxTypedSignal<TiledMap->Void>();
-	
-	public var beforeLoadedObjectLayer(default, null) = new FlxTypedSignal<TiledObjectLayer->ObjectLayer->Void>();
-	public var afterLoadedObjectLayer(default, null) = new FlxTypedSignal<TiledObjectLayer->ObjectLayer->Void>();
-	
-	public var beforeLoadedTileLayer(default, null) = new FlxTypedSignal<TiledTileLayer->TileLayer->Void>();
-	public var afterLoadedTileLayer(default, null) = new FlxTypedSignal<TiledTileLayer->TileLayer->Void>();
+	public var onLoadedObjectLayer(default, null) = new FlxTypedSignal<TiledObjectLayer->ObjectLayer->Void>();
+	public var onLoadedTileLayer(default, null) = new FlxTypedSignal<TiledTileLayer->TileLayer->Void>();
 	
 	public var onLoadingProgressed(default, null) = new FlxTypedSignal<Float->Void>();
 	public var onLoadingComplete(default, null) = new FlxTypedSignal<Void->Void>();
@@ -66,7 +63,7 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:Array<ObjectHandler>, tileLayerLoadingHandler:TileLayerHandler):Void {
+	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:ObjectHandlers, tileLayerLoadingHandler:TileLayerHandler):Void {
 		var tiledMap = new TiledMap(tiledLevel);
 		properties = tiledMap.properties.keys;
 		width = tiledMap.fullWidth;
@@ -101,19 +98,17 @@ class World extends FlxGroup {
 		onLoadedTileSets.dispatch(tiledMap);
 	}
 	
-	private function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:Array<ObjectHandler>):Void {
+	private function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
 		var layer = new ObjectLayer(this);
-		beforeLoadedObjectLayer.dispatch(tiledLayer, layer);
 		layer.load(tiledLayer, handlers);
 		add(layer.group);
-		afterLoadedObjectLayer.dispatch(tiledLayer, layer);
+		onLoadedObjectLayer.dispatch(tiledLayer, layer);
 	}
 	
 	private function loadTileLayer(tiledLayer:TiledTileLayer, handler:TileLayerHandler):Void {
 		var layer = new TileLayer(this);
-		beforeLoadedTileLayer.dispatch(tiledLayer, layer);
 		layer.load(tiledLayer, handler);
 		add(layer.tilemap);
-		afterLoadedTileLayer.dispatch(tiledLayer, layer);
+		onLoadedTileLayer.dispatch(tiledLayer, layer);
 	}
 }
