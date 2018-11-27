@@ -4,8 +4,6 @@ import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.tile.FlxTilemap;
 import lycan.world.layer.TileLayer;
 
-typedef TileLayerHandler = TiledTileLayer->TileLayer->FlxTilemap;
-
-class TileLayerLoader {
-
+@:callable
+abstract TileLayerHandler(TiledTileLayer->TileLayer->FlxTilemap) from (TiledTileLayer->TileLayer->FlxTilemap) {
 }
