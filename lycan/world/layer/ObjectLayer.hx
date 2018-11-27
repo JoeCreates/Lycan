@@ -6,6 +6,7 @@ import flixel.group.FlxGroup;
 import lycan.world.ObjectHandler;
 import lycan.world.World;
 import lycan.world.layer.ILayer.LayerType;
+import lycan.world.ObjectHandler.ObjectHandlers;
 
 class ObjectLayer implements ILayer {
 	public var type(default, null):LayerType = LayerType.OBJECT;
@@ -21,7 +22,7 @@ class ObjectLayer implements ILayer {
 		return group;
 	}
 	
-	public function load(tiledLayer:TiledObjectLayer, handlers:Array<ObjectHandler>):Void {
+	public function load(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
 		this.properties = tiledLayer.properties.keys;
 		
 		loadObjects(tiledLayer, handlers);
@@ -31,7 +32,7 @@ class ObjectLayer implements ILayer {
 		return group.add(object);
 	}
 	
-	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:Array<ObjectHandler>):Void {
+	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
 		for (o in tiledLayer.objects) {
 			for (handler in handlers) {
 				var basic = handler(o, this);
