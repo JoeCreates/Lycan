@@ -37,14 +37,23 @@ class CameraSprite extends FlxSprite {
 	
 	@:access(flixel.FlxCamera)
 	override public function draw():Void {
-		if (FlxG.renderTile) {
+		var onScreen = false;
+		for (c in cameras) {
+			if (isOnScreen(c)) {
+				onScreen = true;
+				break;
+			}
+		}
+		if (!onScreen) return;
+		
+		if (!FlxG.renderBlit) {
 			sourceCamera.clearDrawStack();
 			sourceCamera.canvas.graphics.clear();
 		} else {
 			sourceCamera.fill(0, false);
 		}
 		group.draw();
-		if (FlxG.renderTile) {
+		if (!FlxG.renderBlit) {
 			sourceCamera.render();
 		}
 		pixels.fillRect(pixels.rect, FlxColor.TRANSPARENT);
