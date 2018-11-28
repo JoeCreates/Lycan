@@ -22,6 +22,8 @@ class PlatformerPhysics {
 	public static var groundableType:CbType = new CbType();
 	public static var characterType:CbType = new CbType();
 	public static var onewayType:CbType = new CbType();
+	public static var pushableType:CbType = new CbType();
+	public static var movingPlatformType:CbType = new CbType();
 	
 	public static function setupPlatformerPhysics():Void {
 		// Landing on ground

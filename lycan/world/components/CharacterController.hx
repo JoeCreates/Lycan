@@ -42,7 +42,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var targetMoveVel:Float = 0;
 	public var currentMoveVel:Float = 0;
 	public var moveAcceleration:Float = 0.4;
-	public var stopAcceleration:Float = 0.15;
+	public var stopAcceleration:Float = 0.4;
 	public var minMoveVel:Float = 20;
 	@:calc public var isMoving:Bool = targetMoveVel != 0;
 	
@@ -122,18 +122,30 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	@:prepend("update")
 	public function update(dt:Float):Void {
 		var body:Body = physics.body;
+		var groundable:GroundableComponent = entity.groundable;
+		var isGrounded:Bool = groundable.isGrounded;
+		
+		//TODO test this attempt to only anchor if we are trying to move
+		//TODO stop is duplicating airdrag functionality! oops
+		anchorJoint.active = hasControl && Math.abs(currentMoveVel) > 0;
 		
 		// Ground sucking
-		// TODO Doesnt make grounded... is this a bad method? Fires leave listeners that shouldnt...
-		var oldVel:Vec2 = body.velocity.copy(true);
-		body.velocity.setxy(0, 10 * 60);//TODO customisable
-		body.position.y--;
-		var result:ConvexResult = Phys.space.convexCast(feetShape, 1/60, false);
-		body.velocity.set(oldVel);
-		if (result != null && result.toi > 1/600) {
-			body.position.y += 600 * result.toi;
-		} else {
-			body.position.y++;
+		// Dont apply to very edges (like in Chris' original method)
+		// TODO replace groundedness with something like this?
+		// TODO is this a bad method? Fires leave listeners that shouldnt...
+		// TODO no friction on moving platforms that are moving down... we need friction! (or specil moving platforms)
+		if (groundable.wasGrounded && !isGrounded) {
+			var oldVel:Vec2 = body.velocity.copy(true);
+			body.velocity.setxy(0, 10 * 60);//TODO customisable
+			body.position.y--;
+			var result:ConvexResult = Phys.space.convexCast(feetShape, 1/60, false);
+			if (result != null && Math.abs(result.normal.angle * FlxAngle.TO_DEG + 90)  <= entity.groundable.groundedAngleLimit) {
+				body.integrate(result.toi);
+				entity.groundable.add(result.shape.body.userData.entity);
+			} else {
+				body.position.y++;
+			}
+			body.velocity.set(oldVel);
 		}
 		
 		// Moving Left/Right
@@ -143,7 +155,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 			targetMoveVel = leftPress ? -runSpeed : runSpeed;
 			move();
 		} else {
-			stop();
+			if (Math.abs(currentMoveVel) > 0) stop();
 		}
 		
 		// Ground friction
@@ -162,11 +174,6 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		if (groundable.isGrounded) {
 			currentJumps = 0;
 			canJump = true;
-		} else {
-			if (hasControl && !isMoving) {
-				var vx:Float = body.velocity.x;
-				body.velocity.x -= FlxMath.signOf(vx) * Math.min(dt * airDrag, Math.abs(vx));
-			}
 		}
 		
 		if (currentJumps >= maxJumps || (body.velocity.y > maxJumpVelY && !groundable.isGrounded)) {
