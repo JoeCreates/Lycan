@@ -36,27 +36,27 @@ interface CharacterController extends Entity {
 class CharacterControllerComponent extends Component<CharacterController> {
 	@:forward var _object:FlxObject;
 	var physics(get, never):PhysicsComponent;
-	function get_physics() return entity.physics;
+	private function get_physics() return entity.physics;
 	
-	var jumpSpeed:Float = -900;
-	var runImpulse:Float = 1000;
-	var runSpeed:Float = 600;
-	var maxJumps:Int = 2;
-	var maxJumpVelY:Float = 200;
-	var airDrag:Float = 5000;
+	public var jumpSpeed:Float = -900;
+	public var runImpulse:Float = 1000;
+	public var runSpeed:Float = 600;
+	public var maxJumps:Int = 2;
+	public var maxJumpVelY:Float = 500;
+	public var airDrag:Float = 5000;
 	
-	public var dropThrough:Bool = false; 
+	public var dropThrough:Bool = false;
 	
 	/** Indicates how in control the character is. Applies high drag while in air. */
-	var hasControl:Bool;
-	var currentJumps:Int;
-	var canJump:Bool;
+	public var hasControl:Bool;
+	public var currentJumps:Int;
+	public var canJump:Bool;
 	
 	//var movingPlatforms:Array<MovingPlatform>;
 	//var currentMovingPlatform:MovingPlatform;
 	
-	var bodyShape:Shape;
-	var feetShape:Shape;
+	public var bodyShape:Shape;
+	public var feetShape:Shape;
 	
 	public function new(entity:CharacterController) {
 		super(entity);
@@ -102,6 +102,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 			body.position.y++;
 		}
 		
+		// Moving Left/Right
 		var running:Bool = false;
 		if (physics.body.velocity.x > -runSpeed && FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT])) {
 			physics.body.applyImpulse(Vec2.weak(-runImpulse, 0));
@@ -112,6 +113,8 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		}
 		if (FlxG.keys.anyPressed([A, LEFT, RIGHT, D])) running = true;
 		
+		// Ground friction
+		// TODO prelistener instead
 		var groundable:GroundableComponent = entity.groundable;
 		FlxG.watch.addQuick("grounded", groundable.isGrounded);
 		if (groundable.isGrounded && !running) {
@@ -145,13 +148,9 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		}
 		
 		dropThrough = false;	
-		if (FlxG.keys.anyJustPressed([FlxKey.S, FlxKey.DOWN])) {
+		if (FlxG.keys.anyPressed([FlxKey.S, FlxKey.DOWN])) {
 			dropThrough = true;
-			//body.cbTypes.
 		}
-		
-		//physics.body.getContactList
-		// TODO double jumps + not hanging on walls
 	}
 	
 	public function run() {
