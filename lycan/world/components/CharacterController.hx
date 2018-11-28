@@ -1,5 +1,6 @@
 package lycan.world.components;
 
+import flixel.FlxBasic.FlxType;
 import nape.geom.ConvexResult;
 import nape.phys.Body;
 import flixel.math.FlxMath;
@@ -24,7 +25,8 @@ import lycan.phys.Phys;
 import lycan.components.Entity;
 import lycan.components.Component;
 import flixel.FlxObject;
-
+import nape.constraint.LineJoint;
+import flixel.FlxSprite;
 
 interface CharacterController extends Entity {
 	public var characterController:CharacterControllerComponent;
@@ -34,12 +36,17 @@ interface CharacterController extends Entity {
 
 @:tink
 class CharacterControllerComponent extends Component<CharacterController> {
-	@:forward var _object:FlxObject;
-	var physics(get, never):PhysicsComponent;
-	private function get_physics() return entity.physics;
+	@:forward var _object:FlxSprite;
+	@:calc var physics:PhysicsComponent = entity.physics;
+	
+	public var targetMoveVel:Float = 0;
+	public var currentMoveVel:Float = 0;
+	public var moveAcceleration:Float = 0.4;
+	public var stopAcceleration:Float = 0.15;
+	public var minMoveVel:Float = 20;
+	@:calc public var isMoving:Bool = targetMoveVel != 0;
 	
 	public var jumpSpeed:Float = -900;
-	public var runImpulse:Float = 1000;
 	public var runSpeed:Float = 600;
 	public var maxJumps:Int = 2;
 	public var maxJumpVelY:Float = 500;
@@ -52,9 +59,14 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var currentJumps:Int;
 	public var canJump:Bool;
 	
+	// State
+	public var isSliding:Bool = false;
+	
 	//var movingPlatforms:Array<MovingPlatform>;
 	//var currentMovingPlatform:MovingPlatform;
 	
+	public var anchor:Body;
+	public var anchorJoint:LineJoint;
 	public var bodyShape:Shape;
 	public var feetShape:Shape;
 	
@@ -62,6 +74,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		super(entity);
 		
 		_object = cast entity;
+		targetMoveVel = 0;
 	}
 	
 	public function init() {
@@ -76,11 +89,32 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		
 		physics.body.isBullet = true;
 		
+		anchor = new Body(BodyType.STATIC);
+		anchor.space = physics.body.space;
+		
+		anchorJoint = new LineJoint(anchor, physics.body, anchor.worldPointToLocal(Vec2.get(0.0, 0.0)),
+			physics.body.worldPointToLocal(Vec2.get(0.0, 0.0)), Vec2.weak(0.0, 1.0), Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY);
+		anchorJoint.stiff = false;
+		anchorJoint.maxError = 0.0;		
+		anchorJoint.space = physics.body.space;
+		
 		hasControl = true;
 		currentJumps = 0;
 		
 		physics.body.cbTypes.add(PlatformerPhysics.characterType);
 		physics.body.cbTypes.add(PlatformerPhysics.groundableType);
+	}
+	
+	public function move() {
+		isSliding = false;
+		currentMoveVel -= moveAcceleration * (currentMoveVel - targetMoveVel);
+		
+		if (Math.abs(currentMoveVel) < minMoveVel) {
+			currentMoveVel = 0;
+		}
+		
+		facing = currentMoveVel < 0 ? FlxObject.LEFT : FlxObject.RIGHT;
+		anchor.kinematicVel.x = currentMoveVel;
 	}
 	
 	//TODO destroy
@@ -103,33 +137,33 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		}
 		
 		// Moving Left/Right
-		var running:Bool = false;
-		if (physics.body.velocity.x > -runSpeed && FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT])) {
-			physics.body.applyImpulse(Vec2.weak(-runImpulse, 0));
-			running = true;
-		} else if (physics.body.velocity.x < runSpeed && FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT])) {
-			physics.body.applyImpulse(Vec2.weak(runImpulse, 0));
-			running = true;//TODO rename to moving
+		var leftPress = FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT]);
+		var rightPress = FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]);
+		if (leftPress != rightPress) {
+			targetMoveVel = leftPress ? -runSpeed : runSpeed;
+			move();
+		} else {
+			stop();
 		}
-		if (FlxG.keys.anyPressed([A, LEFT, RIGHT, D])) running = true;
 		
 		// Ground friction
-		// TODO prelistener instead
 		var groundable:GroundableComponent = entity.groundable;
 		FlxG.watch.addQuick("grounded", groundable.isGrounded);
-		if (groundable.isGrounded && !running) {
+		if (groundable.isGrounded && !isMoving) {
 			feetShape.material.dynamicFriction = 100;
 			feetShape.material.staticFriction = 100;
 		} else {
 			feetShape.material.dynamicFriction = 0;
 			feetShape.material.staticFriction = 0;
 		}
+		FlxG.watch.addQuick("friction", feetShape.material.dynamicFriction);
+		
 		
 		if (groundable.isGrounded) {
 			currentJumps = 0;
 			canJump = true;
 		} else {
-			if (hasControl && !running) {
+			if (hasControl && !isMoving) {
 				var vx:Float = body.velocity.x;
 				body.velocity.x -= FlxMath.signOf(vx) * Math.min(dt * airDrag, Math.abs(vx));
 			}
@@ -151,6 +185,19 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		if (FlxG.keys.anyPressed([FlxKey.S, FlxKey.DOWN])) {
 			dropThrough = true;
 		}
+	}
+	
+	public function stop() {
+		targetMoveVel = 0;
+		// TODO from Chris' controller, but doesn't account for dts
+		currentMoveVel -= stopAcceleration * currentMoveVel;
+		
+		if (Math.abs(currentMoveVel) < minMoveVel) {
+			currentMoveVel = 0;
+			isSliding = false;
+		}
+		
+		anchor.kinematicVel.x = currentMoveVel;
 	}
 	
 	public function run() {

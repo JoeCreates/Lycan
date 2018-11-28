@@ -58,8 +58,32 @@ class PlatformerPhysics {
 					if (p.characterController.dropThrough) {
 						return PreFlag.IGNORE;
 					} else {
-						return PreFlag.ACCEPT_ONCE;
+						return null;
 					}
+				}, 1
+			)
+		);
+		
+		// Avoid vertical friction on grounds
+		// TODO could we merge this with groun checks?
+		Phys.space.listeners.add(
+			new PreListener(InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
+				function(ic:PreCallback):PreFlag {
+					var body:Body = ic.int1.castBody;
+					var groundable:Groundable = cast body.userData.entity;
+					var arbiter = ic.arbiter;
+					
+					if (!arbiter.isCollisionArbiter()) return null;
+					var ca:CollisionArbiter = cast arbiter;
+					var angle:Float = FlxAngle.TO_DEG * ca.normal.angle - (arbiter.body1 == body ? 90 : -90);
+					
+					if (!(angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit)) {
+						ca.dynamicFriction = 0;
+						ca.staticFriction = 0;
+					}
+					
+					// We don't need to change the acceptance
+					return PreFlag.ACCEPT_ONCE;//TODO fights onewyas?
 				}
 			)
 		);
@@ -77,7 +101,7 @@ class PlatformerPhysics {
 						return null;
 					}
 					return PreFlag.IGNORE;
-				}
+				}, 2
 			)
 		);
 		
