@@ -12,7 +12,94 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import lycan.util.structure.tree.EditableIntervalTree;
 import flixel.FlxBasic;
-import flixel.util.FlxSignal;
+
+class TimelineSprite extends FlxSprite {
+	var justPressedPosition:FlxPoint;
+	var justReleasedPosition:FlxPoint;
+	public var timeline:Timeline;
+	var text:FlxText;
+	var pressed:Bool = false;
+	
+	public function new(x:Float = 0, y:Float = 0) {
+		super(x, y);
+		justPressedPosition = FlxPoint.get();
+		justReleasedPosition = FlxPoint.get();
+		timeline = new Timeline();
+		text = new FlxText();
+		
+		makeGraphic(400, 100, 0x44ffffff, true);
+		updateHitbox();
+	}
+	
+	override function draw() {
+		super.draw();
+		text.draw();
+	}
+	
+	override function update(dt:Float) {
+		super.update(dt);
+		
+		if (FlxG.mouse.justPressed) {
+			FlxG.mouse.getScreenPosition(justPressedPosition);
+			if (justPressedPosition.y >= y && justPressedPosition.y < y + height) {
+				pressed = true;
+			}
+		}
+		if (FlxG.mouse.justReleased && pressed) {
+			pressed = false;
+			FlxG.mouse.getScreenPosition(justReleasedPosition);
+			var start:Float = FlxMath.bound(justPressedPosition.x - x, 0, width);
+			var end:Float = FlxMath.bound(justReleasedPosition.x - x, 0, width);
+			
+			if (start > end) {
+				var temp = start;
+				start = end;
+				end = temp;
+			}
+			
+			timeline.addPeriod(start, end);
+		}
+		
+		FlxSpriteUtil.fill(this, 0x44ffffff);
+		
+		var p:Period = timeline.head;
+		var cy:Float = 15;
+		while (p != null) {
+			FlxSpriteUtil.drawLine(this, p.start, 5, p.end, 5);
+			FlxSpriteUtil.drawLine(this, p.start, cy, p.end, cy);
+			cy += 10;
+			p = p.next;
+		}
+		
+		text.text = Std.string(timeline.length);
+		text.x = x;
+		text.y = y;
+		text.cameras = this.cameras;
+		text.update(dt);
+	}
+}
+
+class SignalSystem extends FlxBasic {
+	public var edges:List<Edge>;
+	public var nodes:List<Node>;
+	public var supplies:List<Node>;
+	
+	
+	public function new() {
+		super();
+		edges = new List<Edge>();
+		nodes = new List<Node>();
+		supplies = new List<Node>();
+	}
+	
+	override public function update(dt:Float):Void {
+		super.update(dt);
+		
+		for (e in edges) e.update(dt);
+		for (n in nodes) n.update(dt);
+		for (s in supplies) s.update(dt);
+	}
+}
 
 class Period {
 	public var start:Float;
@@ -185,20 +272,16 @@ class Node extends SignalHolder {
 	public var outEdges:List<Edge>;
 	public var inEdges:List<Edge>;
 	
-	public var x:Float;
-	public var y:Float;
-	
 	public function new() {
 		super();
 		outEdges = new List<Edge>();
 		inEdges = new List<Edge>();
-		x = 0;
-		y = 0;
+		signalOn = false;
 	}
 	
-	override function updateOutputs(dt:Float) {
+	override function updateOutputs(timeline:Timeline) {
 		for (out in outEdges) {
-			out.applySignal(dt);
+			out.addSignalTimeline(timeline);
 		}
 	}
 	
@@ -222,15 +305,18 @@ class Edge extends SignalHolder {
 	public var input(get, set):Node;
 	public var output(get, set):Node;
 	
-	public function new(input:Node, output:Node) {
+	public function new(input:Node, output:Node, length:Float = 1) {
 		super();
 		this.output = output;
 		this.input = input;
+		
+		propagationTime = 1;
+		depropagationTime = 1;
 	}
 	
-	override function updateOutputs(dt:Float) {
+	override function updateOutputs(timeline:Timeline) {
 		if (output != null) {
-			output.applySignal(dt);
+			output.addSignalTimeline(timeline);
 		}
 	}
 	
@@ -251,81 +337,109 @@ class Edge extends SignalHolder {
 	}
 }
 
-class EdgeTwoWay extends SignalHolder {
-	public var edgeA:Edge;
-	public var edgeB:Edge;
-	public var nodeA(get, set):Node;
-	public var nodeB(get, set):Node;
-	
-	public function new(nodeA:Node, nodeB:Node) {
-		super();
-		edgeA = new Edge(nodeA, nodeB);
-		edgeB = new Edge(nodeB, nodeA);
-	}
-	
-	override function update(dt:Float) {
-		super.update(dt);
-		edgeA.update(dt);
-		edgeB.update(dt);
-	}
-	
-	override private function get_signalOn():Bool {
-		return nodeA.signalOn || nodeB.signalOn;
-	}
-	
-	private function get_nodeA():Node {
-		return edgeA.input;
-	}
-	private function set_nodeA(node:Node):Node {
-		edgeA.input = node;
-		edgeB.output = node;
-		return node;
-	}
-	private function get_nodeB():Node {
-		return edgeA.output;
-	}
-	private function set_nodeB(node:Node):Node {
-		edgeB.input = node;
-		edgeA.output = node;
-		return node;
-	}
-}
-
-@:tink
 class SignalHolder {
-	@:isVar public var signalOn(get, set):Bool;
+	private var currentDt:Float;
+	/** Timeline of signals recieved from inputs */
+	private var inputTimeline:Timeline;
+	/** Timeline of when this node is propagated */
+	private var propagationTimeline:Timeline;
+	public var signalOn = false;
+	/** Propagation level required to be on */
+	//public var length:Float;
+	public var lastPropagation:Float;
 	public var lastSignalOn:Bool;
-	public var onSignalChanged:FlxTypedSignal<Bool->Void>;
+	// Between 0 and 1
+	public var propagation:Float;
+	public var propagationTime:Float;
+	public var depropagationTime:Float;
+	
+	public var canPropagate:Bool;
 	
 	public function new() {
-		signalOn = false;
-		onSignalChanged = new FlxTypedSignal<Bool->Void>();
+		inputTimeline = new Timeline();
+		propagationTimeline = new Timeline();
+		propagation = 0;
+		lastPropagation = 0;
+		lastSignalOn = false;
+		propagationTime = 0.1;
+		depropagationTime = 0.1;
 	}
 	
 	public function update(dt:Float) {
-		lastSignalOn = signalOn;	
-		signalOn = false;
+		
+		currentDt = dt;
+		inputTimeline.clear();
+		propagationTimeline.clear();
+		lastPropagation = propagation;
+		lastSignalOn = signalOn;
+		updatePropagationTimeline(inputTimeline);
+		//updateOutputs(propagationTimeline);
 	}
 	
-	public function applySignal(dt:Float) {
-		if (!signalOn) {
-			signalOn = true;
-			updateOutputs(dt);
+	public function addSignal():Void {
+		var t = new Timeline();
+		t.addPeriod(0, currentDt);
+		addSignalTimeline(t);
+	}
+	
+	public function addSignalTimeline(timeline:Timeline):Void {
+		timeline = timeline.difference(inputTimeline);
+		if (timeline.isEmpty) return;
+		FlxG.watch.addQuick("adding to signal timeline", "");
+		inputTimeline.add(timeline);
+		updatePropagationTimeline(inputTimeline);// TODO could be more efficient to check if there is a change before updating outputs
+		updateOutputs(propagationTimeline);
+	}
+	
+	public function updatePropagationTimeline(input:Timeline):Void {
+		
+		
+		FlxG.watch.addQuick("Updating prop timeline", "");
+		
+		var startProp:Float = lastPropagation;
+		var currentProp:Float = startProp;
+		var ip:Period = inputTimeline.head;
+		var t:Float = 0;
+		var inputOn:Bool = false;
+		var onTime:Float = lastSignalOn ? 0 : Math.POSITIVE_INFINITY;
+		
+		var bound:Float = currentDt;
+		var nextT:Float = 0;
+		var dt:Float = currentDt;
+		while (ip != null) {
+			t = nextT;
+			bound = inputOn ? ip.end : ip.start;
+			nextT = Math.max(bound, currentDt);
+			dt = nextT - t;
+			
+			// Figure out when signalOn next changes (propagation == 1 || 0)
+			if (inputOn && currentProp < 1) {
+				// when does currentProp + dt / propagationTime = 1
+				onTime = t + (1 - currentProp) * propagationTime;
+				if (onTime <= currentDt) signalOn = true;
+				currentProp += dt / propagationTime;
+			} else if (!inputOn && currentProp > 0) {
+				// when does currentProp - dt / depropagationTime = 0
+				var offTime = t + currentProp * depropagationTime;
+				if (offTime <= currentDt) signalOn = false;
+				// Add to propagationTimeline
+				propagationTimeline.addPeriod(onTime, Math.min(nextT, offTime));
+				currentProp -= dt / depropagationTime;
+			}
+			
+			// Bound currentProp
+			currentProp = Math.max(0, Math.min(1, currentProp));
+			
+			inputOn = !inputOn;
+			ip = ip.next;
 		}
+		if (t < currentDt) {
+			propagationTimeline.addPeriod(onTime, currentDt);
+		}
+		propagation = currentProp;
 	}
 	
-	public function updateOutput(output:SignalHolder, dt:Float) {
-		output.applySignal(dt);
-	}
-	
-	public function updateOutputs(dt:Float):Void {
+	public function updateOutputs(timeline:Timeline):Void {
 		throw("Requires implementation in subclass");
-	}
-	
-	private function set_signalOn(signal:Bool):Bool {
-		return this.signalOn = signal;
-	}
-	private function get_signalOn():Bool {
-		return signalOn;
 	}
 }

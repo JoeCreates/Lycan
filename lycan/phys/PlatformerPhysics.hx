@@ -14,6 +14,8 @@ import nape.phys.Body;
 import nape.dynamics.CollisionArbiter;
 import flixel.math.FlxAngle;
 import lycan.world.components.CharacterController;
+import nape.space.Space;
+
 
 // TODO could be PhysicsPresets?
 class PlatformerPhysics {
@@ -25,13 +27,15 @@ class PlatformerPhysics {
 	public static var pushableType:CbType = new CbType();
 	public static var movingPlatformType:CbType = new CbType();
 	
-	public static function setupPlatformerPhysics():Void {
+	public static function setupPlatformerPhysics(?space:Space):Void {
+		space = space == null ? Phys.space : space;
+		
 		// Landing on ground
-		Phys.space.listeners.add(
+		space.listeners.add(
 			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
 				function(ic:InteractionCallback):Void {
 					var body:Body = ic.int1.castBody;
-					//TODO ask msghero
+					//TODO why did I do this? waking it up?
 					body.position.x += 1;
 					body.position.x -= 1;
 					var groundable:Groundable = cast ic.int1.userData.entity;
@@ -52,7 +56,7 @@ class PlatformerPhysics {
 		);
 		
 		// Character controller drop-through one way
-		Phys.space.listeners.add(
+		space.listeners.add(
 			new PreListener(InteractionType.COLLISION, characterType, onewayType,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
@@ -68,7 +72,7 @@ class PlatformerPhysics {
 		
 		// Avoid vertical friction on grounds
 		// TODO could we merge this with groun checks?
-		Phys.space.listeners.add(
+		space.listeners.add(
 			new PreListener(InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
@@ -93,7 +97,7 @@ class PlatformerPhysics {
 		// One way platforms
 		// TODO should use accept/ignore_once?
 		// TODO don't hardcode the angles
-		Phys.space.listeners.push(
+		space.listeners.push(
 			new PreListener(InteractionType.COLLISION, CbType.ANY_BODY, onewayType,
 				function(ic:PreCallback):PreFlag {
 					var groundable:Groundable = ic.int1.userData.sprite;
