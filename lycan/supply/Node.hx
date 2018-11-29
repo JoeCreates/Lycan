@@ -188,12 +188,12 @@ class Node extends SignalHolder {
 	public var x:Float;
 	public var y:Float;
 	
-	public function new() {
+	public function new(x:Float = 0, y:Float = 0) {
 		super();
 		outEdges = new List<Edge>();
 		inEdges = new List<Edge>();
-		x = 0;
-		y = 0;
+		this.x = x;
+		this.y = y;
 	}
 	
 	override function updateOutputs(dt:Float) {
@@ -212,6 +212,20 @@ class Node extends SignalHolder {
 		if (edge.input != null) edge.input.outEdges.remove(edge);
 		outEdges.add(edge);
 		@:privateAccess edge._input = this;
+	}
+	
+	public function removeEdgeIn(edge:Edge):Void {
+		if (edge.output == this) {
+			@:privateAccess edge._output = null;
+			inEdges.remove(edge);
+		}
+	}
+	
+	public function removeEdgeOut(edge:Edge):Void {
+		if (edge.input == this) {
+			@:privateAccess edge._input = null;
+			outEdges.remove(edge);
+		}
 	}
 	
 }
@@ -234,10 +248,15 @@ class Edge extends SignalHolder {
 		}
 	}
 	
+	public function destroy() {
+		
+	}
+	
 	private function get_input():Node {
 		return _input;
 	}
 	private function set_input(node:Node):Node {
+		if (input != null) input.removeEdgeOut(this);
 		if (node != null) node.addEdgeOut(this);
 		return node;
 	}
@@ -246,6 +265,7 @@ class Edge extends SignalHolder {
 		return _output;
 	}
 	private function set_output(node:Node):Node {
+		if (output != null) output.removeEdgeIn(this);
 		if (node != null) node.addEdgeIn(this);
 		return node;
 	}
@@ -269,12 +289,18 @@ class EdgeTwoWay extends SignalHolder {
 		edgeB.update(dt);
 	}
 	
+	override function applySignal(dt:Float) {
+		super.applySignal(dt);
+		edgeA.applySignal(dt);
+		edgeB.applySignal(dt);
+	}
+	
 	override private function get_signalOn():Bool {
-		return nodeA.signalOn || nodeB.signalOn;
+		return (nodeA != null && nodeA.signalOn) || (nodeB != null && nodeB.signalOn);
 	}
 	
 	private function get_nodeA():Node {
-		return edgeA.input;
+		return edgeA != null ? edgeA.input : null;
 	}
 	private function set_nodeA(node:Node):Node {
 		edgeA.input = node;
@@ -282,7 +308,7 @@ class EdgeTwoWay extends SignalHolder {
 		return node;
 	}
 	private function get_nodeB():Node {
-		return edgeA.output;
+		return edgeA != null ? edgeA.output : null;
 	}
 	private function set_nodeB(node:Node):Node {
 		edgeB.input = node;
@@ -298,12 +324,12 @@ class SignalHolder {
 	public var onSignalChanged:FlxTypedSignal<Bool->Void>;
 	
 	public function new() {
-		signalOn = false;
 		onSignalChanged = new FlxTypedSignal<Bool->Void>();
+		signalOn = false;
 	}
 	
 	public function update(dt:Float) {
-		lastSignalOn = signalOn;	
+		lastSignalOn = signalOn;
 		signalOn = false;
 	}
 	
@@ -323,7 +349,10 @@ class SignalHolder {
 	}
 	
 	private function set_signalOn(signal:Bool):Bool {
-		return this.signalOn = signal;
+		var old:Bool = signalOn;
+		this.signalOn = signal;
+		if (old != signalOn) onSignalChanged.dispatch(signal);
+		return signal;
 	}
 	private function get_signalOn():Bool {
 		return signalOn;

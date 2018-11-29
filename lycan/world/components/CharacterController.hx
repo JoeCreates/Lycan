@@ -77,7 +77,10 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		targetMoveVel = 0;
 	}
 	
-	public function init() {
+	public function init(?width:Float, ?height:Float) {
+		if (width == null) width = _object.width;
+		if (height == null) height = _object.height;
+		
 		physics.init(BodyType.DYNAMIC, false);
 		physics.body.position.setxy(x, y);
 		physics.body.allowRotation = false;
@@ -86,6 +89,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		physics.body.shapes.add(feetShape);
 		physics.body.shapes.add(bodyShape);
 		physics.setBodyMaterial();
+		physics.body.group = PlatformerPhysics.overlappingObjectGroup;
 		
 		physics.body.isBullet = true;
 		

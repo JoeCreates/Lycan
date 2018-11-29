@@ -24,7 +24,7 @@ class PlatformerContactListener extends B2ContactListener {
 	
 	static var worldManifold:B2WorldManifold = new B2WorldManifold();
 	
-	override function preSolve(contact:B2Contact, oldManifold:B2Manifold) {
+	override function preSolve(contact:B2Contct, oldManifold:B2Manifold) {
 		if (!contact.isTouching()) return;
 		
 		var fa:B2Fixture = contact.m_fixtureA;

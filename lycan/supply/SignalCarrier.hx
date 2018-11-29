@@ -13,8 +13,8 @@ import lycan.components.Attachable;
 import haxe.ds.Map;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
-import lycan.util.structure.tree.EditableIntervalTree;
 import flixel.FlxBasic;
+import lycan.supply.Node;
 
 interface SignalCarrier extends Entity {
 	public var signalCarrier:SignalCarrierComponent;
@@ -24,18 +24,20 @@ interface SignalCarrier extends Entity {
 class SignalCarrierComponent extends Component<SignalCarrier> {
 	@:forward var _basic:FlxBasic;
 	public var nodes:Array<Node>;
-	public var edges:Array<EdgeTwoWay>;
+	public var edges:Array<Edge>;
 	
 	public function new(entity:SignalCarrier) {
 		super(entity);
 		_basic = cast entity;
+		nodes = [];
+		edges = [];
 		
 		FlxG.signals.preUpdate.add(earlyUpdate);
 	}
 	
-	public function drawToSprite(sprite:FlxSprite):Void {
+	public function drawToSprite(sprite:FlxSprite, forceSignalOn:Bool = false):Void {
 		for (e in edges) {
-			FlxSpriteUtil.drawLine(sprite, e.nodeA.x, e.nodeA.y, e.nodeB.x, e.nodeB.y, {color: FlxColor.fromHSB(1, 1, e.signalOn ? 1 : 0.5, 1), thickness: 10});
+			FlxSpriteUtil.drawLine(sprite, e.input.x, e.input.y, e.output.x, e.output.y, {color: FlxColor.fromHSB(1, 0, e.signalOn || forceSignalOn ? 1 : 0.5, 1), thickness: 10});
 		}
 	}
 	
@@ -46,7 +48,10 @@ class SignalCarrierComponent extends Component<SignalCarrier> {
 	public function earlyUpdate() {
 		if (exists && alive) {
 			for (node in nodes) {
-				node.update(dt);
+				node.update(FlxG.elapsed);
+			}
+			for (edge in edges) {
+				edge.update(FlxG.elapsed);
 			}
 		}
 	}

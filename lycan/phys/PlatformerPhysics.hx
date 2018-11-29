@@ -15,7 +15,7 @@ import nape.dynamics.CollisionArbiter;
 import flixel.math.FlxAngle;
 import lycan.world.components.CharacterController;
 import nape.space.Space;
-
+import nape.dynamics.InteractionGroup;
 
 // TODO could be PhysicsPresets?
 class PlatformerPhysics {
@@ -26,6 +26,8 @@ class PlatformerPhysics {
 	public static var onewayType:CbType = new CbType();
 	public static var pushableType:CbType = new CbType();
 	public static var movingPlatformType:CbType = new CbType();
+	
+	public static var overlappingObjectGroup:InteractionGroup = new InteractionGroup(true);
 	
 	public static function setupPlatformerPhysics(?space:Space):Void {
 		space = space == null ? Phys.space : space;
