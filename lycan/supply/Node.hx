@@ -249,7 +249,8 @@ class Edge extends SignalHolder {
 	}
 	
 	public function destroy() {
-		
+		input = null;
+		output = null;
 	}
 	
 	private function get_input():Node {

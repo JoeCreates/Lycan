@@ -170,11 +170,13 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		// Moving Left/Right
 		var leftPress = FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT]);
 		var rightPress = FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]);
-		if (leftPress != rightPress) {
-			targetMoveVel = leftPress ? -runSpeed : runSpeed;
-			move();
-		} else {
-			if (Math.abs(currentMoveVel) > 0) stop();
+		if (hasControl) {//TODO tidy up control, probably differentiate between hascontrol and input enabled
+			if (leftPress != rightPress) {
+				targetMoveVel = leftPress ? -runSpeed : runSpeed;
+				move();
+			} else {
+				if (Math.abs(currentMoveVel) > 0) stop();
+			}
 		}
 		
 		// Ground friction
@@ -199,8 +201,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 			canJump = false;
 		}
 		
-		
-		if (FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP])) {
+		if (hasControl && FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP])) {
 			if (canJump) {
 				currentJumps++;
 				physics.body.velocity.y = jumpSpeed;
@@ -208,7 +209,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		}
 		
 		dropThrough = false;	
-		if (FlxG.keys.anyPressed([FlxKey.S, FlxKey.DOWN])) {
+		if (hasControl && FlxG.keys.anyPressed([FlxKey.S, FlxKey.DOWN])) {
 			dropThrough = true;
 		}
 	}

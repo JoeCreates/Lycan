@@ -57,7 +57,7 @@ interface PhysicsEntity extends Entity {
 		offset = FlxPoint.get();
 		
 		if (createRectBody) {
-			createRectangularBody();
+			createRectangularBody(0, 0, bodyType);
 		}
 		
 		body.userData.entity = entity;

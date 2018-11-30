@@ -130,7 +130,8 @@ class Phys {
 	}
 
 	public static function update():Void {
-		if (space != null && FlxG.elapsed > 0) {
+		var dt = forceTimestep == null ? FlxG.elapsed : forceTimestep;
+		if (space != null && dt > 0) {
 			
 			#if !FLX_NO_DEBUG
 			if (debugManipulator != null && enableDebugManipulator) debugManipulator.update();
@@ -139,7 +140,7 @@ class Phys {
 			// TODO better method or location for this?
 			GroundableComponent.clearGroundsSignal.dispatch();
 			
-			space.step(forceTimestep == null ? FlxG.elapsed : forceTimestep, velocityIterations, positionIterations);
+			space.step(dt, velocityIterations, positionIterations);
 		}
 	}
 	
