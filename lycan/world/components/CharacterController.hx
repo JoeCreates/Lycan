@@ -127,11 +127,26 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public function update(dt:Float):Void {
 		var body:Body = physics.body;
 		var groundable:GroundableComponent = entity.groundable;
-		var isGrounded:Bool = groundable.isGrounded;
 		
 		//TODO test this attempt to only anchor if we are trying to move
 		//TODO stop is duplicating airdrag functionality! oops
 		anchorJoint.active = hasControl && Math.abs(currentMoveVel) > 0;
+		
+		// Compute groundedness
+		// Clear previous grounds
+		// TODO make this the proper method instead of a quick hack for LD readiness
+		var oldVel:Vec2 = body.velocity.copy(true);
+		body.velocity.setxy(0, 1);
+		body.position.y--;
+		var result:ConvexResult = Phys.space.convexCast(feetShape, 1, false);
+		if (result != null && Math.abs(result.normal.angle * FlxAngle.TO_DEG + 90)  <= groundable.groundedAngleLimit) {
+			entity.groundable.add(result.shape.body.userData.entity);
+		}
+		body.position.y++;
+		body.velocity.set(oldVel);
+		
+		
+		var isGrounded:Bool = groundable.isGrounded;
 		
 		// Ground sucking
 		// Dont apply to very edges (like in Chris' original method)

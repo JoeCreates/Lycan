@@ -18,10 +18,10 @@ import flixel.tile.FlxTilemap;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import haxe.ds.Map;
 import haxe.io.Path;
-import lycan.world.ObjectHandler.ObjectHandlers;
-import lycan.world.TileLayerHandler;
+import lycan.world.WorldHandlers;
 import lycan.world.layer.ObjectLayer;
 import lycan.world.layer.TileLayer;
+import lycan.world.WorldHandlers;
 
 // A 2D world built from Tiled maps
 class World extends FlxGroup {
@@ -68,8 +68,9 @@ class World extends FlxGroup {
 		return false;
 	}
 	
-	public function load(tiledLevel:FlxTiledMapAsset, objectLoadingHandlers:ObjectHandlers, tileLayerLoadingHandler:TileLayerHandler):Void {
-		var tiledMap = new TiledMap(tiledLevel);
+	public function load(tiledMap:TiledMap, objectHandlers:ObjectHandlers, objectLayerHandlers:ObjectLayerHandlers,
+		tileLayerHandler:TileLayerHandler, worldHandlers:WorldHandlers):Void
+	{
 		properties = tiledMap.properties.keys;
 		width = tiledMap.fullWidth;
 		height = tiledMap.fullHeight;
@@ -82,10 +83,11 @@ class World extends FlxGroup {
 		for (tiledLayer in tiledMap.layers) {
 			switch (tiledLayer.type) {
 				case TiledLayerType.OBJECT: {
-					loadObjectLayer(cast tiledLayer, objectLoadingHandlers);
+					var layer = loadObjectLayer(cast tiledLayer, objectHandlers);
+					objectLayerHandlers.dispatch(cast tiledLayer, layer);
 				}
 				case TiledLayerType.TILE: {
-					loadTileLayer(cast tiledLayer, tileLayerLoadingHandler);
+					var layer = loadTileLayer(cast tiledLayer, tileLayerHandler);
 				}
 				default:
 					throw("Encountered unsupported Tiled layer type");
@@ -96,6 +98,7 @@ class World extends FlxGroup {
 			layersLoaded++;
 		}
 		
+		worldHandlers.dispatch(tiledMap, this);
 		onLoadingComplete.dispatch();
 	}
 	
@@ -124,17 +127,19 @@ class World extends FlxGroup {
 		namedTileSets = tiledMap.tilesets;
 	}
 	
-	private function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
+	private function loadObjectLayer(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):ObjectLayer {
 		var layer = new ObjectLayer(this);
 		layer.load(tiledLayer, handlers);
 		add(layer.group);
 		namedObjectLayers.set(tiledLayer.name, layer);
+		return layer;
 	}
 	
-	private function loadTileLayer(tiledLayer:TiledTileLayer, handler:TileLayerHandler):Void {
+	private function loadTileLayer(tiledLayer:TiledTileLayer, handler:TileLayerHandler):TileLayer {
 		var layer = new TileLayer(this);
 		layer.load(tiledLayer, handler);
 		add(layer.tilemap);
 		namedTileLayers.set(tiledLayer.name, layer);
+		return layer;
 	}
 }

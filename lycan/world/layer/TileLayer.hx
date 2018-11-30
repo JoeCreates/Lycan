@@ -1,10 +1,11 @@
 package lycan.world.layer;
 
+import lycan.world.WorldHandlers;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.tile.FlxTilemap;
 import flixel.util.FlxSignal.FlxTypedSignal;
-import lycan.world.TileLayerHandler;
 import lycan.world.layer.ILayer.LayerType;
+import lycan.world.WorldHandlers;
 
 @:access(flixel.tile.FlxTilemap)
 class TileLayer implements ILayer {

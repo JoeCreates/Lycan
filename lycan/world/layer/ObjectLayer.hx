@@ -3,9 +3,10 @@ package lycan.world.layer;
 import flixel.FlxBasic;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.group.FlxGroup;
-import lycan.world.ObjectHandler.ObjectHandlers;
+import lycan.world.WorldHandlers;
 import lycan.world.World;
 import lycan.world.layer.ILayer.LayerType;
+import flixel.addons.editors.tiled.TiledObject;
 
 class ObjectLayer implements ILayer {
 	public var type(default, null):LayerType = LayerType.OBJECT;
@@ -32,16 +33,9 @@ class ObjectLayer implements ILayer {
 	}
 	
 	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
+		var objMap = new Map<TiledObject, FlxBasic>();
 		for (o in tiledLayer.objects) {
-			for (handler in handlers) {
-				var basic = handler(o, this);
-				
-				if (basic != null) {
-					if(o.type != null && o.type != "") {
-						world.namedObjects.set(o.type, basic);
-					}
-				}
-			}
+			handlers.dispatch(o, this, objMap);
 		}
 	}
 }

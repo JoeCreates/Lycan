@@ -29,33 +29,43 @@ class PlatformerPhysics {
 	
 	public static var overlappingObjectGroup:InteractionGroup = new InteractionGroup(true);
 	
+	private static var isSetup:Bool = false;
+	
 	public static function setupPlatformerPhysics(?space:Space):Void {
+		if (space == Phys.space) {
+			if (isSetup) {
+				return;
+			} else {
+				isSetup = true;
+			}
+		}
+		
 		space = space == null ? Phys.space : space;
 		
 		// Landing on ground
-		space.listeners.add(
-			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
-				function(ic:InteractionCallback):Void {
-					var body:Body = ic.int1.castBody;
-					//TODO why did I do this? waking it up?
-					body.position.x += 1;
-					body.position.x -= 1;
-					var groundable:Groundable = cast ic.int1.userData.entity;
-					for (arbiter in ic.arbiters) {
-						if (!arbiter.isCollisionArbiter()) continue;
-						var groundableFirst:Bool = arbiter.body1 == body;
-						var ca:CollisionArbiter = cast arbiter;
-						var angle:Float = FlxAngle.TO_DEG * ca.normal.angle - (groundableFirst ? 90 : -90);
-						// If we just left the ground
-						if (arbiter.collisionArbiter.totalImpulse().length == 0) {
-							groundable.groundable.remove(cast ic.int2.userData.entity);
-						} else if (angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit) {
-							groundable.groundable.add(cast ic.int2.userData.entity);
-						}
-					}
-				}
-			)
-		);
+		// space.listeners.add(
+		// 	new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, groundableType, CbType.ANY_SHAPE,
+		// 		function(ic:InteractionCallback):Void {
+		// 			var body:Body = ic.int1.castBody;
+		// 			//TODO why did I do this? waking it up?
+		// 			body.position.x += 1;
+		// 			body.position.x -= 1;
+		// 			var groundable:Groundable = cast ic.int1.userData.entity;
+		// 			for (arbiter in ic.arbiters) {
+		// 				if (!arbiter.isCollisionArbiter()) continue;
+		// 				var groundableFirst:Bool = arbiter.body1 == body;
+		// 				var ca:CollisionArbiter = cast arbiter;
+		// 				var angle:Float = FlxAngle.TO_DEG * ca.normal.angle - (groundableFirst ? 90 : -90);
+		// 				// If we just left the ground
+		// 				if (arbiter.collisionArbiter.totalImpulse().length == 0) {
+		// 					groundable.groundable.remove(cast ic.int2.userData.entity);
+		// 				} else if (angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit) {
+		// 					groundable.groundable.add(cast ic.int2.userData.entity);
+		// 				}
+		// 			}
+		// 		}
+		// 	)
+		// );
 		
 		// Character controller drop-through one way
 		space.listeners.add(
