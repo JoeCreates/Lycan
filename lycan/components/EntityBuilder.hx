@@ -270,7 +270,7 @@ class EntityBuilder {
 				// If target function isn't in the entity...
 				if (targetFunc == null) {
 					// Try to get it from a super class
-					var targetField:ClassField = getField(classType, targetMethodName);
+					var targetField:ClassField = getField(classType, targetMethodName, true);
 					
 					// If it's not in a super class, throw an error
 					if (targetField == null) {
@@ -453,16 +453,19 @@ class EntityBuilder {
 		return getField(type, fieldName) != null;
 	}
 		
-	public static function getField(type:ClassType, fieldName:String):ClassField {
+	public static function getField(type:ClassType, fieldName:String, checkForExpression:Bool = false):ClassField {
 		for (field in type.fields.get()) {
 			// Check if this Field is the required field
 			if (field.name == fieldName) {
-				return field;
+				if (!checkForExpression || field.expr() != null) {
+					trace("returned");
+					return field;
+				}
 			}
 		}
 		// If not, check the super class if there is one
 		if (type.superClass != null) {
-			return getField(type.superClass.t.get(), fieldName);
+			return getField(type.superClass.t.get(), fieldName, checkForExpression);
 		}
 		return null;
 	}
