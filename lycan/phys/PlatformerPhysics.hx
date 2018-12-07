@@ -1,5 +1,10 @@
 package lycan.phys;
 
+import nape.geom.Geom;
+import nape.dynamics.Contact;
+import nape.shape.Polygon;
+import nape.dynamics.InteractionFilter;
+import nape.shape.Shape;
 import flixel.FlxG;
 import nape.callbacks.PreCallback;
 import nape.callbacks.PreListener;
@@ -16,6 +21,8 @@ import flixel.math.FlxAngle;
 import lycan.world.components.CharacterController;
 import nape.space.Space;
 import nape.dynamics.InteractionGroup;
+import nape.geom.Vec2;
+import nape.geom.Vec3;
 
 // TODO could be PhysicsPresets?
 class PlatformerPhysics {
@@ -26,8 +33,11 @@ class PlatformerPhysics {
 	public static var onewayType:CbType = new CbType();
 	public static var pushableType:CbType = new CbType();
 	public static var movingPlatformType:CbType = new CbType();
+	public static var tilemapShapeType:CbType = new CbType();
 	
 	public static var overlappingObjectGroup:InteractionGroup = new InteractionGroup(true);
+	
+	public static var sensorFilter:InteractionFilter = new InteractionFilter(0, 0, 1, 1);
 	
 	private static var isSetup:Bool = false;
 	
@@ -66,6 +76,45 @@ class PlatformerPhysics {
 		// 		}
 		// 	)
 		// );
+		
+		var threshold:Float = 2;
+		// Attempt to work around ghost edges issue
+		// TODO it's a work in progress
+		space.listeners.add(
+			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, CbType.ANY_BODY, tilemapShapeType,
+				function(ic:InteractionCallback) {
+					var b1:Body = ic.int1.castBody;
+					var b2:Body = ic.int2.castBody;
+					for (a in ic.arbiters) {
+						if (a.isCollisionArbiter()) {
+							var ca:CollisionArbiter = cast a.collisionArbiter;
+							var s1 = ca.shape1;
+							var s2 = ca.shape2;
+							if (s1.body != b1) {
+								var ts = s1;
+								s1 = s2;
+								s2 = ts;
+							}
+							if (Math.abs(ca.normal.y) > 0) {
+								var d:Float;
+								if (s1.bounds.x > s2.bounds.x) {
+									d = s2.bounds.x + s2.bounds.width - s1.bounds.x;
+								} else {
+									d = -(s1.bounds.x + s1.bounds.width - s2.bounds.x);
+								}
+								if (Math.abs(d) > threshold) break;
+								b1.position.x += d;
+								var impulse:Vec3 = ca.contacts.at(0).normalImpulse();
+								// trace("impulse: " + impulse);
+								// trace("totalImpulse: " + impulse);
+								b1.applyImpulse(Vec2.weak(impulse.x, impulse.y));
+								break;
+							}
+						}
+					}
+				}
+			)
+		);
 		
 		// Character controller drop-through one way
 		space.listeners.add(
