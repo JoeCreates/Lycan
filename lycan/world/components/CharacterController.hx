@@ -121,7 +121,12 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		anchor.kinematicVel.x = currentMoveVel;
 	}
 	
-	//TODO destroy
+	@:append("destroy")
+	public function destroy() {
+		anchor.space = null;
+		anchorJoint.space = null;
+		_object = null;
+	}
 	
 	@:prepend("update")
 	public function update(dt:Float):Void {
