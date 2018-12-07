@@ -180,48 +180,48 @@ class Timeline {
 	}
 }
 
-class Node extends SignalHolder {
+class Node<T> extends SignalHolder<T> {
 	/** Map of outward edges to their lengths */
-	public var outEdges:List<Edge>;
-	public var inEdges:List<Edge>;
+	public var outEdges:List<Edge<T>>;
+	public var inEdges:List<Edge<T>>;
 	
 	public var x:Float;
 	public var y:Float;
 	
 	public function new(x:Float = 0, y:Float = 0) {
 		super();
-		outEdges = new List<Edge>();
-		inEdges = new List<Edge>();
+		outEdges = new List<Edge<T>>();
+		inEdges = new List<Edge<T>>();
 		this.x = x;
 		this.y = y;
 	}
 	
-	override function updateOutputs(dt:Float) {
+	override function updateOutputs(value:Null<T>, dt:Float) {
 		for (out in outEdges) {
-			out.applySignal(dt);
+			out.applySignal(value, dt);
 		}
 	}
 	
-	public function addEdgeIn(edge:Edge):Void {
+	public function addEdgeIn(edge:Edge<T>):Void {
 		if (edge.output != null) edge.output.inEdges.remove(edge);
 		inEdges.add(edge);
 		@:privateAccess edge._output = this;
 	}
 	
-	public function addEdgeOut(edge:Edge):Void {
+	public function addEdgeOut(edge:Edge<T>):Void {
 		if (edge.input != null) edge.input.outEdges.remove(edge);
 		outEdges.add(edge);
 		@:privateAccess edge._input = this;
 	}
 	
-	public function removeEdgeIn(edge:Edge):Void {
+	public function removeEdgeIn(edge:Edge<T>):Void {
 		if (edge.output == this) {
 			@:privateAccess edge._output = null;
 			inEdges.remove(edge);
 		}
 	}
 	
-	public function removeEdgeOut(edge:Edge):Void {
+	public function removeEdgeOut(edge:Edge<T>):Void {
 		if (edge.input == this) {
 			@:privateAccess edge._input = null;
 			outEdges.remove(edge);
@@ -230,21 +230,21 @@ class Node extends SignalHolder {
 	
 }
 
-class Edge extends SignalHolder {
-	private var _input:Node;
-	private var _output:Node;
-	public var input(get, set):Node;
-	public var output(get, set):Node;
+class Edge<T> extends SignalHolder<T> {
+	private var _input:Node<T>;
+	private var _output:Node<T>;
+	public var input(get, set):Node<T>;
+	public var output(get, set):Node<T>;
 	
-	public function new(input:Node, output:Node) {
+	public function new(input:Node<T>, output:Node<T>) {
 		super();
 		this.output = output;
 		this.input = input;
 	}
 	
-	override function updateOutputs(dt:Float) {
+	override function updateOutputs(value:Null<T>, dt:Float) {
 		if (output != null) {
-			output.applySignal(dt);
+			output.applySignal(value, dt);
 		}
 	}
 	
@@ -253,35 +253,35 @@ class Edge extends SignalHolder {
 		output = null;
 	}
 	
-	private function get_input():Node {
+	private function get_input():Node<T> {
 		return _input;
 	}
-	private function set_input(node:Node):Node {
+	private function set_input(node:Node<T>):Node<T> {
 		if (input != null) input.removeEdgeOut(this);
 		if (node != null) node.addEdgeOut(this);
 		return node;
 	}
 	
-	private function get_output():Node {
+	private function get_output():Node<T> {
 		return _output;
 	}
-	private function set_output(node:Node):Node {
+	private function set_output(node:Node<T>):Node<T> {
 		if (output != null) output.removeEdgeIn(this);
 		if (node != null) node.addEdgeIn(this);
 		return node;
 	}
 }
 
-class EdgeTwoWay extends SignalHolder {
-	public var edgeA:Edge;
-	public var edgeB:Edge;
-	public var nodeA(get, set):Node;
-	public var nodeB(get, set):Node;
+class EdgeTwoWay<T> extends SignalHolder<T> {
+	public var edgeA:Edge<T>;
+	public var edgeB:Edge<T>;
+	public var nodeA(get, set):Node<T>;
+	public var nodeB(get, set):Node<T>;
 	
-	public function new(nodeA:Node, nodeB:Node) {
+	public function new(nodeA:Node<T>, nodeB:Node<T>) {
 		super();
-		edgeA = new Edge(nodeA, nodeB);
-		edgeB = new Edge(nodeB, nodeA);
+		edgeA = new Edge<T>(nodeA, nodeB);
+		edgeB = new Edge<T>(nodeB, nodeA);
 	}
 	
 	override function update(dt:Float) {
@@ -290,28 +290,30 @@ class EdgeTwoWay extends SignalHolder {
 		edgeB.update(dt);
 	}
 	
-	override function applySignal(dt:Float) {
-		super.applySignal(dt);
-		edgeA.applySignal(dt);
-		edgeB.applySignal(dt);
+	override function applySignal(value:Null<T>, dt:Float) {
+		super.applySignal(value, dt);
+		edgeA.applySignal(value, dt);
+		edgeB.applySignal(value, dt);
 	}
 	
-	override private function get_signalOn():Bool {
-		return (nodeA != null && nodeA.signalOn) || (nodeB != null && nodeB.signalOn);
+	override private function get_signal():Null<T> {
+		if (nodeA != null && nodeA.signal != null) return nodeA.signal;
+		if (nodeB != null && nodeB.signal != null) return nodeB.signal;
+		return null;
 	}
 	
-	private function get_nodeA():Node {
+	private function get_nodeA():Node<T> {
 		return edgeA != null ? edgeA.input : null;
 	}
-	private function set_nodeA(node:Node):Node {
+	private function set_nodeA(node:Node<T>):Node<T> {
 		edgeA.input = node;
 		edgeB.output = node;
 		return node;
 	}
-	private function get_nodeB():Node {
+	private function get_nodeB():Node<T> {
 		return edgeA != null ? edgeA.output : null;
 	}
-	private function set_nodeB(node:Node):Node {
+	private function set_nodeB(node:Node<T>):Node<T> {
 		edgeB.input = node;
 		edgeA.output = node;
 		return node;
@@ -319,43 +321,43 @@ class EdgeTwoWay extends SignalHolder {
 }
 
 @:tink
-class SignalHolder {
-	@:isVar public var signalOn(get, set):Bool;
-	public var lastSignalOn:Bool;
-	public var onSignalChanged:FlxTypedSignal<Bool->Void>;
+class SignalHolder<T> {
+	@:isVar public var signal(get, set):Null<T>;
+	public var lastSignal:Null<T>;
+	public var onSignalChanged:FlxTypedSignal<Null<T>->Void>;
 	
 	public function new() {
-		onSignalChanged = new FlxTypedSignal<Bool->Void>();
-		signalOn = false;
+		onSignalChanged = new FlxTypedSignal<Null<T>->Void>();
+		signal = null;
 	}
 	
 	public function update(dt:Float) {
-		lastSignalOn = signalOn;
-		signalOn = false;
+		lastSignal = signal;
+		signal = null;
 	}
 	
-	public function applySignal(dt:Float) {
-		if (!signalOn) {
-			signalOn = true;
-			updateOutputs(dt);
+	public function applySignal(value:Null<T>, dt:Float) {
+		if (signal == null) {
+			signal = value;
+			updateOutputs(value, dt);
 		}
 	}
 	
-	public function updateOutput(output:SignalHolder, dt:Float) {
-		output.applySignal(dt);
+	public function updateOutput(output:SignalHolder<T>, value:Null<T>, dt:Float) {
+		output.applySignal(value, dt);
 	}
 	
-	public function updateOutputs(dt:Float):Void {
+	public function updateOutputs(value:Null<T>, dt:Float):Void {
 		throw("Requires implementation in subclass");
 	}
 	
-	private function set_signalOn(signal:Bool):Bool {
-		var old:Bool = signalOn;
-		this.signalOn = signal;
-		if (old != signalOn) onSignalChanged.dispatch(signal);
+	private function set_signal(value:Null<T>):Null<T> {
+		var old:Null<T> = signal;
+		this.signal = value;
+		if (old != value) onSignalChanged.dispatch(signal);
 		return signal;
 	}
-	private function get_signalOn():Bool {
-		return signalOn;
+	private function get_signal():Null<T> {
+		return signal;
 	}
 }
