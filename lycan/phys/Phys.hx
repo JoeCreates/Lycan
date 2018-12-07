@@ -35,6 +35,8 @@ class Phys {
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
 	public static var forceTimestep:Null<Float> = null;
 	
+	public static var floorPos:Bool = false;
+	
 	#if !FLX_NO_DEBUG
 	public static var shapeDebug(default, null):ShapeDebug;
 	private static var drawDebugButton:FlxSystemButton;
@@ -177,9 +179,8 @@ class Phys {
 		
 		sprite.scaleX = zoom;
 		sprite.scaleY = zoom;
-		
-		sprite.x = -FlxG.camera.scroll.x * zoom;
-		sprite.y = -FlxG.camera.scroll.y * zoom;
+		sprite.x = -FlxG.camera.scroll.x * zoom - FlxG.camera.width * ((zoom - 1) / 2);
+		sprite.y = -FlxG.camera.scroll.y * zoom - FlxG.camera.height * ((zoom - 1) / 2);
 		#end
 	}
 	

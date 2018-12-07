@@ -8,10 +8,8 @@ interface Attachable extends Entity {
 	public var attachable:AttachableComponent;
 	@:relaxed public var x(get, set):Float;
 	@:relaxed public var y(get, set):Float;
-	// TODO could add optional requirements?
 	@:relaxed public var flipX(get, set):Bool;
 	@:relaxed public var flipY(get, set):Bool;
-	
 	@:relaxed public var exists(get, set):Bool;
 }
 
