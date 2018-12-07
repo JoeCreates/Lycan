@@ -45,6 +45,13 @@ class CameraSprite extends FlxSprite {
 			}
 		}
 		if (!onScreen) return;
+		drawToSprite();
+		super.draw();
+	}
+	
+	@:access(flixel.FlxCamera)
+	public function drawToSprite(?sprite:FlxSprite) {
+		if (sprite == null) sprite = this;
 		
 		if (!FlxG.renderBlit) {
 			sourceCamera.clearDrawStack();
@@ -57,8 +64,7 @@ class CameraSprite extends FlxSprite {
 			sourceCamera.render();
 		}
 		pixels.fillRect(pixels.rect, FlxColor.TRANSPARENT);
-		GraphicUtil.drawCamera(this, sourceCamera);
-		super.draw();
+		GraphicUtil.drawCamera(sprite, sourceCamera);
 	}
 	
 	override public function update(dt:Float):Void {
