@@ -1,5 +1,7 @@
 package lycan.util;
 
+import openfl.display3D.textures.RectangleTexture;
+import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -27,7 +29,12 @@ class CameraSprite extends FlxSprite {
 		this.width = width;
 		this.height = height;
 		
+		#if !flash
+		var texture = FlxG.stage.context3D.createRectangleTexture(sourceCamera.width, sourceCamera.height, BGRA, true);
+		pixels = BitmapData.fromTexture(texture);
+		#else
 		makeGraphic(sourceCamera.width, sourceCamera.height, 0, true);
+		#end
 		
 		group = new CameraGroup();
 		group.camera = sourceCamera;
@@ -63,7 +70,7 @@ class CameraSprite extends FlxSprite {
 		if (!FlxG.renderBlit) {
 			sourceCamera.render();
 		}
-		pixels.fillRect(pixels.rect, FlxColor.TRANSPARENT);
+		sprite.pixels.fillRect(pixels.rect, FlxColor.TRANSPARENT);
 		GraphicUtil.drawCamera(sprite, sourceCamera);
 	}
 	
@@ -84,13 +91,15 @@ class CameraSprite extends FlxSprite {
 	}
 	
 	override function set_x(x:Float):Float {
+		this.x = x;
 		updateCameraPos();
-		return super.set_x(x);
+		return x;
 	}
 	
 	override function set_y(y:Float):Float {
+		this.y = y;
 		updateCameraPos();
-		return super.set_y(y);
+		return y;
 	}
 }
 
@@ -100,19 +109,27 @@ class CameraGroup extends FlxGroup {
 	}
 	
 	override public function add(object:FlxBasic):FlxBasic {
-		object.cameras = cameras;
+		setMemberCameras(object);
 		return super.add(object);
 	}
 	
 	override public function insert(position:Int, object:FlxBasic):FlxBasic {
-		object.cameras = cameras;
+		setMemberCameras(object);
 		return super.insert(position, object);
 	}
 	
-	override function set_cameras(Value:Array<FlxCamera>):Array<FlxCamera> {
-		for (m in members) {
-			m.cameras = cameras;
+	private function setMemberCameras(object:FlxBasic):Void {
+		object.cameras = cameras;
+		if (@:privateAccess object.flixelType == FlxType.GROUP) {
+			var group:FlxGroup = cast object;
+			group.forEach(function(o:FlxBasic) {o.cameras = cameras;}, true);
 		}
-		return super.set_cameras(Value);
+	}
+	
+	override function set_cameras(value:Array<FlxCamera>):Array<FlxCamera> {
+		forEach(function(b:FlxBasic) {
+			b.cameras = value;
+		}, true);
+		return super.set_cameras(value);
 	}
 }
