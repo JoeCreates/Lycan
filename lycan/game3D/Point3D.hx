@@ -124,6 +124,14 @@ class Point3D implements IFlxPooled {
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 	
+	public function distanceToXYZ(x:Float, y:Float, z:Float):Float {
+		var dx:Float = x - this.x;
+		var dy:Float = y - this.y;
+		var dz:Float = z - this.z;
+		
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+	
 	public function angleBetween(p:Point3D):Float {
 		var l = length;
 		var pl = p.length;
