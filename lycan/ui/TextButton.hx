@@ -8,7 +8,7 @@ class TextButton extends FlxButton {
 	public function new(text:String, onClick:Void->Void, frameWidth:Int = 0) {
 		super(0, 0, text, onClick);
 		label.borderStyle = FlxTextBorderStyle.OUTLINE;
-		label.borderColor = ColorPresets.BLACK;
+		label.borderColor = FlxColor.BLACK;
 		label.borderSize = 2;
 		label.color = 0xeeeeee;
 		label.autoSize = true;
