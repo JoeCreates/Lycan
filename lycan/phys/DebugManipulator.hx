@@ -38,14 +38,14 @@ class DebugManipulator {
 		hand.space = Phys.space;
 	}
 	
-	public function update():Void {
-		if (FlxG.mouse.justPressed) {
-			bodyList = Phys.space.bodiesUnderPoint(Vec2.weak(FlxG.mouse.x, FlxG.mouse.y), null, bodyList);
+	public function update(selectNew:Bool = false, ?x:Float, ?y:Float):Void {
+		if (selectNew) {
+			bodyList = Phys.space.bodiesUnderPoint(Vec2.weak(x, y), null, bodyList);
 			
 			for (body in bodyList) {
 				if (body.isDynamic()) {
 					hand.body2 = body;
-					hand.anchor2 = body.worldPointToLocal(Vec2.weak(FlxG.mouse.x, FlxG.mouse.y), true);
+					hand.anchor2 = body.worldPointToLocal(Vec2.weak(x, y), true);
 					hand.active = true;
 					break;
 				}
@@ -53,12 +53,12 @@ class DebugManipulator {
 			
 			bodyList.clear();
 		}
-		else if (FlxG.mouse.justReleased) {
+		else if (x == null || y == null) {
 			hand.active = false;
 		}
 		
 		if (hand.active) {
-			hand.anchor1.setxy(FlxG.mouse.x, FlxG.mouse.y);
+			hand.anchor1.setxy(x, y);
 			hand.body2.angularVel *= 0.9;
 		}
 	}

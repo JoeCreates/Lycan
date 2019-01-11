@@ -33,11 +33,8 @@ class PlatformerPhysics {
 	public static var onewayType:CbType = new CbType();
 	public static var pushableType:CbType = new CbType();
 	public static var movingPlatformType:CbType = new CbType();
-	public static var tilemapShapeType:CbType = new CbType();
 	
 	public static var overlappingObjectGroup:InteractionGroup = new InteractionGroup(true);
-	
-	public static var sensorFilter:InteractionFilter = new InteractionFilter(0, 0, 1, 1);
 	
 	private static var isSetup:Bool = false;
 	
@@ -81,7 +78,7 @@ class PlatformerPhysics {
 		// Attempt to work around ghost edges issue
 		// TODO it's a work in progress
 		space.listeners.add(
-			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, CbType.ANY_BODY, tilemapShapeType,
+			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, CbType.ANY_BODY, Phys.tilemapShapeType,
 				function(ic:InteractionCallback) {
 					var b1:Body = ic.int1.castBody;
 					var b2:Body = ic.int2.castBody;
