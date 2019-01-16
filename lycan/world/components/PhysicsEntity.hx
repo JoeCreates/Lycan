@@ -1,5 +1,6 @@
 package lycan.world.components;
 
+import flash.display.BitmapData;
 import flixel.FlxG;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
@@ -16,6 +17,10 @@ import nape.space.Space;
 import flixel.FlxSprite;
 import flixel.util.FlxDestroyUtil;
 import lycan.core.LG;
+import lycan.phys.IsoBody;
+import lycan.phys.BitmapDataIso;
+import nape.geom.Mat23;
+import flash.geom.Matrix;
 
 interface PhysicsEntity extends Entity {
 	public var physics:PhysicsComponent;
@@ -46,11 +51,15 @@ interface PhysicsEntity extends Entity {
 	public var linearDrag:Float = 1;
 	public var angularDrag:Float = 1;
 	
+	public var rotateEntity:Bool = true;
+	
+	public var enableUpdate(default, set):Bool;
+	
 	public function new(entity:PhysicsEntity) {
 		super(entity);
 	}
 	
-	public function init(?bodyType:BodyType, createRectBody:Bool = true, enabled:Bool = true) {
+	public function init(?bodyType:BodyType, createRectBody:Bool = true, enabled:Bool = true, enableUpdate:Bool = true) {
 		if (bodyType == null) bodyType = BodyType.DYNAMIC;
 		
 		body = new Body(bodyType);
@@ -63,13 +72,24 @@ interface PhysicsEntity extends Entity {
 		body.userData.entity = entity;
 		
 		this.enabled = enabled;
-		LG.lateUpdate.add(update);
+		this.enableUpdate = enableUpdate;
+	}
+	
+	private function set_enableUpdate(val:Bool):Bool {
+		if (this.enableUpdate == val) return val;
+		this.enableUpdate = val;
+		if (val) {
+			LG.lateUpdate.add(update);
+		} else {
+			LG.lateUpdate.remove(update);
+		}
+		return val;
 	}
 	
 	@:append("destroy")
 	public function destroy():Void {
 		destroyPhysObjects();
-		LG.lateUpdate.remove(update);
+		enableUpdate = false;
 		offset = FlxDestroyUtil.put(offset);
 	}
 
@@ -137,6 +157,47 @@ interface PhysicsEntity extends Entity {
 		}
 	}
 	
+	public function createBodyFromBitmap(bmp:BitmapData, alphaThreshold:Float = 0x80):Void {
+		if (body != null) destroyPhysObjects();
+		
+		if (Std.is(entity, FlxSprite)) {
+			var iso = new BitmapDataIso(bmp, alphaThreshold);
+			var isoFunc = #if flash iso #else (x:Float, y:Float)->{return iso.iso(x, y);}#end;
+			var body:Body = IsoBody.run(isoFunc, iso.bounds);
+			addPremadeBody(body);
+			setBodyMaterial();
+			var s:FlxSprite = cast entity;
+			var o:Vec2 = body.userData.graphicOffset;
+			s.origin.set(-o.x, -o.y);
+		}
+	}
+	
+	/**
+	 * Translates shapes such that origin becomes specified position
+	 * 
+	 * @param x X position of the origin from top left of bounds
+	 * @param y Y Position of the origin from top left of bounds
+	 */
+	public function setBodyOrigin(x:Float, y:Float):Void {
+		var pos:Vec2 = body.worldPointToLocal(Vec2.weak(body.bounds.x, body.bounds.y));
+		body.translateShapes(Vec2.weak(-x - pos.x, -y - pos.y));
+		pos.dispose();
+	}
+	
+	public function updateEntityOrigin():Void {
+		var pos:Vec2 = body.worldPointToLocal(Vec2.weak(body.bounds.x, body.bounds.y));
+		entity.entity_origin.set(-pos.x, -pos.y);
+		pos.dispose();
+	}
+	
+	public function flipShapes(flipX:Bool = true, flipY:Bool = false):Void {
+		var m = new Matrix();
+		m.identity();
+		m.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+		var mat = Mat23.fromMatrix(m);
+		body.transformShapes(mat);
+	}
+	
 	public function setBodyMaterial(elasticity:Float = 0, dynamicFriction:Float = 0.2, staticFriction:Float = 0.4,
 		density:Float = 1, rotationFriction:Float = 0.001):Void
 	{
@@ -163,7 +224,7 @@ interface PhysicsEntity extends Entity {
 			entity.entity_y = Math.floor(entity.entity_y);
 		}
 		
-		if (body.allowRotation) {
+		if (body.allowRotation && rotateEntity) {
 			entity.entity_angle = body.rotation * FlxAngle.TO_DEG;
 		}
 	}

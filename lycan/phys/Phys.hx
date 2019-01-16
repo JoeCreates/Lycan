@@ -1,6 +1,7 @@
 package lycan.phys;
 
 
+import flixel.math.FlxPoint;
 import flash.display.BitmapData;
 import flash.geom.Matrix;
 import flixel.FlxG;
@@ -18,6 +19,11 @@ import nape.phys.BodyType;
 import nape.phys.Material;
 import nape.shape.Polygon;
 import nape.space.Space;
+import nape.callbacks.CbType;
+import nape.dynamics.InteractionFilter;
+import openfl.geom.Matrix3D;
+import lycan.game3D.Point3D;
+import lycan.game3D.PerspectiveProjection;
 #if !FLX_NO_DEBUG
 import nape.util.ShapeDebug;
 import flixel.addons.nape.FlxNapeSpace.GraphicNapeDebug;
@@ -30,6 +36,7 @@ class Phys {
 	public static var velocityIterations:Int = 10;
 	/** Iterations for resolving position (default 10) */
 	public static var positionIterations:Int = 10;
+	public static var steps:Int = 1;
 	/** Whether debug graphics are enabled */
 	public static var drawDebug(default, set):Null<Bool> = null;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */
@@ -44,9 +51,16 @@ class Phys {
 	public static var enableDebugManipulator(default, set):Bool = false;
 	#end
 	
+	public static var matrix3D:Matrix3D;
+	public static var projection:PerspectiveProjection;//TODO general projections
+	
+	// CbTypes
+	public static var tilemapShapeType:CbType = new CbType();
+	public static var sensorFilter:InteractionFilter = new InteractionFilter(0, 0, 1, 1, 0, 0);
+	
 	public static function init():Void {
 		if (space != null) return;
-		
+		trace("klkj");
 		space = new Space(Vec2.weak(0, 3));
 		space.gravity.y = 2500;
 		
@@ -132,17 +146,45 @@ class Phys {
 	}
 
 	public static function update():Void {
+		if (FlxG.mouse.justPressed)  trace("Physics update");
 		var dt = forceTimestep == null ? FlxG.elapsed : forceTimestep;
 		if (space != null && dt > 0) {
 			
 			#if !FLX_NO_DEBUG
-			if (debugManipulator != null && enableDebugManipulator) debugManipulator.update();
+			if (debugManipulator != null && enableDebugManipulator) {
+				var x:Null<Float> = FlxG.mouse.x;
+				var y:Null<Float> = FlxG.mouse.y;
+				if (!FlxG.mouse.pressed) {
+					x = null;
+					y = null;	
+				} else if (projection != null) {
+					var p = FlxPoint.get(x, y);
+					var p3d = Point3D.get(x, y, 0);
+					projection.to3D(null, p, projection.depth);
+					p.put();
+					x = p3d.x;
+					y = p3d.y;
+					p3d.put();
+					if (FlxG.mouse.justPressed) trace(x + " " + y);
+				}
+				debugManipulator.update(FlxG.mouse.justPressed, x, y);
+			}
 			#end
 			
 			// TODO better method or location for this?
 			GroundableComponent.clearGroundsSignal.dispatch();
 			
-			space.step(dt, velocityIterations, positionIterations);
+			if (steps == 1) {
+				space.step(dt, velocityIterations, positionIterations);
+			} else {
+				var sdt = dt / steps;
+				var velItr = Std.int(velocityIterations / steps);
+				var posItr = Std.int(positionIterations / steps);
+				for (i in 0...steps) {
+					space.step(sdt, velItr, posItr);
+				}
+			}
+
 		}
 	}
 	
@@ -176,11 +218,25 @@ class Phys {
 		
 		var zoom = FlxG.camera.zoom;
 		var sprite = shapeDebug.display;
+		var scale = FlxG.camera.totalScaleX / FlxG.camera.zoom;
 		
-		sprite.scaleX = zoom;
-		sprite.scaleY = zoom;
-		sprite.x = -FlxG.camera.scroll.x * zoom - FlxG.camera.width * ((zoom - 1) / 2);
-		sprite.y = -FlxG.camera.scroll.y * zoom - FlxG.camera.height * ((zoom - 1) / 2);
+		// sprite.scaleX = FlxG.camera.totalScaleX;
+		// sprite.scaleY = FlxG.camera.totalScaleY;
+		// sprite.x = FlxG.camera.x - FlxG.camera.scroll.x * FlxG.camera.totalScaleX - FlxG.width * ((scale - 1) / 2);
+		// sprite.y = FlxG.camera.y - FlxG.camera.scroll.y * FlxG.camera.totalScaleY - FlxG.height * ((scale - 1) / 2);
+		
+		if (matrix3D != null) {
+			if (sprite.transform.matrix3D == null) sprite.transform.matrix3D = new Matrix3D();
+			// var scaleX = sprite.scaleX;
+			// var scaleY = sprite.scaleY;
+			// var sx = sprite.x;
+			// var sy = sprite.y;
+			var mat = sprite.transform.matrix3D;
+			mat.identity();
+			// mat.appendScale(scaleX, scaleY, 1);
+			// mat.appendTranslation(sx, sy, 0);
+			mat.append(matrix3D);
+		}
 		#end
 	}
 	

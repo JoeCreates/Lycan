@@ -1,5 +1,6 @@
 package lycan.world.components;
 
+import nape.dynamics.InteractionFilter;
 import flixel.FlxBasic.FlxType;
 import nape.geom.ConvexResult;
 import nape.phys.Body;
@@ -42,7 +43,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var targetMoveVel:Float = 0;
 	public var currentMoveVel:Float = 0;
 	public var moveAcceleration:Float = 0.4;
-	public var stopAcceleration:Float = 0.4;
+	public var stopAcceleration:Float = 0.2;
 	public var minMoveVel:Float = 20;
 	@:calc public var isMoving:Bool = targetMoveVel != 0;
 	
@@ -51,6 +52,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var maxJumps:Int = 2;
 	public var maxJumpVelY:Float = 500;
 	public var airDrag:Float = 5000;
+	public var groundSuckDistance:Float = 2;
 	
 	public var dropThrough:Bool = false;
 	
@@ -143,8 +145,8 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		var oldVel:Vec2 = body.velocity.copy(true);
 		body.velocity.setxy(0, 1);
 		body.position.y--;
-		var result:ConvexResult = Phys.space.convexCast(feetShape, 1, false);
-		if (result != null && Math.abs(result.normal.angle * FlxAngle.TO_DEG + 90)  <= groundable.groundedAngleLimit) {
+		var result:ConvexResult = Phys.space.convexCast(feetShape, 1, false, feetShape.filter);
+		if (result != null && Math.abs(result.normal.angle * FlxAngle.TO_DEG + 90) <= groundable.groundedAngleLimit) {
 			entity.groundable.add(result.shape.body.userData.entity);
 		}
 		body.position.y++;
@@ -160,9 +162,9 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		// TODO no friction on moving platforms that are moving down... we need friction! (or specil moving platforms)
 		if (groundable.wasGrounded && !isGrounded) {
 			var oldVel:Vec2 = body.velocity.copy(true);
-			body.velocity.setxy(0, 10 * 60);//TODO customisable
+			body.velocity.setxy(0, groundSuckDistance * 60);//TODO customisable
 			body.position.y--;
-			var result:ConvexResult = Phys.space.convexCast(feetShape, 1/60, false);
+			var result:ConvexResult = Phys.space.convexCast(feetShape, 1/60, false, feetShape.filter);
 			if (result != null && Math.abs(result.normal.angle * FlxAngle.TO_DEG + 90)  <= entity.groundable.groundedAngleLimit) {
 				body.integrate(result.toi);
 				entity.groundable.add(result.shape.body.userData.entity);
@@ -221,8 +223,8 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	
 	public function stop() {
 		targetMoveVel = 0;
-		// TODO from Chris' controller, but doesn't account for dts
-		currentMoveVel -= stopAcceleration * currentMoveVel;
+		// TODO probably issues with this method when running into a wall as walls don't zero it
+		currentMoveVel = 0;
 		
 		if (Math.abs(currentMoveVel) < minMoveVel) {
 			currentMoveVel = 0;

@@ -16,7 +16,6 @@ import openfl.Lib;
 import openfl.display.BlendMode;
 import openfl.display.Stage;
 import openfl.display.StageQuality;
-import openfl.filesystem.File;
 import openfl.utils.ByteArray;
 
 /*
@@ -60,7 +59,7 @@ class CircularGraphic extends FlxSprite {
 				var spacing:Float = 360 / l.spokeCount;
 				var angle:Float = l.angleOffset;
 				for (i in 0...l.spokeCount) {
-					l.spoke.draw(layerSprite, currentRadius, angle, radius);
+					l.spoke.draw(layerSprite, currentRadius, angle, radius, color);
 					angle += spacing;
 				}
 			}
@@ -104,12 +103,6 @@ class CircularGraphic extends FlxSprite {
 			currentRadius += l.radius;
 		}
 	}
-	
-	public function saveToPng():Void {
-		#if (flash)
-			new FileReference().save(pixels.encode(pixels.rect, new PNGEncoderOptions()), "");
-		#end
-	}
 }
 
 class CircularGraphicLayer {
@@ -146,7 +139,7 @@ class Spoke {
 		this.relativeRadius = relativeRadius;
 	}
 	
-	public function draw(layerSprite:FlxSprite, radius:Float, angle:Float, totalRadius:Float):Void {
+	public function draw(layerSprite:FlxSprite, radius:Float, angle:Float, totalRadius:Float, ?color:FlxColor):Void {
 		
 	}
 	
@@ -160,14 +153,14 @@ class CircleSpoke extends Spoke {
 		super(rotates, relativeRadius);
 	}
 	
-	override public function draw(layerSprite:FlxSprite, currentRadius:Float, angle:Float, totalRadius:Float):Void {
+	override public function draw(layerSprite:FlxSprite, currentRadius:Float, angle:Float, totalRadius:Float, ?color:FlxColor):Void {
 		super.draw(layerSprite, currentRadius, angle, totalRadius);
 		
 		var a = FlxAngle.TO_RAD * angle;
 		var r = this.radius;
 		var cr = currentRadius + r;
 		
-		FlxSpriteUtil.drawCircle(layerSprite, totalRadius + Math.sin(a) * cr, totalRadius -Math.cos(a) * cr, r);
+		FlxSpriteUtil.drawCircle(layerSprite, totalRadius + Math.sin(a) * cr, totalRadius -Math.cos(a) * cr, r, color);
 	}
 }
 
@@ -184,7 +177,7 @@ class PolygonSpoke extends Spoke {
 		super(rotates, relativeRadius);
 	}
 	
-	override public function draw(layerSprite:FlxSprite, radius:Float, angle:Float, totalRadius:Float):Void {
+	override public function draw(layerSprite:FlxSprite, radius:Float, angle:Float, totalRadius:Float, ?color:FlxColor):Void {
 		super.draw(layerSprite, radius, angle, totalRadius);
 		
 		var matrix = Spoke.matrix;
@@ -198,7 +191,7 @@ class PolygonSpoke extends Spoke {
 			p.transform(matrix);
 			i++;
 		}
-		FlxSpriteUtil.drawPolygon(layerSprite, transformedPoints, 0xffffffff, null, {smoothing: true});
+		FlxSpriteUtil.drawPolygon(layerSprite, transformedPoints, color, null, {smoothing: true});
 	}
 	
 	public static function makeRectSpoke(width:Float, height:Float, rotates:Bool = true, ?relativeRadius:Float):PolygonSpoke {

@@ -32,7 +32,8 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return false;/* TypeTools.getClass(Context.getLocalType()).name == "Example"; */};
+	static function shouldTrace() {return false;};
+	// static function shouldTrace() {return TypeTools.getClass(Context.getLocalType()).name == "Paddle";};
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
@@ -274,6 +275,8 @@ class EntityBuilder {
 					
 					// If it's not in a super class, throw an error
 					if (targetField == null) {
+						//TODO hack to work around haxe bug which prevents completion
+						continue;
 						throw(classType.name + " has no function " + targetMethodName +
 							", required by " + componentClass.name);
 					}
@@ -454,19 +457,26 @@ class EntityBuilder {
 	}
 		
 	public static function getField(type:ClassType, fieldName:String, checkForExpression:Bool = false):ClassField {
+		traceIf("Attempting to get field " + fieldName + " " + (checkForExpression ? "(Required expression)" : "(No expression required)"));
+		
 		for (field in type.fields.get()) {
 			// Check if this Field is the required field
 			if (field.name == fieldName) {
 				if (!checkForExpression || field.expr() != null) {
-					trace("returned");
 					return field;
 				}
 			}
 		}
+		
+		traceIf("Failed to find field " + fieldName);
+		
 		// If not, check the super class if there is one
 		if (type.superClass != null) {
+			traceIf("Checking superclass " + type.superClass.t.get().name);
 			return getField(type.superClass.t.get(), fieldName, checkForExpression);
 		}
+		
+		traceIf("No superclass, field not found");
 		return null;
 	}
 	
