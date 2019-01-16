@@ -37,6 +37,7 @@ class GraphicUtil {
 			spr.pixels.copyPixels(camera.buffer, camera.buffer.rect, pointZero);
 			spr.dirty = true;
 		} else {
+			//spr.pixels.readable = false;
 			spr.pixels.draw(camera.canvas);
 		}
 	}
@@ -164,7 +165,12 @@ class GraphicUtil {
 		//mat.identity();
 		//mat.rotate();
 		
-		FlxSpriteUtil.drawPolygon(tempSprite, triPoints, solidTriangle ? color : 0, lineStyle, drawStyle);
+		var quality = FlxG.stage.quality;
+		FlxG.stage.quality = LOW;
+		
+		FlxSpriteUtil.drawPolygon(tempSprite, triPoints, solidTriangle ? color : 0, lineStyle, {smoothing: false});
+		
+		FlxG.stage.quality = quality;
 		
 		for (p in triPoints) p.put();
 		

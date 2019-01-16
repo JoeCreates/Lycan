@@ -12,10 +12,23 @@ class StringUtil {
 		a.reverse();
 		return a.join("");
 	}
-
+	
+	public static function parseRange(str:String, delimiter:String = "-"): { min:Float, max:Float } {
+		var reg:EReg = new EReg("(\\d+(?:\\.\\d+)?)(?:\\s*" + delimiter + "\\s*)?((\\d+(?:\\.\\d+)?))?", "i");
+		reg.match(str);
+		
+		var isRange:Bool = true;
+		try { reg.matched(2); } catch (msg:String) { isRange = false; };
+		
+		var min:Float = Std.parseFloat(reg.matched(1));
+		var max:Float = isRange ? Std.parseFloat(reg.matched(2)) : min;
+		
+		if (Math.isNaN(max)) max = min;
+		
+		return {min: min, max: max};
+	}
+	
 	public static function repeat(s:String, times:Int):String {
-		Sure.sure(s != null);
-		Sure.sure(times >= 1);
 		var output:String = "";
 		for (i in 0...times) {
 			output += s;
@@ -33,9 +46,6 @@ class StringUtil {
 
 	// Exclusion of some characters e.g. spaces is useful for multi-word anagrams
 	public static function isAnagram(a:String, b:String, ?excluding:String):Bool {
-		Sure.sure(a != null);
-		Sure.sure(b != null);
-
 		if (excluding != null) {
 			a = a.replace(excluding, "");
 			b = b.replace(excluding, "");

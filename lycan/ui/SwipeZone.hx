@@ -17,17 +17,33 @@ import flixel.FlxObject;
 	
 	public var onMove:SwipeZone->Void;
 	
+	/**
+	 * The x distance which swipe must move before final swipe position is updated.
+	 * Negative means update if y threshold has been crossed
+	 */
+	public var thresholdX:Float;
+	/**
+	 * The y distance which swipe must move before final swipe position is updated.
+	 * Negative means update if x threshold has been crossed
+	 */
+	public var thresholdY:Float;
+	public var thresholdCrossedX:Bool;
+	public var thresholdCrossedY:Bool;
 	
 	@:calc public var startDiffX:Float = currentPosition.x - startPosition.x;
 	@:calc public var startDiffY:Float = currentPosition.y - startPosition.y;
 	@:calc public var frameDiffX:Float = currentPosition.x - lastPosition.x;
 	@:calc public var frameDiffY:Float = currentPosition.y - lastPosition.y;
 	
-	public function new() {
+	public function new(moveThresholdX:Float = 0, moveThresholdY:Float = 0) {
 		super();
 		startPosition = FlxPoint.get();
 		currentPosition = FlxPoint.get();
 		lastPosition = FlxPoint.get();
+		this.thresholdX = moveThresholdX;
+		this.thresholdY = moveThresholdY;
+		thresholdCrossedX = false;
+		thresholdCrossedY = false;
 	}
 	
 	override function update(dt:Float) {
@@ -52,9 +68,12 @@ import flixel.FlxObject;
 		// If there is a currentPointer, update position
 		if (currentPointer != null) {
 			lastPosition.copyFrom(currentPosition);
-			currentPointer.getWorldPosition(camera, currentPosition);
-			if (!currentPosition.equals(lastPosition) && onMove != null) {
-				onMove(this);
+			updateThreshold();
+			if (thresholdCrossedX || thresholdCrossedY) {
+				currentPointer.getWorldPosition(camera, currentPosition);
+				if (!currentPosition.equals(lastPosition) && onMove != null) {
+					onMove(this);
+				}
 			}
 		}
 		// Otherwise, check for new pointer
@@ -79,6 +98,20 @@ import flixel.FlxObject;
 		
 	}
 	
+	/**
+	 * Set threshold crossed flags based on current position with respect to start position
+	 */
+	private function updateThreshold() {
+		if (!thresholdCrossedX && thresholdX >= 0 && Math.abs(currentPointer.x - startPosition.x) >= thresholdX) {
+			thresholdCrossedX = true;
+			if (thresholdY < 0) thresholdCrossedY = true;
+		}
+		if (!thresholdCrossedY && thresholdY >= 0 && Math.abs(currentPointer.y - startPosition.y) >= thresholdY) {
+			thresholdCrossedY = true;
+			if (thresholdX < 0) thresholdCrossedX = true;
+		}
+	}
+	
 	private function setCurrentPointer(pointer:FlxPointer, input:IFlxInput) {
 		if (pointer == currentPointer) return;
 		
@@ -89,6 +122,8 @@ import flixel.FlxObject;
 			pointer.getWorldPosition(camera, startPosition);
 			pointer.getWorldPosition(camera, currentPosition);
 			pointer.getWorldPosition(camera, lastPosition);
+			thresholdCrossedX = false;
+			thresholdCrossedY = false;
 		}
 	}
 }

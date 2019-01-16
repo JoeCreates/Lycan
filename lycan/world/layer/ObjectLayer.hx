@@ -4,36 +4,22 @@ import flixel.FlxBasic;
 import flixel.addons.editors.tiled.TiledObjectLayer;
 import flixel.group.FlxGroup;
 import lycan.world.WorldHandlers;
-import lycan.world.World;
-import lycan.world.layer.ILayer.LayerType;
+import lycan.world.TiledWorld;
 import flixel.addons.editors.tiled.TiledObject;
+import flixel.addons.editors.tiled.TiledPropertySet;
+import lycan.world.WorldLayer;
 
-class ObjectLayer implements ILayer {
-	public var type(default, null):LayerType = LayerType.OBJECT;
-	public var world(default, null):World;
-	public var properties(default, null):Map<String, String>;
-	public var group:FlxGroup = new FlxGroup();
+class ObjectLayer extends FlxGroup implements WorldLayer { 
+	public var properties(default, null):TiledPropertySet;
 	
-	public function new(world:World) {
-		this.world = world;
+	public function new(world:TiledWorld, tiledLayer:TiledObjectLayer) {
+		super();
+		worldLayer.init(tiledLayer, world);
 	}
 	
-	public function getBasic():FlxBasic {
-		return group;
-	}
-	
-	public function load(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
-		this.properties = tiledLayer.properties.keys;
-		
-		loadObjects(tiledLayer, handlers);
-	}
-
-	public function add(object:FlxBasic):FlxBasic {
-		return group.add(object);
-	}
-	
-	private function loadObjects(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {
+	public function loadObjects(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {		
 		var objMap = new Map<TiledObject, FlxBasic>();
+		
 		for (o in tiledLayer.objects) {
 			handlers.dispatch(o, this, objMap);
 		}

@@ -49,8 +49,8 @@ class Spring extends FlxBasic {
 	public function setTarget(object:Dynamic, property:String, ?restValue:Float):Void {
 		this.targetObject = object;
 		this.targetProperty = property;
-		this.restValue = restValue != null ? restValue : Reflect.getProperty(object, property);
-		this.value = this.restValue;
+		this.value = Reflect.getProperty(object, property);
+		this.restValue = restValue != null ? restValue : value;
 	}
 	
 	private function set_diff(diff:Float):Float {
