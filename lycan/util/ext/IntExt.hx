@@ -1,7 +1,7 @@
 package lycan.util;
 
 // Extension methods for Ints
-class IntUtil {
+class IntExt {
 	inline public static function abs(v:Int):Int {
 		if (v < 0) {
 			return -v;
@@ -31,20 +31,6 @@ class IntUtil {
 		return v % 2 != 0;
 	}
 
-	inline public static function max(a:Int, b:Int):Int {
-		if (a > b) {
-			return a;
-		}
-		return b;
-	}
-
-	inline public static function min(a:Int, b:Int):Int {
-		if (a < b) {
-			return a;
-		}
-		return b;
-	}
-
 	inline public static function toBool(v:Int):Bool {
 		return v != 0;
 	}
@@ -53,7 +39,7 @@ class IntUtil {
 		return (v > 0) && ((v & (v - 1)) == 0);
 	}
 
-	inline public static function sign(x:Float):Int {
+	inline public static function sign(v:Int):Int {
 		return x > 0 ? 1 : x < 0 ? -1 : 0;
 	}
 }

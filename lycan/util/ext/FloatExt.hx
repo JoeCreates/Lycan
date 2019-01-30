@@ -1,17 +1,9 @@
 package lycan.util;
 
 // Extension methods for Floats
-class FloatUtil {
+class FloatExt {
 	public static inline function clamp(v:Float, min:Float, max:Float):Float {
 		return (v < min ? min : (v > max ? max : v));
-	}
-
-	public static inline function max<T:Float>(a:T, b:T):T {
-		return (a > b ? a : b);
-	}
-
-	public static inline function min<T:Float>(a:T, b:T):T {
-		return (a < b ? a : b);
 	}
 
 	public static inline function inRangeInclusive<T:Float>(p:T, x1:T, x2:T):Bool {
@@ -35,16 +27,14 @@ class FloatUtil {
 		return x > 0 ? 1 : x < 0 ? -1 : 0;
 	}
 
-	public static inline function fpart(x:Float):Float {
+	public static inline function floatPart(x:Float):Float {
 		return x < 0 ? 1 - (x - Math.floor(x)) : x - Math.floor(x);
 	}
 
-	public static inline function rfpart(x:Float):Float {
-		return 1.0 - fpart(x);
-	}
-
 	public static inline function wrap(x:Float, lower:Float, upper:Float):Float {
-		Sure.sure(lower <= upper);
+		if (lower > upper) {
+			throw("Lower bound must be less than upper bound");
+		}
 		var range = upper - lower + 1;
 		x = ((x - lower) % range);
 		if (x < 0) {
