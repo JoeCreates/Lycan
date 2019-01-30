@@ -6,6 +6,13 @@ import haxe.ds.StringMap;
 using StringTools;
 
 class StringExt {
+	public static inline function random(s:String, length:Int, alphabet:String):String {
+		for (i in 0...length) {
+			s += alphabet.charAt(Std.random(alphabet.length));
+		}
+		return s;
+	}
+
 	// NOTE this will be slow
 	public static inline function reverse(s:String):String {
 		var a = s.split("");
