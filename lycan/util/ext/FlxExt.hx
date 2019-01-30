@@ -9,14 +9,14 @@ class FlxObjExt {
 		if (targetY != null) obj.y = obj2.y + obj2.height * targetY - obj.height * anchorY;
 	}
 	
-	public static function centerX(o:FlxObject, ?val:Float):Float {
-		if (val != null) o.x = val - o.width / 2;
-		return o.x + o.width / 2;
-	}
+	public static function getCenterX(o:FlxObject):Float {return o.x + o.width / 2;}
+	public static function getCenterY(o:FlxObject):Float {return o.y + o.height / 2;}
+	public static function setCenterX(o:FlxObject, val:Float) {o.x = val - o.width / 2;}
+	public static function setCenterY(o:FlxObject, val:Float) {o.y = val - o.height / 2;}
 	
-	public static function centerY(o:FlxObject, ?val:Float):Float {
-		if (val != null) o.y = val - o.height / 2;
-		return o.y + o.height / 2;
+	public static function setCenter(o:FlxObject, ?x:Float, ?y:Float) {
+		if (x != null) setCenterX(o, x);
+		if (y != null) setCenterX(y, y);
 	}
 	
 	public static function scaleTo(spr:FlxSprite, scale:Float, updateHitbox:Bool = true) {

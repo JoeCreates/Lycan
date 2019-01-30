@@ -5,7 +5,7 @@ import haxe.ds.StringMap;
 
 using StringTools;
 
-class StringUtil {
+class StringExt {
 	// NOTE this will be slow
 	public static inline function reverse(s:String):String {
 		var a = s.split("");
@@ -37,11 +37,7 @@ class StringUtil {
 	}
 
 	public static function contains(s:String, substr:String):Bool {
-		#if php
-		return test == "" || s.indexOf(substr) >= 0;
-		#else
 		return s.indexOf(substr) >= 0;
-		#end
 	}
 
 	// Exclusion of some characters e.g. spaces is useful for multi-word anagrams

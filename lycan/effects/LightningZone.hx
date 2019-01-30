@@ -1,5 +1,7 @@
 package lycan.effects;
 
+import openfl.display.Bitmap;
+import openfl.display3D.textures.RectangleTexture;
 import flash.display.BitmapData;
 import flash.filters.GlowFilter;
 import flash.geom.Point;
@@ -39,17 +41,30 @@ import flash.display.BitmapDataChannel;
 	public var alphaChannel:Null<BitmapDataChannel>;
 
 	var fadeTransform:ColorTransform;
+	var fadePixels:BitmapData;
+	var fadeBM:openfl.display.Bitmap;
 	
 	public function new(?width:Int, ?height:Int) {
 		super();
 		if (width == null) width = FlxG.width;
 		if (height == null) width = FlxG.height;
+		
+		// #if !flash
+		// var makeTexture = ()->return BitmapData.fromTexture(FlxG.stage.context3D.createRectangleTexture(width, height, BGRA, true));
+		// pixels = makeTexture();
+		// //fadePixels = makeTexture();
+		// fadePixels = new BitmapData(width, height, true, 0xffff0000);
+		// fadeBM = new Bitmap(fadePixels);
+		
+		
+		// #else
 		makeGraphic(width, height, 0, true);
+		// #end
 		
 		group = new FlxTypedGroup<Lightning>();
 		
-		filter = new GlowFilter(FlxColor.WHITE, 1, 16, 16, 2);
-		filterFrames = FlxFilterFrames.fromFrames(frames, 0, 0, [filter]);
+		//filter = new GlowFilter(FlxColor.WHITE, 1, 16, 16, 2);
+		//filterFrames = FlxFilterFrames.fromFrames(frames, 0, 0, [filter]);
 		fadeTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 		
 		fadeTime = 0.1;
@@ -57,13 +72,21 @@ import flash.display.BitmapDataChannel;
 	
 	
 	override public function draw():Void {
+		pixels.lock();
 		if (fade) {
 			fadeTransform.alphaMultiplier = Math.max(0, 1 - fadeRate * FlxG.elapsed);
 			pixels.colorTransform(pixels.rect, fadeTransform);
+			// fadePixels.fillRect(fadePixels.rect, 0);
+			// fadePixels.draw(pixels, null, null);
+			// pixels.fillRect(pixels.rect, 0);
+			// pixels.draw(fadeBM, null, fadeTransform);
 		} else {
 			pixels.fillRect(pixels.rect, 0);
 		}
-		pixels = pixels;
+		// pixels.fillRect(pixels.rect, 0);
+		// pixels.draw(pixels, null, fadeTransform);
+		pixels.unlock();
+		frames = frames;
 		
 		
 		for (l in group.members) {
@@ -74,10 +97,10 @@ import flash.display.BitmapDataChannel;
 		
 		//TODO this is a workaround for a flixel issue
 		//applyToSprite sets sprites graphic to parent of filterFrames, which is null (unless we do this)
-		if (enableFilters) {
-			filterFrames.parent = graphic;
-			filterFrames.applyToSprite(this, false, true);
-		}
+		// if (enableFilters) {
+		// 	filterFrames.parent = graphic;
+		// 	filterFrames.applyToSprite(this, false, true);
+		// }
 		
 		super.draw();
 	}
