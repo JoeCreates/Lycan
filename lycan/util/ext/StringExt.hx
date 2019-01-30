@@ -1,4 +1,4 @@
-package lycan.util;
+package lycan.util.ext;
 
 import flixel.util.FlxStringUtil;
 import haxe.ds.StringMap;

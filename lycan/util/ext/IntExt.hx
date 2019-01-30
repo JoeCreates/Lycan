@@ -1,4 +1,4 @@
-package lycan.util;
+package lycan.util.ext;
 
 // Extension methods for Ints
 class IntExt {
