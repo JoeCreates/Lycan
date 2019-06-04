@@ -31,7 +31,7 @@ class CinematicText extends FlxSpriteGroup {
 		
 		for (i in 0...text.length) {
 			fullText.text += text.charAt(i);
-			fullText.calcFrame();
+			fullText.calcFrame(true);
 			fullText.updateHitbox();
 			var letter:CinematicLetter = letterCreator(text.charAt(i), size, font);
 			letter.setPosition(x + cumulativeWidth + i * spacing, y);
