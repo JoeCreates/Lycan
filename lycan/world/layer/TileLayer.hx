@@ -35,18 +35,14 @@ class TileLayer extends FlxTilemap implements WorldLayer {
 		worldLayer.init(tiledLayer, world);
 		
 		// Load tilemap
-		tileLayer.loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, combinedTileset,
+		loadMapFromArray(tiledLayer.tileArray, tiledLayer.map.width, tiledLayer.map.height, world.combinedTileset,
 			Std.int(tiledLayer.map.tileWidth), Std.int(tiledLayer.map.tileHeight), null, 1, 1, 1);
 		
 		// Setup collisions
 		if (worldLayer.properties.contains("collision")) {
-			setupCollisions();
+			setupCollisions(tiledLayer);
 		}
-		
-		if (tileLayer.properties.contains("hidden")) {
-			tileLayer.visible = false;
-		}
-		
+		useScaleHack = false;
 		scale.copyFrom(world.scale);
 	}
 	

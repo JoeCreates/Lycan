@@ -26,7 +26,8 @@ import lycan.game3D.Point3D;
 import lycan.game3D.PerspectiveProjection;
 #if !FLX_NO_DEBUG
 import nape.util.ShapeDebug;
-import flixel.addons.nape.FlxNapeSpace.GraphicNapeDebug;
+@:bitmap("assets/images/napeDebug.png")
+class GraphicNapeDebug extends BitmapData {}
 #end
 
 class Phys {
@@ -60,17 +61,18 @@ class Phys {
 	
 	public static function init():Void {
 		if (space != null) return;
-		trace("klkj");
+		
 		space = new Space(Vec2.weak(0, 3));
 		space.gravity.y = 2500;
 		
 		FlxG.signals.preUpdate.add(update);
 		FlxG.signals.postUpdate.add(draw);
-		FlxG.signals.stateSwitched.add(onStateSwitch);
+		FlxG.signals.preStateSwitch.add(onStateSwitch);
+		FlxG.signals.preGameReset.addOnce(destroy);
 		
 		#if !FLX_NO_DEBUG
 		// Add a button to toggle Nape debug shapes to the debugger
-		drawDebugButton = FlxG.debugger.addButton(RIGHT, new GraphicNapeDebug(0, 0), function() {
+		@:access drawDebugButton = FlxG.debugger.addButton(RIGHT, new GraphicNapeDebug(0, 0), function() {
 			drawDebug = !drawDebug;
 		}, true, true);
 		drawDebug = false;
@@ -85,7 +87,7 @@ class Phys {
 		
 		FlxG.signals.preUpdate.remove(update);
 		FlxG.signals.postUpdate.remove(draw);
-		FlxG.signals.stateSwitched.remove(onStateSwitch);
+		FlxG.signals.preStateSwitch.remove(onStateSwitch);
 		
 		GroundableComponent.clearGroundsSignal.removeAll();
 		
@@ -146,7 +148,6 @@ class Phys {
 	}
 
 	public static function update():Void {
-		if (FlxG.mouse.justPressed)  trace("Physics update");
 		var dt = forceTimestep == null ? FlxG.elapsed : forceTimestep;
 		if (space != null && dt > 0) {
 			

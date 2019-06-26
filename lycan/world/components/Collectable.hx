@@ -22,7 +22,8 @@ class CollectableComponent extends Component<Collectable> {
 	/** The thing which collected this collectable */
 	public var collector:Dynamic;
 	
-	public function init():Void {
+	public function new(entity:Collectable) {
+		super(entity);
 		collected = false;
 		collector = null;
 	}

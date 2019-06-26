@@ -1,5 +1,6 @@
 package lycan.world;
 
+import nape.dynamics.InteractionGroup;
 import flash.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxG;
@@ -34,11 +35,12 @@ typedef Tileset = TiledTileSet;
 
 class TiledWorld extends FlxGroup {
 	
-	public var objects = new Map<Int, FlxBasic>();
+	public var objects = new Map<Int, Dynamic>();
 	public var objectLayers = new Map<String, ObjectLayer>();
 	public var tileLayers = new Map<String, TileLayer>();
 	public var imageLayers = new Map<String, ImageLayer>();
 	public var tilesets = new Map<String, Tileset>();
+	public var collisionGroups = new Map<String, InteractionGroup>();
 	
 	public var objectHandlers:ObjectHandlers;
 	public var layerLoadedHandlers:LayerLoadedHandlers;
@@ -46,6 +48,10 @@ class TiledWorld extends FlxGroup {
 	public var combinedTileset:FlxTileFrames;
 	
 	public var defaultCollisionType:WorldCollisionType;
+	
+	public var width:Float;
+	public var height:Float;
+	public var scale:FlxPoint;
 	
 	/**
 	 *  Array of tilemaps to use for flixel base collision detection
@@ -59,8 +65,8 @@ class TiledWorld extends FlxGroup {
 		super();
 		collisionLayers = [];
 		this.scale = FlxPoint.get(scale, scale);
-		objectLoaders = new ObjectLoaders();
-		layerLoadedHandlers = new ObjectLoaders();
+		objectHandlers = new ObjectHandlers();
+		layerLoadedHandlers = new LayerLoadedHandlers();
 		this.defaultCollisionType = defaultCollisionType;
 	}
 	
@@ -70,7 +76,6 @@ class TiledWorld extends FlxGroup {
 		objectLayers = null;
 		tileLayers = null;
 		imageLayers = null;
-		properties = null;
 		scale.put();
 		scale = null;
 		combinedTileset.destroy();
@@ -96,14 +101,14 @@ class TiledWorld extends FlxGroup {
 		if (layerLoadedHandlers == null) layerLoadedHandlers = this.layerLoadedHandlers;
 		if (defaultCollisionType == null) defaultCollisionType = this.defaultCollisionType;
 		
-		properties = new TiledProperties(tiledMap.properties);
+		var properties = tiledMap.properties;
 		width = tiledMap.fullWidth;
 		height = tiledMap.fullHeight;
 		
 		// Default collision type
 		if (properties.contains("defaultCollisionType")) {
-			var val = properties.get("defaultCollisionType");
-			switch (val) {
+			var val:String = properties.get("defaultCollisionType");
+			switch (val.toLowerCase()) {
 				case WorldCollisionType.ARCADE:
 					defaultCollisionType = WorldCollisionType.ARCADE;
 				case WorldCollisionType.PHYSICS:
@@ -124,19 +129,19 @@ class TiledWorld extends FlxGroup {
 			switch (tiledLayer.type) {
 				case TiledLayerType.OBJECT: {
 					layer = loadObjectLayer(cast tiledLayer, objectHandlers);
+					objectLayers.set(tiledLayer.name, cast layer);
 				}
 				case TiledLayerType.TILE: {
-					layer = loadTileLayer(cast tiledLayer);
+					layer = loadTileLayer(cast tiledLayer, defaultCollisionType);
+					tileLayers.set(tiledLayer.name, cast layer);
 				}
 				case TiledLayerType.IMAGE: {
 					layer = loadImageLayer(cast tiledLayer);
+					imageLayers.set(tiledLayer.name, cast layer);
 				}
 				default:
 					throw("Encountered unsupported Tiled layer type");
 			}
-			
-			// Add to object ID map
-			objects.set(tiledLayer.gid, layer);
 			
 			// Call post-load handlers
 			layerLoadedHandlers.dispatch(tiledLayer, layer);
@@ -197,7 +202,7 @@ class TiledWorld extends FlxGroup {
 		return layer;
 	}
 	
-	private function loadTileLayer(tiledLayer:TiledTileLayer):TileLayer {
+	private function loadTileLayer(tiledLayer:TiledTileLayer, defaultCollisionType:WorldCollisionType):TileLayer {
 		// By default, use world's physics setting
 		var collisionType:WorldCollisionType = defaultCollisionType;
 		

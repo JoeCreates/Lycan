@@ -18,10 +18,8 @@ class ObjectLayer extends FlxGroup implements WorldLayer {
 	}
 	
 	public function loadObjects(tiledLayer:TiledObjectLayer, handlers:ObjectHandlers):Void {		
-		var objMap = new Map<TiledObject, FlxBasic>();
-		
 		for (o in tiledLayer.objects) {
-			handlers.dispatch(o, this, objMap);
+			handlers.dispatch(o, this, worldLayer.world.objects);
 		}
 	}
 }

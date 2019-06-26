@@ -32,8 +32,8 @@ class EntityBuilder {
 	public static var componentPath:TypePath = {pack: packagePath, name: "Component"};
 	
 	/** change this to get conditional output when building */
-	static function shouldTrace() {return false;};
-	// static function shouldTrace() {return TypeTools.getClass(Context.getLocalType()).name == "Paddle";};
+	// static function shouldTrace() {return false;};
+	static function shouldTrace() {return TypeTools.getClass(Context.getLocalType()).name == "PlayerX";};
 	
 	/** Conditional trace for debugging */
 	static function traceIf(string:String):Void {
@@ -232,7 +232,7 @@ class EntityBuilder {
 		fields.push(constructor.toHaxe());
 		
 		
-		
+		traceIf("COMPONENT FIELDS:" + componentFields);
 		
 		// Handle :append and :prepend metadata
 		// Once we've found the "component field", for each of its fields look for the :prepend and :append metadata then handle them
@@ -242,8 +242,13 @@ class EntityBuilder {
 		// For each component
 		for (componentField in componentFields) {
 			var componentClass:ClassType = TypeTools.getClass(componentField.field.type);
+			
+			traceIf("Class for field  " + componentField.field.name + ":\n" + componentClass.fields.get());
+			
 			// For each field in the component, look for the metadata
 			for (field in componentClass.fields.get()) {
+				traceIf("Checking for append/prepend on field " + componentClass.name + "#" + field.name);
+				
 				var meta:MetadataEntry; 
 				if (field.meta.has(":prepend")) {
 					meta = field.meta.extract(":prepend")[0];
@@ -252,6 +257,8 @@ class EntityBuilder {
 				} else {
 					continue;
 				}
+				
+				traceIf(componentField.field.name + " has " + "append/prepend " + new Printer().printExpr(meta.params[0]));
 				
 				if (meta.params.length != 1) {
 					throw("Prepend/append metadata must have exactly one parameter");
@@ -308,6 +315,10 @@ class EntityBuilder {
 				
 				var componentFuncName:String = field.name;
 				var expr = {pos: Context.currentPos(), expr: ECall(macro $i{componentField.field.name}.$componentFuncName, params)};
+				
+				
+				traceIf("Handling prepend/append");
+				traceIf("Original expression: " + new Printer().printExpr(expr));
 				
 				targetFunc.expr = switch(meta.name) {
 					case ":prepend":

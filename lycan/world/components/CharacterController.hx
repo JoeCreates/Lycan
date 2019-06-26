@@ -1,5 +1,9 @@
 package lycan.world.components;
 
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.FlxInput.FlxInputState;
+import flixel.input.actions.FlxAction.FlxActionDigital;
+import flixel.input.actions.FlxActionManager;
 import nape.dynamics.InteractionFilter;
 import flixel.FlxBasic.FlxType;
 import nape.geom.ConvexResult;
@@ -51,7 +55,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var runSpeed:Float = 600;
 	public var maxJumps:Int = 2;
 	public var maxJumpVelY:Float = 500;
-	public var airDrag:Float = 5000;
+	public var airDrag:Float = 90000;
 	public var groundSuckDistance:Float = 2;
 	
 	public var dropThrough:Bool = false;
@@ -72,11 +76,17 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var bodyShape:Shape;
 	public var feetShape:Shape;
 	
+	public var actionJump:Bool;
+	public var actionLeft:Bool;
+	public var actionRight:Bool;
+	
 	public function new(entity:CharacterController) {
 		super(entity);
 		
 		_object = cast entity;
 		targetMoveVel = 0;
+		
+		resetActions();
 	}
 	
 	public function init(?width:Float, ?height:Float) {
@@ -84,7 +94,6 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		if (height == null) height = _object.height;
 		
 		physics.init(BodyType.DYNAMIC, false);
-		physics.body.position.setxy(x, y);
 		physics.body.allowRotation = false;
 		feetShape = new Circle(width / 2, Vec2.weak(0, (height - width) / 2));
 		bodyShape = new Polygon(Polygon.rect(-width / 2, -height / 2, width, height - width / 2));
@@ -94,7 +103,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		physics.body.group = PlatformerPhysics.overlappingObjectGroup;
 		
 		physics.body.isBullet = true;
-		
+
 		anchor = new Body(BodyType.STATIC);
 		anchor.space = physics.body.space;
 		
@@ -123,11 +132,34 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		anchor.kinematicVel.x = currentMoveVel;
 	}
 	
-	@:append("destroy")
-	public function destroy() {
+	// @:append("destroy")
+	// public function destroy() {
+	// 	anchor.space = null;
+	// 	anchorJoint.space = null;
+	// 	_object = null;
+	// }
+	
+	public function resetActions() {
+		actionLeft = false;
+		actionRight = false;
+		actionJump = false;
+	}
+	
+	@:append("kill")
+	public function kill() {
 		anchor.space = null;
 		anchorJoint.space = null;
-		_object = null;
+	}
+	
+	@:append("revive")
+	public function revive() {
+		anchor.space = entity.physics.body.space;
+		anchorJoint.space = entity.physics.body.space;
+	}
+	
+	@:append("destroy")
+	public function destroy() {
+
 	}
 	
 	@:prepend("update")
@@ -175,14 +207,13 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		}
 		
 		// Moving Left/Right
-		var leftPress = FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT]);
-		var rightPress = FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]);
 		if (hasControl) {//TODO tidy up control, probably differentiate between hascontrol and input enabled
-			if (leftPress != rightPress) {
-				targetMoveVel = leftPress ? -runSpeed : runSpeed;
+			if (actionLeft != actionRight) {
+				targetMoveVel = actionLeft ? -runSpeed : runSpeed;
 				move();
 			} else {
-				if (Math.abs(currentMoveVel) > 0) stop();
+				FlxG.watch.addQuick("mv", currentMoveVel);
+				stop();
 			}
 		}
 		
@@ -208,7 +239,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 			canJump = false;
 		}
 		
-		if (hasControl && FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP])) {
+		if (hasControl && actionJump) {
 			if (canJump) {
 				currentJumps++;
 				physics.body.velocity.y = jumpSpeed;
@@ -219,6 +250,8 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		if (hasControl && FlxG.keys.anyPressed([FlxKey.S, FlxKey.DOWN])) {
 			dropThrough = true;
 		}
+		
+		resetActions();
 	}
 	
 	public function stop() {
@@ -231,14 +264,11 @@ class CharacterControllerComponent extends Component<CharacterController> {
 			isSliding = false;
 		}
 		
+		physics.body.velocity.x = currentMoveVel;
 		anchor.kinematicVel.x = currentMoveVel;
 	}
 	
-	public function run() {
-		
-	}
-	
 	public function jump() {
-		
+		actionJump = true;
 	}
 }

@@ -16,6 +16,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSignal;
 import lycan.util.MasterCamera;
 import lycan.core.LG;
+import flixel.group.FlxGroup;
 
 // Base state for all substates in a game
 class LycanState extends FlxSubState {
@@ -42,6 +43,8 @@ class LycanState extends FlxSubState {
 	public var rootState(get, never):LycanRootState;
 	public var parentState(get, never):LycanState;
 	
+	private var oldCamera:FlxCamera;
+	
 	override public function create():Void {
 		super.create();
 		
@@ -53,7 +56,8 @@ class LycanState extends FlxSubState {
 		uiCamera = new FlxCamera(Std.int(FlxG.camera.x), Std.int(FlxG.camera.y),
 		                         FlxG.camera.width, FlxG.camera.height, FlxG.camera.zoom);
 		uiCamera.bgColor = FlxColor.TRANSPARENT;
-		FlxG.cameras.remove(FlxG.camera);
+		oldCamera = FlxG.camera;
+		FlxG.cameras.remove(FlxG.camera, false);
 		FlxG.camera = worldCamera;
 		FlxG.cameras.add(worldCamera);
 		FlxG.cameras.add(uiCamera);
@@ -65,7 +69,6 @@ class LycanState extends FlxSubState {
 		
 		// UI
 		uiGroup = new FlxSpriteGroup();
-		uiGroup.scrollFactor.set(0, 0);
 		uiGroup.cameras = [uiCamera];
 		add(uiGroup);
 		overlay = new FlxSprite();
@@ -85,8 +88,10 @@ class LycanState extends FlxSubState {
 		// TODO fix camera setup - make sure we don't cause mem leaks by leaving refs to cameras on state + on FlxG
 		FlxG.cameras.remove(worldCamera);
 		FlxG.cameras.remove(uiCamera);
-
-		FlxCamera.defaultCameras = [];
+		
+		FlxG.camera = oldCamera;
+		FlxG.cameras.add(oldCamera);
+		FlxCamera.defaultCameras = [oldCamera];
 
 	}
 	

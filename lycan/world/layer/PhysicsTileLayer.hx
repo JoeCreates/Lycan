@@ -36,9 +36,10 @@ class PhysicsTileLayer extends TileLayer implements PhysicsEntity {
 		origin = FlxPoint.get();
 		
 		super(world, tiledLayer);
+		
 	}
 	
-	public function setupCollisions(tiledLayer:TiledTileLayer):Void {
+	override public function setupCollisions(tiledLayer:TiledTileLayer):Void {
 		setupCollideIndex(1, new Material(0, 1, 2, 0, 0.001), Phys.tilemapShapeType);
 		body.space = null;
 		body.scaleShapes(scale.x, scale.y);

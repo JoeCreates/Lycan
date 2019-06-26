@@ -109,6 +109,7 @@ class GraphicUtil {
 		
 		var bitmap:BitmapData = new BitmapData(width * frameCount, height, true, color);
 		spr.loadGraphic(bitmap, frameCount > 1, width, height);
+		spr.updateHitbox();
 		
 		var txt:TextField = new TextField();
 		txt.defaultTextFormat = new TextFormat("Verdana", 9, color);

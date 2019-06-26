@@ -80,8 +80,14 @@ class PlatformerPhysics {
 		space.listeners.add(
 			new InteractionListener(CbEvent.ONGOING, InteractionType.COLLISION, CbType.ANY_BODY, Phys.tilemapShapeType,
 				function(ic:InteractionCallback) {
-					var b1:Body = ic.int1.castBody;
-					var b2:Body = ic.int2.castBody;
+					var b1:Body = ic.int1.isShape() ? ic.int1.castShape.body : ic.int1.castBody;
+					var b2:Body = ic.int2.isShape() ? ic.int2.castShape.body : ic.int2.castBody;
+					if (ic.int1.cbTypes.has(Phys.tilemapShapeType)) {
+						var tb = b1;
+						b1 = b2;
+						b2 = tb;
+					}
+					
 					for (a in ic.arbiters) {
 						if (a.isCollisionArbiter()) {
 							var ca:CollisionArbiter = cast a.collisionArbiter;
@@ -131,7 +137,7 @@ class PlatformerPhysics {
 		// Avoid vertical friction on grounds
 		// TODO could we merge this with groun checks?
 		space.listeners.add(
-			new PreListener(InteractionType.COLLISION, groundableType, CbType.ANY_BODY,
+			new PreListener(InteractionType.COLLISION, groundableType, CbType.ANY_SHAPE,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
 					var groundable:Groundable = cast body.userData.entity;

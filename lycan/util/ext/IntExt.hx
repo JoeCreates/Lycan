@@ -40,6 +40,6 @@ class IntExt {
 	}
 
 	inline public static function sign(v:Int):Int {
-		return x > 0 ? 1 : x < 0 ? -1 : 0;
+		return v > 0 ? 1 : v < 0 ? -1 : 0;
 	}
 }

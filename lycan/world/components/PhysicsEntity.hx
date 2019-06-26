@@ -29,16 +29,25 @@ interface PhysicsEntity extends Entity {
 	@:relaxed public var moves(get, set):Bool;
 	@:relaxed public var angle(get, set):Float;
 	@:relaxed public var alive(get, set):Bool;
+	@:relaxed public var exists(get, set):Bool;
 	@:relaxed public var origin(get, set):FlxPoint;
 	@:relaxed public var scale(get, set):FlxPoint;
 	@:relaxed public var width(get, set):Float;
 	@:relaxed public var height(get, set):Float;
 }
 
-@:tink class PhysicsComponent extends Component<PhysicsEntity> {
-	@:forward(position, rotation) public var body:Body;
+class PhysicsComponent extends Component<PhysicsEntity> {
+	public var body:Body;
 	public var space(get, never):Space;
 	private function get_space():Space return body.space;
+	
+	public var position(get, set):Vec2;
+	private function get_position() return body.position;
+	private function set_position(p:Vec2) return body.position = p;
+	
+	public var rotation(get, set):Float;
+	private function get_rotation() return body.rotation;
+	private function set_rotation(v:Float) return body.rotation = v;
 	
 	public var rotationDeg(get, set):Float;
 	private function get_rotationDeg():Float return body.rotation * FlxAngle.TO_DEG;
@@ -94,7 +103,7 @@ interface PhysicsEntity extends Entity {
 	}
 
 	public function update(dt:Float):Void {
-		if (!entity.entity_alive) return;
+		if (!entity.entity_exists) return;
 		
 		if (body != null && entity.entity_moves) {
 			updatePhysObjects();
@@ -141,10 +150,10 @@ interface PhysicsEntity extends Entity {
 		if (Std.is(entity, FlxSprite)) {
 			var entity:FlxSprite = cast this.entity;
 			if (width <= 0) {
-				width = entity.frameWidth * entity.scale.x;
+				width = entity.width;
 			}
 			if (height <= 0) {
-				height = entity.frameHeight * entity.scale.y;
+				height = entity.height;
 			}
 			
 			entity.centerOffsets(false);
@@ -157,19 +166,24 @@ interface PhysicsEntity extends Entity {
 		}
 	}
 	
-	public function createBodyFromBitmap(bmp:BitmapData, alphaThreshold:Float = 0x80):Void {
+	public function createBodyFromBitmap(?bmp:BitmapData, alphaThreshold:Float = 0x80, ?grid:Vec2, quality:Int = 2, simplification:Float = 1.5):Void {
 		if (body != null) destroyPhysObjects();
-		
-		if (Std.is(entity, FlxSprite)) {
-			var iso = new BitmapDataIso(bmp, alphaThreshold);
-			var isoFunc = #if flash iso #else (x:Float, y:Float)->{return iso.iso(x, y);}#end;
-			var body:Body = IsoBody.run(isoFunc, iso.bounds);
-			addPremadeBody(body);
-			setBodyMaterial();
-			var s:FlxSprite = cast entity;
-			var o:Vec2 = body.userData.graphicOffset;
-			s.origin.set(-o.x, -o.y);
+		if (bmp == null && Std.is(entity, FlxSprite)) {
+			var spr:FlxSprite = cast entity;
+			bmp = spr.pixels;
 		}
+		
+		var iso = new BitmapDataIso(bmp, alphaThreshold);
+		var isoFunc = #if flash iso #else (x:Float, y:Float)->{return iso.iso(x, y);}#end;
+		var body:Body = IsoBody.run(isoFunc, iso.bounds, grid, quality, simplification);
+		addPremadeBody(body);
+		setBodyMaterial();
+		var s:FlxSprite = cast entity;
+		var o:Vec2 = body.userData.graphicOffset;
+		offset.set(o.x, o.y);
+		s.origin.set(-o.x, -o.y);
+		
+		body.userData.entity = entity;
 	}
 	
 	/**
@@ -216,8 +230,8 @@ interface PhysicsEntity extends Entity {
 	
 	//TODO from old flixel. origin is not correct
 	public function snapEntityToBody():Void {
-		entity.entity_x = position.x - entity.entity_origin.x * entity.entity_scale.x;
-		entity.entity_y = position.y - entity.entity_origin.y * entity.entity_scale.y;
+		entity.entity_x = position.x - entity.entity_origin.x;
+		entity.entity_y = position.y - entity.entity_origin.y;
 		
 		if (Phys.floorPos) {
 			entity.entity_x = Math.floor(entity.entity_x);
@@ -229,21 +243,22 @@ interface PhysicsEntity extends Entity {
 		}
 	}
 	
-	public function snapBodyToEntity():Void {
-		var wasEnabled = enabled;
-		enabled = false;
-		position.x = entity.entity_x + entity.entity_origin.x * entity.entity_scale.x;
-		position.y = entity.entity_y + entity.entity_origin.y * entity.entity_scale.y;
+	public function snapBodyToEntity(?body:Body, disableWhileSnapping:Bool = true):Void {
+		if (body == null) body = this.body;
+		var oldSpace = body.space;
+		if (disableWhileSnapping) body.space = null;
+		body.position.x = entity.entity_x + entity.entity_origin.x;
+		body.position.y = entity.entity_y + entity.entity_origin.y;
 		
 		if (Phys.floorPos) {
-			position.x = Math.floor(position.x);
-			position.y = Math.floor(position.y);
+			body.position.x = Math.floor(body.position.x);
+			body.position.y = Math.floor(body.position.y);
 		}
 		
 		if (body.allowRotation) {
-			body.rotation = entity.entity_angle * FlxAngle.TO_RAD;
+			body.rotate(Vec2.weak(entity.entity_x + entity.entity_width / 2, entity.entity_y + entity.entity_height / 2), entity.entity_angle * FlxAngle.TO_RAD);
 		}
-		enabled = wasEnabled;
+		body.space = oldSpace;
 	}
 	
 	public inline function setDrag(linearDrag:Float = 1, angularDrag:Float = 1):Void {
