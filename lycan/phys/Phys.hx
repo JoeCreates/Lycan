@@ -34,10 +34,10 @@ class Phys {
 	public static var space:Space;
 	
 	/** Iterations for resolving velocity (default 10) */
-	public static var velocityIterations:Int = 10;
+	public static var velocityIterations:Int = 20;
 	/** Iterations for resolving position (default 10) */
-	public static var positionIterations:Int = 10;
-	public static var steps:Int = 1;
+	public static var positionIterations:Int = 20;
+	public static var steps:Int = 2;
 	/** Whether debug graphics are enabled */
 	public static var drawDebug(default, set):Null<Bool> = null;
 	/** Force a fixed timestep for integrator. Null means use FlxG.elapsed */

@@ -23,6 +23,7 @@ import nape.space.Space;
 import nape.dynamics.InteractionGroup;
 import nape.geom.Vec2;
 import nape.geom.Vec3;
+import nape.phys.BodyType;
 
 // TODO could be PhysicsPresets?
 class PlatformerPhysics {
@@ -33,6 +34,16 @@ class PlatformerPhysics {
 	public static var onewayType:CbType = new CbType();
 	public static var pushableType:CbType = new CbType();
 	public static var movingPlatformType:CbType = new CbType();
+	
+	public static var worldFilterGroup:Int = 2;
+	public static var objectFilterGroup:Int = 4;
+	public static var overlappingObjectFilterGroup:Int = 8;
+	public static var overlappingWorldFilterGroup:Int = 16;
+	
+	public static var worldFilter = new InteractionFilter(worldFilterGroup, 1 | objectFilterGroup | worldFilterGroup | overlappingObjectFilterGroup);
+	public static var overlappingWorldFilter = new InteractionFilter(overlappingWorldFilterGroup, 1 | objectFilterGroup | worldFilterGroup | overlappingObjectFilterGroup);
+	public static var objectFilter = new InteractionFilter(objectFilterGroup, 1 | worldFilterGroup | objectFilterGroup | overlappingObjectFilterGroup | overlappingWorldFilterGroup);
+	public static var overlappingObjectFilter = new InteractionFilter(overlappingObjectFilterGroup, 1 | worldFilterGroup | objectFilterGroup | overlappingWorldFilterGroup);
 	
 	public static var overlappingObjectGroup:InteractionGroup = new InteractionGroup(true);
 	
@@ -82,10 +93,15 @@ class PlatformerPhysics {
 				function(ic:InteractionCallback) {
 					var b1:Body = ic.int1.isShape() ? ic.int1.castShape.body : ic.int1.castBody;
 					var b2:Body = ic.int2.isShape() ? ic.int2.castShape.body : ic.int2.castBody;
-					if (ic.int1.cbTypes.has(Phys.tilemapShapeType)) {
+					
+					if (b1.shapes.at(0).cbTypes.has(Phys.tilemapShapeType) && b1.type != BodyType.DYNAMIC) {
 						var tb = b1;
 						b1 = b2;
 						b2 = tb;
+					}
+					
+					if (b1.type != BodyType.DYNAMIC) {
+						return;
 					}
 					
 					for (a in ic.arbiters) {
@@ -150,8 +166,9 @@ class PlatformerPhysics {
 					if (!(angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit)) {
 						ca.dynamicFriction = 0;
 						ca.staticFriction = 0;
+					} else {
+						var e = ic.int2.castShape.body.userData.entity;
 					}
-					
 					// We don't need to change the acceptance
 					return PreFlag.ACCEPT_ONCE;//TODO fights onewyas?
 				}

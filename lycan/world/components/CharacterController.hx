@@ -56,7 +56,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 	public var maxJumps:Int = 2;
 	public var maxJumpVelY:Float = 500;
 	public var airDrag:Float = 90000;
-	public var groundSuckDistance:Float = 2;
+	public var groundSuckDistance:Float = 4;
 	
 	public var dropThrough:Bool = false;
 	
@@ -99,7 +99,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		bodyShape = new Polygon(Polygon.rect(-width / 2, -height / 2, width, height - width / 2));
 		physics.body.shapes.add(feetShape);
 		physics.body.shapes.add(bodyShape);
-		physics.setBodyMaterial();
+		physics.setBodyMaterial(0, 0, 0.1);
 		physics.body.group = PlatformerPhysics.overlappingObjectGroup;
 		
 		physics.body.isBullet = true;
@@ -110,7 +110,8 @@ class CharacterControllerComponent extends Component<CharacterController> {
 		anchorJoint = new LineJoint(anchor, physics.body, anchor.worldPointToLocal(Vec2.get(0.0, 0.0)),
 			physics.body.worldPointToLocal(Vec2.get(0.0, 0.0)), Vec2.weak(0.0, 1.0), Math.NEGATIVE_INFINITY, Math.POSITIVE_INFINITY);
 		anchorJoint.stiff = false;
-		anchorJoint.maxError = 0.0;		
+		anchorJoint.maxError = 0.0;
+		anchorJoint.maxForce = runSpeed * 20 * physics.body.mass;		
 		anchorJoint.space = physics.body.space;
 		
 		hasControl = true;
@@ -213,7 +214,7 @@ class CharacterControllerComponent extends Component<CharacterController> {
 				move();
 			} else {
 				FlxG.watch.addQuick("mv", currentMoveVel);
-				stop();
+				if (Math.abs(currentMoveVel) > 0) stop();
 			}
 		}
 		

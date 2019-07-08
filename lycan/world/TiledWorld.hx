@@ -96,6 +96,7 @@ class TiledWorld extends FlxGroup {
 		return false;
 	}
 	
+	//TODO could improve by having prehandler for layers similar to nape?
 	public function load(tiledMap:TiledMap, ?objectHandlers:ObjectHandlers, ?layerLoadedHandlers:LayerLoadedHandlers, ?defaultCollisionType:WorldCollisionType):Void {
 		if (objectHandlers == null) objectHandlers = this.objectHandlers;
 		if (layerLoadedHandlers == null) layerLoadedHandlers = this.layerLoadedHandlers;
