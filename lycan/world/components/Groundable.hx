@@ -28,7 +28,7 @@ class GroundableComponent extends Component<Groundable> {
 		currentGroundCount = 0;
 		wasGrounded = false;
 		forceGrounded = false;
-		groundedAngleLimit = 50;
+		groundedAngleLimit = 60;
 	}
 	
 	@:append("update")

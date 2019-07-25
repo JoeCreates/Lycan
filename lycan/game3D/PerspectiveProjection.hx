@@ -46,9 +46,9 @@ class PerspectiveProjection {
 		this.camera = camera;
 		matrix.identity();
 		matrix.appendTranslation(-camera.pos.x, -camera.pos.y, -camera.pos.z);
+		matrix.appendRotation(-camera.angle.z, vec3(0, 0, 1));
 		matrix.appendRotation(camera.angle.y, vec3(0, 1, 0));
 		matrix.appendRotation(camera.angle.x, vec3(1, 0, 0));
-		matrix.appendRotation(-camera.angle.z, vec3(0, 0, 1));
 	}
 	
 	public function set(?width:Float, ?height:Float, ?depth:Float) {
@@ -95,7 +95,7 @@ class PerspectiveProjection {
 		var newWidth = spr.width * depth / _p3.z;
 		var newHeight = spr.height * depth / _p3.z;
 		spr.scale.set(newWidth / spr.width, newHeight / spr.height);
-		spr.angle = -camera.angle.z;
+		spr.angle = -camera.angle.z;//TODO incorrect
 		spr.setPosition(_p2.x - spr.origin.x, _p2.y - spr.origin.y);
 	}
 	

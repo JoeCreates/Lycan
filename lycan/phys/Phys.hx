@@ -1,9 +1,10 @@
 package lycan.phys;
 
 
+import nape.geom.Mat23;
+import openfl.display.Shape;
 import flixel.math.FlxPoint;
 import flash.display.BitmapData;
-import flash.geom.Matrix;
 import flixel.FlxG;
 import flixel.system.FlxAssets;
 import flixel.system.ui.FlxSystemButton;
@@ -22,6 +23,7 @@ import nape.space.Space;
 import nape.callbacks.CbType;
 import nape.dynamics.InteractionFilter;
 import openfl.geom.Matrix3D;
+import openfl.geom.Matrix;
 import lycan.game3D.Point3D;
 import lycan.game3D.PerspectiveProjection;
 #if !FLX_NO_DEBUG
@@ -58,6 +60,8 @@ class Phys {
 	// CbTypes
 	public static var tilemapShapeType:CbType = new CbType();
 	public static var sensorFilter:InteractionFilter = new InteractionFilter(0, 0, 1, 1, 0, 0);
+	
+	private static var _matrix:Matrix = new Matrix();
 	
 	public static function init():Void {
 		if (space != null) return;
@@ -133,7 +137,6 @@ class Phys {
 			if (shapeDebug == null) {
 				shapeDebug = new ShapeDebug(FlxG.width, FlxG.height);
 				shapeDebug.drawConstraints = true;
-				shapeDebug.display.scrollRect = null;
 				shapeDebug.thickness = 1;
 				FlxG.addChildBelowMouse(shapeDebug.display);
 			}
@@ -214,30 +217,45 @@ class Phys {
 		#if !FLX_NO_DEBUG
 		if (shapeDebug == null || space == null) return;
 		
-		shapeDebug.clear();
-		shapeDebug.draw(space);
+		(cast shapeDebug.display:Shape).graphics.clear();
+		shapeDebug.cullingEnabled = true;
 		
 		var zoom = FlxG.camera.zoom;
 		var sprite = shapeDebug.display;
-		var scale = FlxG.camera.totalScaleX / FlxG.camera.zoom;
+		var scale = FlxG.camera.totalScaleX;
 		
-		// sprite.scaleX = FlxG.camera.totalScaleX;
-		// sprite.scaleY = FlxG.camera.totalScaleY;
-		// sprite.x = FlxG.camera.x - FlxG.camera.scroll.x * FlxG.camera.totalScaleX - FlxG.width * ((scale - 1) / 2);
-		// sprite.y = FlxG.camera.y - FlxG.camera.scroll.y * FlxG.camera.totalScaleY - FlxG.height * ((scale - 1) / 2);
+		// if (matrix3D != null) {
+		// 	if (sprite.transform.matrix3D == null) sprite.transform.matrix3D = new Matrix3D();
+		// 	// var scaleX = sprite.scaleX;
+		// 	// var scaleY = sprite.scaleY;
+		// 	// var sx = sprite.x;
+		// 	// var sy = sprite.y;
+		// 	var mat = sprite.transform.matrix3D;
+		// 	mat.identity();
+		// 	// mat.appendScale(scaleX, scaleY, 1);
+		// 	// mat.appendTranslation(sx, sy, 0);
+		// 	mat.append(matrix3D);
+		// } else {
+		// 	//sprite.scaleX = FlxG.camera.totalScaleX;
+		// 	//sprite.scaleY = FlxG.camera.totalScaleY;
+		// 	//sprite.x = FlxG.camera.x - FlxG.camera.scroll.x * FlxG.camera.totalScaleX - FlxG.width * ((scale - 1) / 2) + 120;
+		// 	//sprite.y = FlxG.camera.y - FlxG.camera.scroll.y * FlxG.camera.totalScaleY - FlxG.height * ((scale - 1) / 2);
+		// }
 		
-		if (matrix3D != null) {
-			if (sprite.transform.matrix3D == null) sprite.transform.matrix3D = new Matrix3D();
-			// var scaleX = sprite.scaleX;
-			// var scaleY = sprite.scaleY;
-			// var sx = sprite.x;
-			// var sy = sprite.y;
-			var mat = sprite.transform.matrix3D;
-			mat.identity();
-			// mat.appendScale(scaleX, scaleY, 1);
-			// mat.appendTranslation(sx, sy, 0);
-			mat.append(matrix3D);
-		}
+		// TODO this is terribly slow, especially for scaling
+		// We can cull and crop, but even these seem slow
+		// Potentially making a btimap for scaling could help, but normal draw is slowish, surely can be improved
+		sprite.scaleX = FlxG.camera.totalScaleX;
+		sprite.scaleY = FlxG.camera.totalScaleY;
+		var sd:ShapeDebug = cast shapeDebug;
+		var mat23:Mat23 = cast sd.transform;
+		mat23.reset();
+		mat23.toMatrix(_matrix);
+		// TODO this is really wrong hardcoded for tom platformer temporarily
+		_matrix.translate(FlxG.camera.x -FlxG.camera.scroll.x - FlxG.width *0.4 + 85, FlxG.camera.y -FlxG.camera.scroll.y - FlxG.height * 0.4 + 48);
+		mat23.setAs(_matrix.a, _matrix.b, _matrix.c, _matrix.d, _matrix.tx, _matrix.ty);
+		
+		shapeDebug.draw(space);
 		#end
 	}
 	

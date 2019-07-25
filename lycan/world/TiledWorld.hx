@@ -159,7 +159,7 @@ class TiledWorld extends FlxGroup {
 	private function loadTileSets(tiledMap:TiledMap):Void {
 		var tilesetBitmaps = new Array<BitmapData>();
 		for (tileset in tiledMap.tilesetArray) {
-			if (tileset.properties.contains("noload")) {
+			if (tileset.properties.contains("nontile") || tileset.properties.contains("noload")) {
 				continue;
 			}
 			var imagePath = new Path(tileset.imageSource);

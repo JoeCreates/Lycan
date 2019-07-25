@@ -110,12 +110,13 @@ class PhysicsComponent extends Component<PhysicsEntity> {
 		}
 	}
 	
-	@:prepend("kill")
+	// TODO bad
+	@:append("kill")
 	public function onKill():Void {
 		if (body != null) body.space = null;
 	}
 	
-	@:prepend("revive")
+	@:append("revive")
 	public function onRevive():Void {
 		if (body != null) body.space = Phys.space;
 	}

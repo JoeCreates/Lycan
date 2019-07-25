@@ -140,6 +140,7 @@ class PlatformerPhysics {
 			new PreListener(InteractionType.COLLISION, characterType, onewayType,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
+					if (!Std.is(body.userData.entity, CharacterController)) return null;
 					var p:CharacterController = cast body.userData.entity;
 					if (p.characterController.dropThrough) {
 						return PreFlag.IGNORE;
@@ -150,27 +151,43 @@ class PlatformerPhysics {
 			)
 		);
 		
-		// Avoid vertical friction on grounds
+		// Avoid vertical friction on grounds/characters
 		// TODO could we merge this with groun checks?
 		space.listeners.add(
 			new PreListener(InteractionType.COLLISION, groundableType, CbType.ANY_SHAPE,
 				function(ic:PreCallback):PreFlag {
 					var body:Body = ic.int1.castBody;
 					var groundable:Groundable = cast body.userData.entity;
+					var groundable2:Groundable = null;
+					
+					if (ic.int2.castShape.body.cbTypes.has(groundableType)) {
+						groundable2 = cast ic.int2.castShape.body.userData.entity;
+					}
+					
 					var arbiter = ic.arbiter;
 					
 					if (!arbiter.isCollisionArbiter()) return null;
 					var ca:CollisionArbiter = cast arbiter;
 					var angle:Float = FlxAngle.TO_DEG * ca.normal.angle - (arbiter.body1 == body ? 90 : -90);
+					var inverseAngle:Float = FlxAngle.TO_DEG * ca.normal.angle - (arbiter.body1 != body ? 90 : -90);
 					
-					if (!(angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit)) {
+					var isGrounded1:Bool = false;// Whether within grounable angle limit for first groundable
+					var isGrounded2:Bool = false;// ...and also for second grounable if there is one
+					
+					if (angle >= -groundable.groundable.groundedAngleLimit && angle <= groundable.groundable.groundedAngleLimit) {
+						isGrounded1 = true;
+					}
+					if (groundable2 != null && inverseAngle >= -groundable2.groundable.groundedAngleLimit && inverseAngle <= groundable2.groundable.groundedAngleLimit) {
+						isGrounded2 = true;
+					}
+					
+					if (!(isGrounded1 || isGrounded2)) {
 						ca.dynamicFriction = 0;
 						ca.staticFriction = 0;
-					} else {
-						var e = ic.int2.castShape.body.userData.entity;
 					}
+					
 					// We don't need to change the acceptance
-					return PreFlag.ACCEPT_ONCE;//TODO fights onewyas?
+					return null;//TODO fights onewyas?
 				}
 			)
 		);
@@ -184,6 +201,10 @@ class PlatformerPhysics {
 					var groundable:Groundable = ic.int1.userData.sprite;
 					var arbiter:CollisionArbiter = cast ic.arbiter;
 					var angle:Float = FlxAngle.TO_DEG * arbiter.normal.angle;
+					if (arbiter.shape1.cbTypes.has(onewayType) || arbiter.shape1.body.cbTypes.has(onewayType)) {
+						angle += 180;
+						angle %= 360;	
+					}
 					if (angle >= 45 && angle <= 135 ) {
 						return null;
 					}
