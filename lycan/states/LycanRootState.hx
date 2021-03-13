@@ -64,7 +64,7 @@ class LycanRootState extends FlxState {
 		var child = get.subState;
 
 		while (child != null) {
-			if (Std.is(child, type)) {
+			if (Std.isOfType(child, type)) {
 				return cast child;
 			}
 

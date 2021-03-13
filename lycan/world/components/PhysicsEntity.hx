@@ -124,7 +124,7 @@ interface PhysicsEntity extends Entity {
 	
 	public function createCircularBody(radius:Float = 16, ?type:BodyType):Void {
 		if (body != null) destroyPhysObjects();
-		if (Std.is(entity, FlxSprite)) {
+		if (Std.isOfType(entity, FlxSprite)) {
 			var entity:FlxSprite = cast entity;
 			
 			entity.centerOffsets(false);
@@ -138,7 +138,7 @@ interface PhysicsEntity extends Entity {
 	public function createRectangularBody(width:Float = 0, height:Float = 0, ?type:BodyType):Void {
 		if (body != null) destroyPhysObjects();
 		
-		if (Std.is(entity, FlxSprite)) {
+		if (Std.isOfType(entity, FlxSprite)) {
 			var entity:FlxSprite = cast this.entity;
 			if (width <= 0) {
 				width = entity.frameWidth * entity.scale.x;
@@ -160,7 +160,7 @@ interface PhysicsEntity extends Entity {
 	public function createBodyFromBitmap(bmp:BitmapData, alphaThreshold:Float = 0x80):Void {
 		if (body != null) destroyPhysObjects();
 		
-		if (Std.is(entity, FlxSprite)) {
+		if (Std.isOfType(entity, FlxSprite)) {
 			var iso = new BitmapDataIso(bmp, alphaThreshold);
 			var isoFunc = #if flash iso #else (x:Float, y:Float)->{return iso.iso(x, y);}#end;
 			var body:Body = IsoBody.run(isoFunc, iso.bounds);

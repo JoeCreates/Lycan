@@ -96,7 +96,7 @@ class LycanState extends FlxSubState {
 	}
 	
 	override public function switchTo(state:FlxState):Bool {
-		if (Std.is(state, LycanState)) {
+		if (Std.isOfType(state, LycanState)) {
 			onExit.dispatch(cast state);
 		}
 		return super.switchTo(state);
